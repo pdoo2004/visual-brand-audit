@@ -1,6 +1,6 @@
 # visual-brand-audit
 
-AI-enabled tool for evaluating marketing photography against Capital One's visual brand standards. Built as a VT Capstone project (Group 4).
+AI-enabled tool for evaluating marketing photography against visual brand standards. Built as a VT Capstone project (Group 4).
 
 ## What it does
 
