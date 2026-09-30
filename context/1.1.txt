@@ -1,0 +1,309 @@
+Photography and visual-brand standards review
+
+Literature review for the MVP photography rubric. SCRUM-115 · 29 September 2026 · Krishna Mattaparthi
+
+This comment is the deliverable for ticket 1.1: candidate criteria and the references behind them, organized so the team can choose. Ticket 1.2 still decides the final four to six. Weights, brand_standards.json, and the model choice are out of scope here.
+
+1. Purpose
+
+The system scores marketing photographs against a small, repeatable rubric. A brand rule is usable only after it has a name, a definition, and a kind of evidence the pipeline can produce.
+
+The design document already splits that evidence in two.
+
+Computer vision measures quantities: brightness, dominant colors, contrast, and framing, using OpenCV, Pillow, NumPy, and scikit-learn.
+
+A vision-language model judges context: tone, approachability, and brand fit, and writes the reason in a sentence.
+
+The model has not been benchmarked yet. Five of the six recommended criteria are measurements. Only tone is assigned to the model, and that assignment is a hypothesis for the Sprint 1 prototype, not a proven result.
+
+2. What was kept in scope
+
+A candidate is included only when all three of these are true.
+
+It appears in photography practice, computational aesthetics, or brand-personality research.
+
+It can be checked on a single marketing photograph.
+
+The check is either a measurement or a structured judgment with a written reason.
+
+Left for later: video, site-wide comparison, competitor benchmarking, and style tags that photographers do not treat as quality scores (symmetry and repetition).
+
+3. Candidate criteria
+
+“Yes” means it is recommended for the ticket 1.2 discussion. It is not a decision. The proposal and the design document already name examples in this same neighborhood. Those documents leave the final set open, pending this review and mentor input.
+
+A. Photographic quality
+
+These are mostly computer-vision measurements.
+
+Q1. Exposure and brightness
+
+
+
+Definition. The photograph is neither badly underexposed nor blown out, and the subject is readable.
+
+Why it matters. A dark or clipped marketing photo fails before any brand judgment starts.
+
+How to check. Mean luminance, plus the share of pixels that are near-black or near-white.
+
+Sources. Datta et al. 2006; Ke et al. 2006; design document.
+
+Q2. Contrast
+
+
+
+Definition. Tonal separation is strong enough that the subject separates from the background.
+
+Why it matters. Flat images look dull in ads. Harsh contrast hides detail.
+
+How to check. Spread of luminance values, plus a simple highlight and shadow check.
+
+Sources. Ke et al. 2006; Kong et al. 2016 (“good lighting”); design document.
+
+Q3. Color palette fit
+
+
+
+Definition. Dominant colors are harmonious and can be compared with a brand palette stored in the rubric.
+
+Why it matters. Brand systems treat color as identity.
+
+How to check. Dominant colors from a clustering step, then distance to the palette in the rubric file.
+
+Sources. Datta et al. 2006; Kong et al. 2016 (color harmony, vivid color); design document.
+
+Q4. Framing and subject position
+
+
+
+Definition. The main subject sits in a deliberate place in the frame, centered or along a third, with usable space around it.
+
+Why it matters. Placement is the composition rule most often written into photo guidelines.
+
+How to check. Location of the subject compared with the center and the rule-of-thirds intersections. This needs a subject region first.
+
+Sources. Datta et al. 2006; Kong et al. 2016; Murray et al. 2012; Freeman 2007; design document.
+
+Q5. Sharpness and subject emphasis
+
+
+
+Definition. The subject is in focus. Background blur is acceptable. Blur on the subject is not.
+
+Why it matters. Soft product or people shots read as mistakes in marketing photography.
+
+How to check. A blur or edge measure on the subject region compared with the background.
+
+Sources. Ke et al. 2006; Kong et al. 2016 (object emphasis, depth of field, motion blur).
+
+Q6. Background simplicity
+
+
+
+Definition. The background does not compete with the subject through clutter or busy texture.
+
+Why it matters. Busy backgrounds bury the offer or the person.
+
+How to check. Edge or texture energy outside the subject region.
+
+Sources. Ke et al. 2006 (how edges are spread across the frame). Use this if the team drops Q4 or Q5.
+
+B. Brand alignment
+
+These are mostly vision-language model judgments. Confidence is low until the Sprint 1 model benchmark, because no candidate model has been run on these words yet.
+
+B1. Tone and approachability
+
+
+
+Definition. The photograph fits a stated tone, such as calm, confident, or approachable, and the model cites something visible.
+
+Why it matters. The team contract treats tone and affect as the subjective half of the rubric.
+
+How to check. The model returns a tone label, a 1–5 fit score, and one evidence sentence. Allowed tones live in the rubric file so another organization can swap them.
+
+Sources. Machajdik and Hanbury 2010; Aaker 1997; team contract; design document.
+
+B2. Authenticity
+
+
+
+Definition. People and places look specific rather than like generic stock: forced smiles, identical posing, or an empty handshake scene.
+
+Why it matters. Marketing teams reject photographs that look interchangeable.
+
+How to check. A model judgment plus evidence. The team needs a written definition of “stock-like” before this can be scored.
+
+Sources. Brand practice. Needs mentor input before it is locked. First alternate if the team drops B1.
+
+B3. People and representation
+
+
+
+Definition. When people are present, the photograph matches a written rule about who is shown and how they are shown.
+
+Why it matters. Brand guides treat casting and portrayal as part of the standard.
+
+How to check. Do not score how an individual looks. Check only an explicit rule in the rubric, and keep a human-review flag.
+
+Sources. Needs mentor and brand-owner input.
+
+B4. Message clarity
+
+
+
+Definition. A viewer can tell what the photograph is about — a person, a product, or a place — without reading the caption.
+
+Why it matters. A brand-aligned photo that does not communicate still fails the page.
+
+How to check. The model names the apparent subject and whether it dominates the frame. This overlaps sharpness and subject emphasis.
+
+Sources. Design document (“brand fit”).
+
+C. Useful later, weak as an MVP criterion
+
+ID
+
+Criterion
+
+Why it waits
+
+L1
+
+Symmetry
+
+Kong et al. treat symmetry as something a photo has, not as a quality score. Many strong ads are asymmetric.
+
+L2
+
+Repetition
+
+A style tag, not a pass or fail.
+
+L3
+
+Vividness alone
+
+Vivid color can fight a calm financial brand. Fold color into Q3 so the rubric decides.
+
+L4
+
+Cross-image consistency
+
+Real for a campaign, and it needs a batch of images. Out of scope for a single-image MVP.
+
+L5
+
+Motion blur alone
+
+Fold into Q5. Intentional motion, such as a city or a moving card, should not automatically fail.
+
+4. Recommended set for ticket 1.2
+
+Six criteria. Five can be measured by computer vision. One is a model judgment. That matches the design split and the target of about four to six criteria.
+
+Keep
+
+Criterion
+
+Checker
+
+Evidence the scorer should see
+
+Q1
+
+Exposure and brightness
+
+Computer vision
+
+Mean luminance, clipped-pixel share, pass or fail against rubric thresholds
+
+Q2
+
+Contrast
+
+Computer vision
+
+Luminance spread, pass or fail against rubric thresholds
+
+Q3
+
+Color palette fit
+
+Computer vision
+
+Top dominant colors and distance to the configured palette
+
+Q4
+
+Framing and subject position
+
+Computer vision
+
+Subject position relative to center and thirds
+
+Q5
+
+Sharpness and subject emphasis
+
+Computer vision
+
+Focus on the subject versus the background
+
+B1
+
+Tone and approachability
+
+Vision-language model
+
+Tone label, score, and one evidence sentence
+
+Background simplicity (Q6) and authenticity (B2) are the first alternates if a mentor drops one of the six.
+
+5. What the references support
+
+Measurable photo quality
+
+Datta, Joshi, Li, and Wang (ECCV 2006) showed that simple visual features — brightness, color, saturation, and spatial layout, including a rule-of-thirds cue — already separate higher-rated photographs from lower-rated ones. Ke, Tang, and Jing (CVPR 2006) used a smaller set aimed at the same problem: blur, contrast, colorfulness, and how edges are spread in the frame. Those two papers are why Q1 through Q6 are specified as measurements.
+
+Named attributes, not one score
+
+Kong, Shen, Lin, Mech, and Fowlkes (ECCV 2016) asked photographers which attributes belong in an aesthetic judgment and kept eleven: interesting content, object emphasis, good lighting, color harmony, vivid color, shallow depth of field, motion blur, rule of thirds, balancing element, repetition, and symmetry. Their AADB set records those as human ratings. Murray, Marchesotti, and Perronnin (CVPR 2012) built the AVA dataset the same way: aesthetic scores plus style tags such as rule of thirds and complementary colors. The lesson for this project is to score named attributes.
+
+Tone is only partly measurable
+
+Machajdik and Hanbury (ACM Multimedia 2010) map brightness and saturation onto pleasure and arousal, using color findings from psychology and art theory. That supports using color and brightness as hints for mood. It does not support scoring “approachable” from a histogram alone. Aaker (1997) gives the brand side: personality dimensions such as sincerity, excitement, competence, sophistication, and ruggedness. B1 should store the target tone in the rubric file, for example “approachable, competent,” and ask the model for evidence.
+
+Craft, not a threshold
+
+Freeman’s The Photographer’s Eye (2007) is the composition reference for framing, balance, and subject placement behind Q4. It justifies the criterion. It does not supply a numeric cutoff.
+
+Missing brand guide
+
+No Capital One photography style guide was in the project files used for this review. Thresholds, allowed tone words, and any rule about people have to come from the mentor or from a public brand guide the team is allowed to use. Until then, B1 stays a structured judgment with a swappable target tone.
+
+6. Questions to settle before ticket 1.2
+
+Confirm the target tone words with the mentor. “Approachable” and “confident” are placeholders from the design document and the team contract.
+
+Confirm palette values for Q3, or agree that the MVP palette is a placeholder list in the rubric file.
+
+Agree that a failed model call still returns the computer-vision scores and marks tone as needing review. That behavior is already in the solution workshop notes.
+
+7. References
+
+Aaker, J. L. (1997). Dimensions of brand personality. Journal of Marketing Research, 34(3), 347–356. https://doi.org/10.1177/002224379703400304
+
+Datta, R., Joshi, D., Li, J., & Wang, J. Z. (2006). Studying aesthetics in photographic images using a computational approach. European Conference on Computer Vision (ECCV), LNCS 3953, 288–301. https://doi.org/10.1007/11744078_23
+
+Freeman, M. (2007). The Photographer’s Eye: Composition and Design for Better Digital Photos. Focal Press / Ilex.
+
+Ke, Y., Tang, X., & Jing, F. (2006). The design of high-level features for photo quality assessment. IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 419–426. https://doi.org/10.1109/CVPR.2006.303
+
+Kong, S., Shen, X., Lin, Z., Mech, R., & Fowlkes, C. (2016). Photo aesthetics ranking network with attributes and content adaptation. European Conference on Computer Vision (ECCV). https://arxiv.org/abs/1606.01621
+
+Machajdik, J., & Hanbury, A. (2010). Affective image classification using features inspired by psychology and art theory. Proceedings of the 18th ACM International Conference on Multimedia, 83–92. https://doi.org/10.1145/1873951.1873965
+
+Murray, N., Marchesotti, L., & Perronnin, F. (2012). AVA: A large-scale database for aesthetic visual analysis. IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2408–2415. https://doi.org/10.1109/CVPR.2012.6247954
+
+Project notes used only to set scope: the team contract, the design document, the capstone proposal, Literature_review(Sheet1).csv, and the “Problem Statement to MVP” and “Designing a Solution” workshop notes.
