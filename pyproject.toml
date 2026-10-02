@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brandlens"
+version = "0.1.0"
+description = "Image preprocessing and photography standards analysis for visual brand evaluation."
+readme = "README.md"
+requires-python = ">=3.11"
+
+authors = [
+    { name = "Priuyankaa Balaji", email = "pribalaji@vt.edu" },
+    { name = "Sanish Bhochhibhoya", email = "sbhochhi@vt.edu" },
+    { name = "Peter Do", email = "pdoo2004@vt.edu" },
+    { name = "Bilal Masood", email = "bilalm22@vt.edu" },
+    { name = "Gopala Krishna Mattaparthi", email = "krishna2026@vt.edu" },
+    ]
+license = { text = "GPL-3.0-only" }
+
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "scipy",
+    "pandas",
+    "h5py",
+    "Pillow",
+]
+
+# Optional dev dependencies
+[project.optional-dependencies]
+dev = ["pytest", "sphinx", "sphinx-rtd-theme", "coverage"]
+
+[project.urls]
+Homepage = "https://github.com/pdoo2004/visual-brand-audit"
+Repository = "https://github.com/pdoo2004/visual-brand-audit"
+Issues = "https://github.com/pdoo2004/visual-brand-audit/issues"
+Documentation = "https://brandlens.readthedocs.io/en/latest/"
