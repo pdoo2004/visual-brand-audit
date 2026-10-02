@@ -1,0 +1,21 @@
+# Files
+*.egg-info
+*.pyc
+*.tmp_profiler_run
+.vscode
+
+
+# Folders
+.ipynb_checkpoints
+__pycache__
+dist
+build
+mutation_report
+.tox
+scratch
+env
+test/.coverage
+test/htmlcov
+docs/html
+docs/_build
+docs_auto
