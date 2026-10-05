@@ -27,5 +27,3 @@ A scoring engine combines both layers against a configurable rubric and produces
 ## Stack
 
 Python 3.11+, FastAPI, React, OpenCV, Pillow, NumPy, scikit-learn, BeautifulSoup, Playwright, Gemma 4 (31B). No paid APIs or licenses required.
-
-test
