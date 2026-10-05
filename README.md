@@ -1,6 +1,6 @@
 # visual-brand-audit
 
-AI-enabled tool for evaluating marketing photography against visual brand standards. Built as a VT Capstone project (Group 4).
+AI-enabled tool for evaluating marketing photography against visual brand standards. Built as a VT Capstone project,
 
 ## What it does
 
@@ -28,3 +28,4 @@ A scoring engine combines both layers against a configurable rubric and produces
 
 Python 3.11+, FastAPI, React, OpenCV, Pillow, NumPy, scikit-learn, BeautifulSoup, Playwright, Gemma 4 (31B). No paid APIs or licenses required.
 
+test
