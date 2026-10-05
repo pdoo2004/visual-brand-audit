@@ -6,6 +6,7 @@ from PIL import Image, UnidentifiedImageError, features
 
 from brandlens.preprocessing.image_io import load_image
 
+
 class TestLoadImage(unittest.TestCase):
     """Test supported formats, input validation, and file handling."""
 
@@ -185,18 +186,16 @@ class TestLoadImage(unittest.TestCase):
 
     def test_invalid_path_type(self):
         for value in (None, 123, ["image.png"]):
-            with self.subTest(value=value):
-                with self.assertRaises(TypeError):
-                    load_image(value)
+            with self.subTest(value=value), self.assertRaises(TypeError):
+                load_image(value)
 
     def test_invalid_supported_formats_type(self):
         for value in ("PNG", ["PNG"], None, (123,)):
-            with self.subTest(value=value):
-                with self.assertRaises(TypeError):
-                    load_image(
-                        self.directory / "unused.png",
-                        supported_formats=value,
-                    )
+            with self.subTest(value=value), self.assertRaises(TypeError):
+                load_image(
+                    self.directory / "unused.png",
+                    supported_formats=value,
+                )
 
     def test_empty_supported_formats(self):
         with self.assertRaises(ValueError):
@@ -207,21 +206,19 @@ class TestLoadImage(unittest.TestCase):
 
     def test_invalid_max_pixels_type(self):
         for value in (True, 100.0, "100", None):
-            with self.subTest(value=value):
-                with self.assertRaises(TypeError):
-                    load_image(
-                        self.directory / "unused.png",
-                        max_pixels=value,
-                    )
+            with self.subTest(value=value), self.assertRaises(TypeError):
+                load_image(
+                    self.directory / "unused.png",
+                    max_pixels=value,
+                )
 
     def test_invalid_max_pixels_value(self):
         for value in (0, -1):
-            with self.subTest(value=value):
-                with self.assertRaises(ValueError):
-                    load_image(
-                        self.directory / "unused.png",
-                        max_pixels=value,
-                    )
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                load_image(
+                    self.directory / "unused.png",
+                    max_pixels=value,
+                )
 
 
 if __name__ == "__main__":

@@ -1,7 +1,12 @@
 import unittest
+
 from PIL import Image, ImageCms
 
-from brandlens.preprocessing.standardization import StandardizationSettings, standardize_image
+from brandlens.preprocessing.standardization import (
+    StandardizationSettings,
+    standardize_image,
+)
+
 
 class TestStandardizationSettings(unittest.TestCase):
     """Test default settings and parameter validation."""
@@ -23,27 +28,23 @@ class TestStandardizationSettings(unittest.TestCase):
 
     def test_invalid_max_size_type(self):
         for value in ([800, 600], "800", 800, (800.0, 600), (True, 600)):
-            with self.subTest(value=value):
-                with self.assertRaises(TypeError):
-                    StandardizationSettings(max_size=value)
+            with self.subTest(value=value), self.assertRaises(TypeError):
+                StandardizationSettings(max_size=value)
 
     def test_invalid_max_size_value(self):
         for value in ((), (800,), (800, 600, 400), (0, 600), (800, -1)):
-            with self.subTest(value=value):
-                with self.assertRaises(ValueError):
-                    StandardizationSettings(max_size=value)
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                StandardizationSettings(max_size=value)
 
     def test_invalid_background_type(self):
         for value in ([255, 255, 255], None, (255.0, 0, 0), (True, 0, 0)):
-            with self.subTest(value=value):
-                with self.assertRaises(TypeError):
-                    StandardizationSettings(background=value)
+            with self.subTest(value=value), self.assertRaises(TypeError):
+                StandardizationSettings(background=value)
 
     def test_invalid_background_value(self):
         for value in ((), (255, 255), (0, 0, 0, 0), (-1, 0, 0), (256, 0, 0)):
-            with self.subTest(value=value):
-                with self.assertRaises(ValueError):
-                    StandardizationSettings(background=value)
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                StandardizationSettings(background=value)
 
 
 class TestStandardizeImage(unittest.TestCase):
@@ -215,19 +216,16 @@ class TestStandardizeImage(unittest.TestCase):
 
     def test_invalid_image_type(self):
         for value in (None, "image.png", 123):
-            with self.subTest(value=value):
-                with self.assertRaises(TypeError):
-                    standardize_image(value)
+            with self.subTest(value=value), self.assertRaises(TypeError):
+                standardize_image(value)
 
     def test_invalid_settings_type(self):
-        with Image.new("RGB", (10, 10)) as image:
-            with self.assertRaises(TypeError):
-                standardize_image(image, {"max_size": (100, 100)})
+        with Image.new("RGB", (10, 10)) as image, self.assertRaises(TypeError):
+            standardize_image(image, {"max_size": (100, 100)})
 
     def test_zero_dimension_is_rejected(self):
-        with Image.new("RGB", (0, 10)) as image:
-            with self.assertRaises(ValueError):
-                standardize_image(image)
+        with Image.new("RGB", (0, 10)) as image, self.assertRaises(ValueError):
+            standardize_image(image)
 
     def test_original_pixels_and_metadata_are_unchanged(self):
         settings = StandardizationSettings(max_size=(20, 20))

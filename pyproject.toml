@@ -31,6 +31,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest", "sphinx", "sphinx-rtd-theme", "coverage"]
 
+[tool.ruff.lint]
+ignore = ["SIM117"]
+
 [project.urls]
 Homepage = "https://github.com/pdoo2004/visual-brand-audit"
 Repository = "https://github.com/pdoo2004/visual-brand-audit"

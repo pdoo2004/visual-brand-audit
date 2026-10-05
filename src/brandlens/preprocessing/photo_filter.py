@@ -3,6 +3,7 @@ from math import isfinite
 
 from PIL import Image
 
+
 @dataclass(frozen=True)
 class FilterSettings:
     """

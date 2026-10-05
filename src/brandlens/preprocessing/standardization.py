@@ -3,6 +3,7 @@ from io import BytesIO
 
 from PIL import Image, ImageCms, ImageOps
 
+
 def _validate_image(image: Image.Image) -> None:
     """Check that the input is a Pillow image with positive dimensions."""
     if not isinstance(image, Image.Image):
