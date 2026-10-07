@@ -26,6 +26,7 @@ dependencies = [
     "h5py",
     "Pillow",
     "fastapi>=0.110",
+    "pydantic>=2.5",
     "uvicorn[standard]>=0.29",
 ]
 
