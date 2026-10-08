@@ -1,0 +1,78 @@
+{
+  "model": "gemma4:e2b",
+  "prompt": "You evaluate one marketing photograph. Score only the criteria listed below.\nDo not score exposure, contrast, color palette, framing, or sharpness. Another system measures those.\nDo not add criteria that were not listed.\nReturn one JSON object and no other text.\n\nTarget tone: approachable, competent\n\nCriteria:\n- B1: Tone and approachability. The photograph fits the target tone stored in the rubric, and the judgment cites something visible. Required fields: tone_label (short string), fit_score (integer 1-5), evidence (one sentence).\n\nUse this JSON shape:\n{\n  \"criteria\": [\n    {\n      \"id\": \"<criterion id>\",\n      \"name\": \"<criterion name>\",\n      \"tone_label\": \"<short label for the tone you actually see>\",\n      \"fit_score\": <integer 1 to 5, where 5 is a strong fit to the target tone>,\n      \"evidence\": \"<one sentence that names something visible in this photograph>\"\n    }\n  ]\n}\n\nRules:\n- The criteria array contains only the ids listed above, in that order.\n- fit_score is an integer from 1 to 5.\n- evidence must name a visible subject, object, place, or light. Do not invent words, logos, or people that are not in the photograph.\n- If the photograph does not fit the target tone, say so with a low score. Do not force a passing judgment.\n",
+  "options": {
+    "temperature": 0.2,
+    "num_predict": 256,
+    "num_ctx": 2048
+  },
+  "think": false,
+  "runs": [
+    {
+      "file": "01-coffee-shop.jpg",
+      "scene": "Hands holding a latte while milk is poured. Warm light, close crop, one person.",
+      "wall_seconds": 31.509,
+      "load_seconds": 15.117,
+      "prompt_eval_seconds": 15.598,
+      "eval_seconds": 0.753,
+      "eval_count": 102,
+      "gpu": "4251 MiB, 6144 MiB, 85 %",
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability. The photograph fits the target tone stored in the rubric, and the judgment cites something visible.\",\n      \"tone_label\": \"Competent\",\n      \"fit_score\": 4,\n      \"evidence\": \"The close-up shot of a hand pouring latte art suggests a competent and skilled action.\"\n    }\n  ]\n}",
+      "thinking": "",
+      "checks": {
+        "json_ok": true,
+        "only_expected_ids": true,
+        "fields_ok": true,
+        "ids": [
+          "B1"
+        ],
+        "error": null
+      },
+      "tokens_per_second": 135.46
+    },
+    {
+      "file": "02-glass-office.jpg",
+      "scene": "Bright open office. One person working at a wooden desk among monitors and plants.",
+      "wall_seconds": 0.903,
+      "load_seconds": 0.009,
+      "prompt_eval_seconds": 0.285,
+      "eval_seconds": 0.587,
+      "eval_count": 98,
+      "gpu": "4253 MiB, 6144 MiB, 80 %",
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability. The photograph fits the target tone stored in the rubric, and the judgment cites something visible.\",\n      \"tone_label\": \"competent\",\n      \"fit_score\": 4,\n      \"evidence\": \"The arrangement of wooden tables and materials suggests a professional, organized workspace.\"\n    }\n  ]\n}",
+      "thinking": "",
+      "checks": {
+        "json_ok": true,
+        "only_expected_ids": true,
+        "fields_ok": true,
+        "ids": [
+          "B1"
+        ],
+        "error": null
+      },
+      "tokens_per_second": 166.95
+    },
+    {
+      "file": "03-neon-city.jpg",
+      "scene": "Night city seen through a dense blue neon mesh. No people.",
+      "wall_seconds": 0.995,
+      "load_seconds": 0.006,
+      "prompt_eval_seconds": 0.288,
+      "eval_seconds": 0.662,
+      "eval_count": 88,
+      "gpu": "4252 MiB, 6144 MiB, 43 %",
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"Competent/Futuristic\",\n      \"fit_score\": 4,\n      \"evidence\": \"The complex network of bright blue lines and digital structures conveys a competent and high-tech feel.\"\n    }\n  ]\n}",
+      "thinking": "",
+      "checks": {
+        "json_ok": true,
+        "only_expected_ids": true,
+        "fields_ok": true,
+        "ids": [
+          "B1"
+        ],
+        "error": null
+      },
+      "tokens_per_second": 132.93
+    }
+  ]
+}
