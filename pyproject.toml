@@ -31,6 +31,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest", "sphinx", "sphinx-rtd-theme", "coverage"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.ruff.lint]
 ignore = ["SIM117"]
 
