@@ -49,10 +49,29 @@ Requires [Ollama](https://ollama.com). Pull the development model (~6.6 GB) once
 ollama pull gemma4:e4b
 ```
 
-Run the B1 (tone and approachability) scorer on one photograph:
+If your machine does not have enough GPU memory, pull a lighter alternative instead:
 
 ```bash
+ollama pull gemma4:e2b
+ollama pull qwen2.5vl:3b
+```
+
+Run the B1 (tone and approachability) scorer on one photograph (use `python3` on Mac, `python` on Windows):
+
+**Mac:**
+```bash
+python3 vlm/run_local.py vlm/samples/01-coffee-shop.jpg
+```
+
+**Windows:**
+```powershell
 python vlm/run_local.py vlm/samples/01-coffee-shop.jpg
+```
+
+To use a different model, pass `--model`:
+
+```bash
+python3 vlm/run_local.py --model qwen2.5vl:3b vlm/samples/01-coffee-shop.jpg
 ```
 
 See `vlm/OLLAMA.md` for setup details and `vlm/BENCHMARK.md` for the model selection rationale. Do not pull `gemma4:26b` or `gemma4:31b` on a laptop — those weights are for the GPU host.
