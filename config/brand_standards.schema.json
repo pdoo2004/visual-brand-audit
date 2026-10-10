@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Photography Standards",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "criteria",
+    "metadata"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "$ref": "#/$defs/criterion"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "source_decision",
+        "interface_contract",
+        "weights_status",
+        "scoring_ready"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interface_contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "weights_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scoring_ready": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "criterion_id",
+        "name",
+        "definition",
+        "evaluation_evidence",
+        "method",
+        "weight",
+        "params",
+        "required_measurements"
+      ],
+      "properties": {
+        "criterion_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "definition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluation_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "type": "string",
+          "enum": ["cv", "vlm"]
+        },
+        "weight": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "params": {
+          "type": "object"
+        },
+        "required_measurements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
