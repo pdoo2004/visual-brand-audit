@@ -25,6 +25,7 @@ dependencies = [
     "pandas",
     "h5py",
     "Pillow",
+    "jsonschema"
 ]
 
 # Optional dev dependencies
