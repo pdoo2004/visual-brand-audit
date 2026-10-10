@@ -1,0 +1,41 @@
+{
+    "schema_version": "1.0.0",
+    "criteria": [
+        {
+        "criterion_id": "exposure_brightness",
+        "name": "Exposure and brightness",
+        "definition": "The photograph is neither badly underexposed nor blown out, and the subject is readable.",
+        "evaluation_evidence": "Mean luminance, the share of near-black pixels, the share of near-white pixels, and a pass or fail against configured thresholds."
+        },
+        {
+        "criterion_id": "contrast",
+        "name": "Contrast",
+        "definition": "Tonal separation is strong enough that the subject separates from the background. Both flat and harsh images should be flagged.",
+        "evaluation_evidence": "Spread of luminance values, a highlight and shadow check, and a pass or fail against configured thresholds."
+        },
+        {
+        "criterion_id": "color_palette_fit",
+        "name": "Color palette fit",
+        "definition": "The photograph's dominant colors fit the configured brand palette. More color is not inherently better.",
+        "evaluation_evidence": "Top dominant colors from clustering and their distances to the configured palette."
+        },
+        {
+        "criterion_id": "framing_subject_position",
+        "name": "Framing and subject position",
+        "definition": "The main subject sits deliberately near the center or along a third, with usable space around it.",
+        "evaluation_evidence": "Subject position relative to the center and rule-of-thirds intersections, using an identified subject region."
+        },
+        {
+        "criterion_id": "sharpness_subject_emphasis",
+        "name": "Sharpness and subject emphasis",
+        "definition": "The subject is in focus and visually dominant. Background blur is acceptable. Intentional motion is not an automatic failure.",
+        "evaluation_evidence": "A blur or edge measure on the subject region compared with the background."
+        },
+        {
+        "criterion_id": "tone_approachability",
+        "name": "Tone and approachability",
+        "definition": "The photograph fits the configured target tone, supported by something visible in the photograph.",
+        "evaluation_evidence": "A tone label, an integer fit score from 1 to 5, and one sentence citing visible evidence."
+        }
+    ]
+}
