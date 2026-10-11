@@ -28,11 +28,15 @@ dependencies = [
     "fastapi>=0.110",
     "pydantic>=2.5",
     "uvicorn[standard]>=0.29",
+    "jsonschema"
 ]
 
 # Optional dev dependencies
 [project.optional-dependencies]
 dev = ["pytest", "sphinx", "sphinx-rtd-theme", "coverage", "httpx"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff.lint]
 ignore = ["SIM117"]

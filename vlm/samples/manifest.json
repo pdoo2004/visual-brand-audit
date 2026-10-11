@@ -1,0 +1,21 @@
+{
+  "purpose": "Same three photographs for every candidate in the SCRUM-119 benchmark.",
+  "license": "Pexels license. Free to use. Not a Capital One asset.",
+  "images": [
+    {
+      "file": "01-coffee-shop.jpg",
+      "scene": "Hands holding a latte while milk is poured. Warm light, close crop, one person.",
+      "source": "https://www.pexels.com/photo/302899/"
+    },
+    {
+      "file": "02-glass-office.jpg",
+      "scene": "Bright open office. One person working at a wooden desk among monitors and plants.",
+      "source": "https://www.pexels.com/photo/380769/"
+    },
+    {
+      "file": "03-neon-city.jpg",
+      "scene": "Night city seen through a dense blue neon mesh. No people.",
+      "source": "https://www.pexels.com/photo/373543/"
+    }
+  ]
+}

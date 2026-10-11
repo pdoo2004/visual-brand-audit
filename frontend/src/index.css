@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+
+@theme {
+  /* Brand */
+  --color-brand-50: #eff6ff;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+
+  /* Neutrals */
+  --color-ink: #111827;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f3f4f6;
+  --color-line: #e5e7eb;
+  --color-text-muted: #6b7280;
+
+  /* Result status */
+  --color-status-pass: #15803d;
+  --color-status-pass-bg: #dcfce7;
+  --color-status-review: #b45309;
+  --color-status-review-bg: #fef3c7;
+  --color-status-fail: #b91c1c;
+  --color-status-fail-bg: #fee2e2;
+
+  /* Criterion source tags ("Measured" vs "AI judgment") */
+  --color-tag-measured: #1d4ed8;
+  --color-tag-measured-bg: #dbeafe;
+  --color-tag-ai: #4b5563;
+  --color-tag-ai-bg: #e5e7eb;
+
+  /* Typography */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Shape */
+  --radius-control: 0.5rem;
+  --radius-card: 0.75rem;
+}
+
+@layer base {
+  body {
+    @apply bg-surface-muted font-sans text-ink antialiased;
+  }
+}
