@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Photography Standards",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "rubric_id",
+    "name",
+    "flag_threshold",
+    "brand_palette",
+    "criteria",
+    "metadata"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "rubric_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "flag_threshold": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "brand_palette": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^#[0-9A-Fa-f]{6}$"
+      }
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/criterion"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "source_decision",
+        "interface_contract",
+        "weights_status",
+        "palette_status",
+        "tone_status",
+        "on_unavailable",
+        "scoring_ready"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interface_contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "weights_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "palette_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tone_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "flag_threshold_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "on_unavailable": {
+          "const": "unavailable_needs_review"
+        },
+        "scoring_ready": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "criterion_id",
+        "name",
+        "definition",
+        "evaluation_evidence",
+        "method",
+        "weight",
+        "params",
+        "required_measurements"
+      ],
+      "properties": {
+        "criterion_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "definition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluation_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "type": "string",
+          "enum": ["cv", "vlm"]
+        },
+        "weight": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "required_measurements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
