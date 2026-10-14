@@ -9,7 +9,8 @@ configuration. Override with BRANDLENS_* environment variables, for example:
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 
 # Vite's default dev-server addresses (the React UI runs here during development).
 _DEFAULT_CORS_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173"
@@ -24,6 +25,10 @@ class Settings:
     log_level: str = "info"
     reload: bool = False
     cors_origins: tuple[str, ...] = tuple(_DEFAULT_CORS_ORIGINS.split(","))
+    db_path: Path = field(default_factory=lambda: Path("data/brandlens.db"))
+    upload_dir: Path = field(default_factory=lambda: Path("data/uploads/raw"))
+    processed_dir: Path = field(default_factory=lambda: Path("data/uploads/processed"))
+    rubric_path: Path = field(default_factory=lambda: Path("config/brand_standards.json"))
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -35,4 +40,8 @@ class Settings:
             log_level=os.getenv("BRANDLENS_LOG_LEVEL", cls.log_level).lower(),
             reload=os.getenv("BRANDLENS_RELOAD", "").lower() in {"1", "true", "yes"},
             cors_origins=tuple(o.strip() for o in origins.split(",") if o.strip()),
+            db_path=Path(os.getenv("BRANDLENS_DB_PATH", "data/brandlens.db")),
+            upload_dir=Path(os.getenv("BRANDLENS_UPLOAD_DIR", "data/uploads/raw")),
+            processed_dir=Path(os.getenv("BRANDLENS_PROCESSED_DIR", "data/uploads/processed")),
+            rubric_path=Path(os.getenv("BRANDLENS_RUBRIC_PATH", "config/brand_standards.json")),
         )
