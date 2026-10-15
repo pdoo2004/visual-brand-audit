@@ -1,10 +1,12 @@
 """Task 3.4: integrate geometry filtering and image standardization."""
 
 from collections.abc import Mapping
+
 from PIL import Image
 
 from .photo_filter import FilterSettings, filter_photo
 from .standardization import StandardizationSettings, standardize_image
+
 
 def _resolve_settings(filter_settings, standardization_settings):
     """Create defaults and reject invalid configuration before processing."""
