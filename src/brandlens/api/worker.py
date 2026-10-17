@@ -16,7 +16,10 @@ from pathlib import Path
 from brandlens.api import db as database
 from brandlens.preprocessing.image_io import load_image
 from brandlens.preprocessing.photo_filter import FilterSettings, filter_photo
-from brandlens.preprocessing.standardization import StandardizationSettings, standardize_image
+from brandlens.preprocessing.standardization import (
+    StandardizationSettings,
+    standardize_image,
+)
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +58,7 @@ def run_job(
                 _mark_failed(db_path, image_id, "LOAD_ERROR", str(exc))
                 had_error = True
             continue
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             _mark_failed(db_path, image_id, "LOAD_ERROR", str(exc))
             had_error = True
             log.warning("job %s image %s: load failed: %s", job_id, image_id, exc)
@@ -69,7 +72,7 @@ def run_job(
 
         try:
             standardized = standardize_image(filtered, _STD)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             _mark_failed(db_path, image_id, "STANDARDIZE_ERROR", str(exc))
             had_error = True
             log.warning("job %s image %s: standardization failed: %s", job_id, image_id, exc)

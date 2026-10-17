@@ -13,7 +13,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, Request, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+)
 from pydantic import ValidationError
 
 from brandlens.api import db as database
@@ -71,9 +79,9 @@ def _error(code: ErrorCode, message: str) -> dict:
 async def submit_upload(
     request: Request,
     background_tasks: BackgroundTasks,
-    files: list[UploadFile] = File(..., description="JPEG, PNG, or WEBP images"),
+    files: list[UploadFile] = File(..., description="JPEG, PNG, or WEBP images"),  # noqa: B008
     rubric_id: str = Form(..., description="Rubric identifier, e.g. 'default-v1-draft'"),
-    criterion_ids: list[str] | None = Form(
+    criterion_ids: list[str] | None = Form(  # noqa: B008
         default=None,
         description="Criterion subset to evaluate (omit to use all rubric criteria)",
     ),

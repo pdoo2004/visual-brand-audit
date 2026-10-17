@@ -18,7 +18,6 @@ from PIL import Image
 from brandlens.api.app import create_app
 from brandlens.api.config import Settings
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
