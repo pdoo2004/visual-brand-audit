@@ -28,6 +28,7 @@ dependencies = [
     "fastapi>=0.110",
     "pydantic>=2.5",
     "uvicorn[standard]>=0.29",
+    "python-multipart>=0.0.9",
     "jsonschema",
     "scikit-image"
 ]
