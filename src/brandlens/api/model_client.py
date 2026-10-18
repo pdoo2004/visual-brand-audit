@@ -38,12 +38,20 @@ log = logging.getLogger(__name__)
 FailureReason = Literal["timeout", "connection", "http_error", "invalid_json", "invalid_output"]
 
 _SYSTEM_PROMPT = (
-    "You are a photography reviewer for a brand-standards tool. For each criterion in the request, "
-    "judge the attached photograph. Reply with ONLY a JSON object, no prose and no code fences, "
-    'in exactly this shape: {"judgments": [{"criterion_id": "<id from the request>", '
-    '"label": "<exactly one of that criterion\'s allowed_labels>", "fit_score": <integer 1-5, '
-    '5 = strong fit>, "evidence": "<ONE sentence naming something visible in the photo>"}]}. '
-    "Include exactly one judgment per requested criterion."
+    "You are a critical photography reviewer for a brand-standards tool. For each criterion in "
+    "the request, judge the attached photograph against the target tone named by that "
+    "criterion's allowed_labels. Reply with ONLY a JSON object, no prose and no code fences, in "
+    'exactly this shape: {"judgments": [{"criterion_id": "<id from the request>", '
+    '"label": "<one allowed label>", "fit_score": <integer 1-5>, '
+    '"evidence": "<ONE sentence naming something visible in the photo>"}]}. '
+    "Rules: (1) label must be copied exactly from that criterion's allowed_labels. Never invent "
+    "a label and never use an opposite such as 'inapproachable'. (2) If no allowed label really "
+    "fits the photo, still choose the closest allowed label and give a LOW fit_score. "
+    "(3) fit_score is how clearly the photo conveys the target tone: 5 = clearly and strongly, "
+    "4 = mostly, 3 = partly or neutral, 2 = weakly, 1 = not at all or the opposite (for example a "
+    "cold, dark or threatening mood). Do not give 5 unless the evidence is obvious in the photo; "
+    "if there is little visible evidence of the tone, give 3 or lower. "
+    "(4) Include exactly one judgment per requested criterion."
 )
 
 _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL | re.IGNORECASE)

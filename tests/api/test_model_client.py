@@ -105,6 +105,20 @@ def test_request_is_openai_chat_shape(request_, image_path):
     assert base64.b64decode(url.split(",", 1)[1]) == image_path.read_bytes()
 
 
+def test_prompt_tells_model_not_to_invent_labels_and_to_score_low(request_, image_path):
+    """Found in live testing: on a dark photo the model invented 'inapproachable'."""
+    seen = {}
+
+    def handler(r: httpx.Request):
+        seen["system"] = json.loads(r.content)["messages"][0]["content"]
+        return _reply([_good()])
+
+    with _client(handler) as c:
+        c.judge(request_, image_path)
+    assert "Never invent a label" in seen["system"]
+    assert "closest allowed label" in seen["system"] and "LOW fit_score" in seen["system"]
+
+
 def test_from_settings(request_, image_path):
     s = Settings(model_base_url="http://x.test/v1", model_name="m", model_max_retries=0)
     with ModelClient.from_settings(s, transport=httpx.MockTransport(lambda r: _reply([_good()]))) as c:
