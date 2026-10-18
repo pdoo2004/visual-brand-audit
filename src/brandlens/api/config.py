@@ -29,6 +29,13 @@ class Settings:
     upload_dir: Path = field(default_factory=lambda: Path("data/uploads/raw"))
     processed_dir: Path = field(default_factory=lambda: Path("data/uploads/processed"))
     rubric_path: Path = field(default_factory=lambda: Path("config/brand_standards.json"))
+    # Model Serving (contract 4.4): any OpenAI-compatible /v1/chat/completions server.
+    # Dev: local Ollama. Prod: vLLM. Set the model name to the tag you pulled / the served name.
+    model_base_url: str = "http://localhost:11434/v1"
+    model_name: str = "gemma4:e4b"
+    model_api_key: str | None = None
+    model_timeout_s: float = 60.0
+    model_max_retries: int = 1  # contract: one retry, then the tone criterion is unavailable
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -44,4 +51,11 @@ class Settings:
             upload_dir=Path(os.getenv("BRANDLENS_UPLOAD_DIR", "data/uploads/raw")),
             processed_dir=Path(os.getenv("BRANDLENS_PROCESSED_DIR", "data/uploads/processed")),
             rubric_path=Path(os.getenv("BRANDLENS_RUBRIC_PATH", "config/brand_standards.json")),
+            model_base_url=os.getenv("BRANDLENS_MODEL_BASE_URL", cls.model_base_url),
+            model_name=os.getenv("BRANDLENS_MODEL_NAME", cls.model_name),
+            model_api_key=os.getenv("BRANDLENS_MODEL_API_KEY") or None,
+            model_timeout_s=float(os.getenv("BRANDLENS_MODEL_TIMEOUT_S", str(cls.model_timeout_s))),
+            model_max_retries=int(
+                os.getenv("BRANDLENS_MODEL_MAX_RETRIES", str(cls.model_max_retries))
+            ),
         )
