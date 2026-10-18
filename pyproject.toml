@@ -29,6 +29,7 @@ dependencies = [
     "pydantic>=2.5",
     "uvicorn[standard]>=0.29",
     "python-multipart>=0.0.9",
+    "httpx>=0.27",
     "jsonschema",
     "scikit-image"
 ]
