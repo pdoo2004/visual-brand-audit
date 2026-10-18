@@ -166,12 +166,15 @@ def create_job(
     job_id: str,
     rubric_id: str,
     input_type: str = "upload",
+    submission_url: str | None = None,
+    max_pages: int | None = None,
 ) -> None:
+    """Insert a queued job. URL jobs must supply `submission_url` (enforced by a table CHECK)."""
     ts = _now()
     conn.execute(
-        "INSERT INTO jobs (job_id, rubric_id, input_type, status, created_at, updated_at)"
-        " VALUES (?, ?, ?, 'queued', ?, ?)",
-        (job_id, rubric_id, input_type, ts, ts),
+        "INSERT INTO jobs (job_id, rubric_id, input_type, submission_url, max_pages,"
+        " status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'queued', ?, ?)",
+        (job_id, rubric_id, input_type, submission_url, max_pages, ts, ts),
     )
 
 
