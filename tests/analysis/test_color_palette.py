@@ -15,6 +15,7 @@ from brandlens.analysis.color_palette import (
     measure_palette_distance,
 )
 
+
 def striped_image(colors, counts):
     image = Image.new("RGB", (sum(counts), 1))
     image.putdata([color for color, count in zip(colors, counts) for _ in range(count)])

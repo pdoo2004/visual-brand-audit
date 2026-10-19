@@ -15,6 +15,7 @@ from math import isfinite
 import numpy as np
 from PIL import Image
 
+
 @dataclass(frozen=True)
 class MeasurementSettings:
     """Settings shared by brightness and contrast measurements.

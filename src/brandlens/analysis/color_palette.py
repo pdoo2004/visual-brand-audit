@@ -10,17 +10,18 @@ This module extracts colors only. Palette-distance measurement and
 brand scoring are separate operations.
 """
 
+import re
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
+from math import isclose, isfinite
+from numbers import Real
 from typing import TypedDict
 
 import cv2
-import re
 import numpy as np
-from collections.abc import Mapping, Sequence
-from math import isclose, isfinite
-from numbers import Real
 from PIL import Image
 from sklearn.cluster import KMeans
+
 
 class DominantColor(TypedDict):
     """One representative color and its whole-image proportion."""

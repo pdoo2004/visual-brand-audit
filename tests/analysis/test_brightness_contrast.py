@@ -12,6 +12,7 @@ from brandlens.analysis.brightness_contrast import (
     measure_contrast,
 )
 
+
 def gray_image(values):
     image = Image.new("RGB", (len(values), 1))
     image.putdata([(value, value, value) for value in values])
