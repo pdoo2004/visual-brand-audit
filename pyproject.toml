@@ -29,7 +29,9 @@ dependencies = [
     "pydantic>=2.5",
     "uvicorn[standard]>=0.29",
     "jsonschema",
-    "scikit-image"
+    "scikit-image",
+    "scikit-learn",
+    "opencv-python"
 ]
 
 # Optional dev dependencies
