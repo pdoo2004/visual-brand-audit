@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -33,6 +34,7 @@ from brandlens.api.schemas import (
     JobProgress,
     JobState,
     JobStatus,
+    RejectedUpload,
     UploadRequest,
 )
 from brandlens.api.worker import run_job
@@ -42,7 +44,25 @@ log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["jobs"])
 
 _MAX_FILE_BYTES = 20 * 1024 * 1024  # 20 MB
-_ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
+
+
+def _sniff_is_image(head: bytes) -> bool:
+    """True for JPEG/PNG/WebP, judged by the file's own bytes (client Content-Type is not trusted)."""
+    if head.startswith((b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n")):
+        return True
+    return head[:4] == b"RIFF" and head[8:12] == b"WEBP"
+
+
+def _display_name(name: str | None) -> str:
+    """Filename safe to show and to use on disk: no directories, no odd characters."""
+    base = re.split(r"[\\/]", name or "")[-1]
+    return re.sub(r"[^\w.\- ]", "_", base).strip()[:150] or "unnamed"
+
+
+_REJECT_STATUS = {
+    ErrorCode.FILE_TOO_LARGE: 413,
+    ErrorCode.UNSUPPORTED_FILE_TYPE: 415,
+}
 
 
 def _load_rubric_criteria(rubric_path: Path, rubric_id: str) -> list[str]:
@@ -109,27 +129,39 @@ async def submit_upload(
             detail=_error(ErrorCode.VALIDATION_ERROR, "At least one file is required."),
         )
 
-    # Validate and buffer each upload before touching the database.
-    pending: list[tuple[str, bytes]] = []  # (filename, data)
+    # Validate each file on its own: keep the good ones, report the bad ones.
+    pending: list[tuple[str, bytes]] = []  # (display filename, data)
+    rejected: list[RejectedUpload] = []
     for f in files:
-        if f.content_type not in _ALLOWED_CONTENT_TYPES:
-            raise HTTPException(
-                status_code=422,
-                detail=_error(
-                    ErrorCode.UNSUPPORTED_FILE_TYPE,
-                    f"{f.filename!r}: unsupported content type {f.content_type!r}.",
-                ),
-            )
-        data = await f.read()
+        name = _display_name(f.filename)
+        data = await f.read(_MAX_FILE_BYTES + 1)
         if len(data) > _MAX_FILE_BYTES:
-            raise HTTPException(
-                status_code=413,
-                detail=_error(
-                    ErrorCode.FILE_TOO_LARGE,
-                    f"{f.filename!r} exceeds the 20 MB per-file limit.",
-                ),
-            )
-        pending.append((f.filename or f"file_{len(pending)}", data))
+            rejected.append(RejectedUpload(
+                filename=name,
+                code=ErrorCode.FILE_TOO_LARGE,
+                message="File exceeds the 20 MB per-file limit.",
+            ))
+        elif not data:
+            rejected.append(RejectedUpload(
+                filename=name, code=ErrorCode.VALIDATION_ERROR, message="File is empty."
+            ))
+        elif not _sniff_is_image(data[:16]):
+            rejected.append(RejectedUpload(
+                filename=name,
+                code=ErrorCode.UNSUPPORTED_FILE_TYPE,
+                message="Not a supported image. Use JPEG, PNG, or WebP.",
+            ))
+        else:
+            pending.append((name, data))
+
+    if not pending:
+        first = rejected[0]
+        body = ErrorBody(
+            code=first.code,
+            message=f"No valid images in the upload. {first.filename!r}: {first.message}",
+            details=[r.model_dump(mode="json") for r in rejected],
+        ).model_dump(mode="json")
+        raise HTTPException(status_code=_REJECT_STATUS.get(first.code, 422), detail=body)
 
     # Resolve criteria — rubric default when caller omits criterion_ids.
     criteria = opts.criterion_ids or _load_rubric_criteria(rubric_path, opts.rubric_id)
@@ -170,8 +202,11 @@ async def submit_upload(
         processed_dir=processed_dir / job_id,
     )
 
-    log.info("job %s accepted: %d image(s), rubric %s", job_id, len(image_records), opts.rubric_id)
-    return JobAccepted.for_job(UUID(job_id), InputType.UPLOAD, created_at)
+    log.info(
+        "job %s accepted: %d image(s), %d rejected, rubric %s",
+        job_id, len(image_records), len(rejected), opts.rubric_id,
+    )
+    return JobAccepted.for_job(UUID(job_id), InputType.UPLOAD, created_at, rejected=rejected)
 
 
 @router.get(
