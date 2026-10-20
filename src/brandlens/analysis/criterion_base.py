@@ -33,7 +33,8 @@ class CriterionBase(ABC):
 
         resolved = deepcopy(defaults) if defaults is not None else {}
 
-        unknown = set(settings) - set(resolved)
+        # Everything in settings must be in defaults (but reverse is not necessary.).
+        unknown = set(settings) - set(resolved) 
         if unknown:
             raise ValueError(f"Unknown settings: {', '.join(sorted(unknown))}")
 
