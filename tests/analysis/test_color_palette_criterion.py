@@ -4,10 +4,10 @@ import json
 import unittest
 
 import numpy as np
-from brandlens.analysis.color_palette_criterion import ColorPaletteCriterion
 from PIL import Image
 
 from brandlens.analysis.analysis_input import AnalysisInput
+from brandlens.analysis.color_palette_criterion import ColorPaletteCriterion
 
 
 class TestColorPaletteCriterion(unittest.TestCase):
