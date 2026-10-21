@@ -6,6 +6,7 @@ from PIL import Image
 
 from .subject.region import SubjectRegion
 
+
 @dataclass(frozen=True)
 class AnalysisInput:
     """A borrowed, standardized RGB/sRGB image.
