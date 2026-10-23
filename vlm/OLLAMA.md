@@ -6,20 +6,39 @@ The development model is `gemma4:e4b`. The choice is explained in `BENCHMARK.md`
 
 ## Setup
 
-Install [Ollama](https://ollama.com), then:
+Install [Ollama](https://ollama.com), then pull the development model:
 
 ```powershell
 ollama pull gemma4:e4b
 ```
 
-The tag is about 6.6 GB. Do not load `gemma4:26b` or `gemma4:31b` on a laptop. Those weights are for the GPU host.
+The tag is about 6.6 GB and needs ~5.7 GB of GPU memory at runtime. Do not load `gemma4:26b` or `gemma4:31b` on a laptop. Those weights are for the GPU host.
+
+If your machine does not have enough GPU memory for `gemma4:e4b`, pull one of these lighter alternatives:
+
+```powershell
+ollama pull gemma4:e2b
+ollama pull qwen2.5vl:3b
+```
 
 ## Command the rest of the pipeline can mirror
 
-From this folder:
+From this folder (use `python3` on Mac, `python` on Windows):
 
+**Mac:**
+```bash
+python3 run_local.py samples/01-coffee-shop.jpg
+```
+
+**Windows:**
 ```powershell
 python run_local.py samples/01-coffee-shop.jpg
+```
+
+To use a different model, pass `--model`:
+
+```bash
+python3 run_local.py --model qwen2.5vl:3b samples/01-coffee-shop.jpg
 ```
 
 That sends the B1 prompt in `prompt_template.py` and one image to:

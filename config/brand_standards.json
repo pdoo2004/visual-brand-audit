@@ -1,0 +1,161 @@
+{
+    "schema_version": "1.0.0",
+    "rubric_id": "default-v1-draft",
+    "name": "MVP photography rubric",
+    "flag_threshold": null,
+    "brand_palette": ["#004977", "#D03027", "#FFFFFF"],
+    "criteria": [
+        {
+        "criterion_id": "exposure_brightness",
+        "name": "Exposure and brightness",
+        "definition": "The photograph is neither badly underexposed nor blown out, and the subject is readable.",
+        "evaluation_evidence": "Mean luminance, the share of near-black pixels, the share of near-white pixels, and a pass or fail against configured thresholds.",
+        "method": "cv",
+        "weight": null,
+        "params": {
+            "luminance_scale": 255,
+            "near_black_max": 10,
+            "near_white_min": 245,
+            "mean_luminance_min": 40,
+            "mean_luminance_max": 215,
+            "near_black_fraction_max": 0.2,
+            "near_white_fraction_max": 0.2,
+            "threshold_status": "placeholder"
+        },
+        "required_measurements": [
+            "mean_luminance",
+            "near_black_fraction",
+            "near_white_fraction"
+        ]
+        },
+        {
+        "criterion_id": "contrast",
+        "name": "Contrast",
+        "definition": "Tonal separation is strong enough that the subject separates from the background. Both flat and harsh images should be flagged.",
+        "evaluation_evidence": "Spread of luminance values, a highlight and shadow check, and a pass or fail against configured thresholds.",
+        "method": "cv",
+        "weight": null,
+        "params": {
+            "luminance_std_min": 20,
+            "luminance_std_max": 90,
+            "p5_p95_range_min": 50,
+            "p5_p95_range_max": 240,
+            "near_black_max": 10,
+            "near_white_min": 245,
+            "near_black_fraction_max": 0.2,
+            "near_white_fraction_max": 0.2,
+            "threshold_status": "placeholder"
+        },
+        "required_measurements": [
+            "luminance_std",
+            "p5_p95_range",
+            "near_black_fraction",
+            "near_white_fraction"
+        ]
+        },
+        {
+        "criterion_id": "color_palette_fit",
+        "name": "Color palette fit",
+        "definition": "The photograph's dominant colors fit the configured brand palette. More color is not inherently better.",
+        "evaluation_evidence": "Top dominant colors from clustering and their distances to the configured palette.",
+        "method": "cv",
+        "weight": null,
+        "params": {
+            "n_clusters": 5,
+            "random_seed": 42,
+            "color_space": "CIELAB_D65",
+            "distance_metric": "euclidean_delta_e_76",
+            "palette_distance_aggregation": "proportion_weighted_mean_nearest",
+            "palette_distance_max": null,
+            "threshold_status": "unset"
+        },
+        "required_measurements": [
+            "dominant_colors",
+            "palette_distance"
+        ]
+        },
+        {
+        "criterion_id": "framing_subject_position",
+        "name": "Framing and subject position",
+        "definition": "The main subject sits deliberately near the center or along a third, with usable space around it.",
+        "evaluation_evidence": "Subject position relative to the center and rule-of-thirds intersections, using an identified subject region.",
+        "method": "cv",
+        "weight": null,
+        "params": {
+            "subject_region_required": true,
+            "coordinate_system": "normalized_xywh",
+            "center_offset_max": null,
+            "thirds_offset_max": null,
+            "edge_margin_min": null,
+            "threshold_status": "unset"
+        },
+        "required_measurements": [
+            "subject_bbox",
+            "center_offset",
+            "thirds_offset",
+            "edge_margin_min"
+        ]
+        },
+        {
+        "criterion_id": "sharpness_subject_emphasis",
+        "name": "Sharpness and subject emphasis",
+        "definition": "The subject is in focus and visually dominant. Background blur is acceptable. Intentional motion is not an automatic failure.",
+        "evaluation_evidence": "A blur or edge measure on the subject region compared with the background.",
+        "method": "cv",
+        "weight": null,
+        "params": {
+            "subject_region_required": true,
+            "sharpness_measure": "variance_of_laplacian",
+            "subject_sharpness_min": null,
+            "sharpness_ratio_min": null,
+            "intentional_motion_policy": "needs_review_not_automatic_fail",
+            "threshold_status": "unset"
+        },
+        "required_measurements": [
+            "subject_sharpness",
+            "background_sharpness",
+            "sharpness_ratio"
+        ]
+        },
+        {
+        "criterion_id": "tone_approachability",
+        "name": "Tone and approachability",
+        "definition": "The photograph fits the configured target tone, supported by something visible in the photograph.",
+        "evaluation_evidence": "A tone label, an integer fit score from 1 to 5, and one sentence citing visible evidence.",
+        "method": "vlm",
+        "weight": null,
+        "params": {
+            "target_tone": "approachable, competent",
+            "allowed_labels": [
+            "approachable",
+            "competent"
+            ],
+            "fit_score_min": 1,
+            "fit_score_max": 5,
+            "score_mapping": "linear_1_5_to_0_100",
+            "threshold_status": "placeholder"
+        },
+        "required_measurements": [
+            "label",
+            "fit_score",
+            "evidence"
+        ]
+        }
+    ],
+    "metadata": {
+        "status": "draft",
+        "source_decision": "Subtask 1.2",
+        "interface_contract": "Subtask 1.4",
+        "weights_status": "unset",
+        "palette_status": "placeholder_not_brand_confirmed",
+        "tone_status": "placeholder_not_brand_confirmed",
+        "on_unavailable": "unavailable_needs_review",
+        "scoring_ready": false,
+         "notes": [
+            "Numerical thresholds and palette colors are provisional and require confirmation or calibration.",
+            "Whole-image exposure and contrast statistics alone do not establish subject readability or subject-background separation.",
+            "Unavailable criteria must not suppress available results.",
+            "required_measurements identifies required evaluator outputs for both CV and VLM methods."
+        ]
+    }
+}

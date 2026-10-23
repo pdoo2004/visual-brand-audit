@@ -12,6 +12,7 @@ dist
 build
 mutation_report
 .tox
+.venv
 scratch
 env
 test/.coverage
