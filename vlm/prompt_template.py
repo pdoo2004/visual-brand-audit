@@ -6,19 +6,16 @@ Q1-Q5 are computer-vision measurements and must not be scored here.
 
 from __future__ import annotations
 
-TARGET_TONE = "approachable, competent"
+import sys
+from pathlib import Path
 
-CRITERIA = {
-    "B1": {
-        "id": "B1",
-        "name": "Tone and approachability",
-        "definition": (
-            "The photograph fits the target tone stored in the rubric, "
-            "and the judgment cites something visible."
-        ),
-        "fields": "tone_label (short string), fit_score (integer 1-5), evidence (one sentence)",
-    }
-}
+_SRC = Path(__file__).resolve().parents[1] / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+from brandlens.vlm.criteria import CRITERIA, RECOMMENDED_TONES, TARGET_TONE
+
+__all__ = ["CRITERIA", "RECOMMENDED_TONES", "RESPONSE_SCHEMA", "TARGET_TONE", "render_prompt"]
 
 # Injected into the prompt and also sent as Ollama's structured-output schema.
 RESPONSE_SCHEMA = {
@@ -36,7 +33,13 @@ RESPONSE_SCHEMA = {
                 "properties": {
                     "id": {"type": "string"},
                     "name": {"type": "string"},
-                    "tone_label": {"type": "string"},
+                    "tone_label": {
+                        "type": "string",
+                        "description": (
+                            "Comma-separated words from the target tone list "
+                            "that are actually visible."
+                        ),
+                    },
                     "fit_score": {"type": "integer", "minimum": 1, "maximum": 5},
                     "evidence": {"type": "string"},
                 },
@@ -50,7 +53,8 @@ Do not score exposure, contrast, color palette, framing, or sharpness. Another s
 Do not add criteria that were not listed.
 Return one JSON object and no other text.
 
-Target tone: {target_tone}
+Target tone. A fitting photograph belongs in this set. It does not have to show every word:
+{target_tone}
 
 Criteria:
 {criteria_block}
@@ -61,7 +65,7 @@ Use this JSON shape:
     {{
       "id": "<criterion id>",
       "name": "<criterion name>",
-      "tone_label": "<short label for the tone you actually see>",
+      "tone_label": "<comma-separated words from the target tone that you actually see>",
       "fit_score": <integer 1 to 5, where 5 is a strong fit to the target tone>,
       "evidence": "<one sentence that names something visible in this photograph>"
     }}
@@ -72,6 +76,7 @@ Rules:
 - The criteria array contains only the ids listed above, in that order.
 - name must be copied exactly from that criterion's name line.
 - fit_score is an integer from 1 to 5.
+- tone_label uses only words from the target tone list, lowercase and comma-separated. Name the words you actually see. Do not add a tone word that is not on that list.
 - evidence must name a visible subject, object, place, or light. Do not invent words, logos, or people that are not in the photograph.
 - If the photograph does not fit the target tone, say so with a low score. Do not force a passing judgment.
 """
