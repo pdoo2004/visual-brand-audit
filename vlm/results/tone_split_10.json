@@ -1,0 +1,439 @@
+{
+  "model_note": "e4b and e2b are Gemma 4 effective-parameter sizes, not dense 4B and 2B.",
+  "expect": "on_brand scores 4 or 5. off_brand scores 1 or 2.",
+  "prompt": "You evaluate one marketing photograph. Score only the criteria listed below.\nDo not score exposure, contrast, color palette, framing, or sharpness. Another system measures those.\nDo not add criteria that were not listed.\nReturn one JSON object and no other text.\n\nTarget tone. A fitting photograph belongs in this set. It does not have to show every word:\nauthentic, aesthetic, carefree, bright, boho, natural, genuine, family, premium, minimalist, lifestyle, casual, candid\n\nCriteria:\n- id: B1\n  name: Tone and approachability\n  definition: The photograph fits the target tone stored in the rubric, and the judgment cites something visible.\n  required fields: tone_label (words from the target tone list), fit_score (integer 1-5), evidence (one sentence)\n\nUse this JSON shape:\n{\n  \"criteria\": [\n    {\n      \"id\": \"<criterion id>\",\n      \"name\": \"<criterion name>\",\n      \"tone_label\": \"<comma-separated words from the target tone that you actually see>\",\n      \"fit_score\": <integer 1 to 5, where 5 is a strong fit to the target tone>,\n      \"evidence\": \"<one sentence that names something visible in this photograph>\"\n    }\n  ]\n}\n\nRules:\n- The criteria array contains only the ids listed above, in that order.\n- name must be copied exactly from that criterion's name line.\n- fit_score is an integer from 1 to 5.\n- tone_label uses only words from the target tone list, lowercase and comma-separated. Name the words you actually see. Do not add a tone word that is not on that list.\n- evidence must name a visible subject, object, place, or light. Do not invent words, logos, or people that are not in the photograph.\n- If the photograph does not fit the target tone, say so with a low score. Do not force a passing judgment.\n",
+  "models": [
+    {
+      "model": "gemma4:e4b",
+      "runs": [
+        {
+          "file": "01-warm-human-latte-hands.jpg",
+          "expected": "on_brand",
+          "scene": "Hands, latte art, warm light",
+          "tone_label": "authentic,natural,lifestyle,casual",
+          "fit_score": 4,
+          "evidence": "The close-up view of hands holding a latte suggests a casual, everyday moment.",
+          "label_word_count": 4,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"authentic,natural,lifestyle,casual\",\n      \"fit_score\": 4,\n      \"evidence\": \"The close-up view of hands holding a latte suggests a casual, everyday moment.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "04-warm-human-picnic-table.jpg",
+          "expected": "on_brand",
+          "scene": "People around an outdoor table",
+          "tone_label": "natural, casual, lifestyle, genuine",
+          "fit_score": 5,
+          "evidence": "The group is gathered outdoors around a table in a grassy field, suggesting a relaxed, natural setting.",
+          "label_word_count": 4,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"natural, casual, lifestyle, genuine\",\n      \"fit_score\": 5,\n      \"evidence\": \"The group is gathered outdoors around a table in a grassy field, suggesting a relaxed, natural setting.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "05-warm-human-picnic-blanket.jpg",
+          "expected": "on_brand",
+          "scene": "People on a picnic blanket",
+          "tone_label": "authentic,casual,natural,lifestyle",
+          "fit_score": 5,
+          "evidence": "The group is gathered outdoors in a relaxed setting, sharing drinks and conversation.",
+          "label_word_count": 4,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"authentic,casual,natural,lifestyle\",\n      \"fit_score\": 5,\n      \"evidence\": \"The group is gathered outdoors in a relaxed setting, sharing drinks and conversation.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "07-warm-human-kitchen-whisk.jpg",
+          "expected": "on_brand",
+          "scene": "Person cooking with a whisk",
+          "tone_label": "lifestyle, natural, casual, authentic",
+          "fit_score": 5,
+          "evidence": "The woman is casually standing in a bright kitchen while looking at a recipe book.",
+          "label_word_count": 4,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"lifestyle, natural, casual, authentic\",\n      \"fit_score\": 5,\n      \"evidence\": \"The woman is casually standing in a bright kitchen while looking at a recipe book.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "08-warm-human-kitchen-window.jpg",
+          "expected": "on_brand",
+          "scene": "Person reading by a kitchen window",
+          "tone_label": "natural, lifestyle, casual",
+          "fit_score": 4,
+          "evidence": "The woman is casually reading a book while standing in a bright kitchen.",
+          "label_word_count": 3,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"natural, lifestyle, casual\",\n      \"fit_score\": 4,\n      \"evidence\": \"The woman is casually reading a book while standing in a bright kitchen.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "09-warm-human-bakery-tray.jpg",
+          "expected": "on_brand",
+          "scene": "Person holding bread at a bakery",
+          "tone_label": "casual, lifestyle, natural",
+          "fit_score": 4,
+          "evidence": "The woman in the striped shirt is casually interacting with the baked goods in the display case.",
+          "label_word_count": 3,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"casual, lifestyle, natural\",\n      \"fit_score\": 4,\n      \"evidence\": \"The woman in the striped shirt is casually interacting with the baked goods in the display case.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "32-cold-tech-drive-bays.jpg",
+          "expected": "off_brand",
+          "scene": "Stacked drive bays, no people",
+          "tone_label": "minimalist, authentic",
+          "fit_score": 3,
+          "evidence": "The rows of uniform server racks create a highly structured and technical scene.",
+          "label_word_count": 2,
+          "words_off_list": [],
+          "separated": false,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"minimalist, authentic\",\n      \"fit_score\": 3,\n      \"evidence\": \"The rows of uniform server racks create a highly structured and technical scene.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "36-cold-tech-circuit-mesh.jpg",
+          "expected": "off_brand",
+          "scene": "Circuit boards behind mesh",
+          "tone_label": "aesthetic, premium",
+          "fit_score": 3,
+          "evidence": "The intricate circuit board designs and glowing purple lighting create a highly aesthetic and premium visual.",
+          "label_word_count": 2,
+          "words_off_list": [],
+          "separated": false,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"aesthetic, premium\",\n      \"fit_score\": 3,\n      \"evidence\": \"The intricate circuit board designs and glowing purple lighting create a highly aesthetic and premium visual.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "39-cold-tech-yellow-robot.jpg",
+          "expected": "off_brand",
+          "scene": "Yellow factory robot arm",
+          "tone_label": "authentic, industrial",
+          "fit_score": 3,
+          "evidence": "The photograph shows complex industrial machinery in a large factory setting.",
+          "label_word_count": 2,
+          "words_off_list": [
+            "industrial"
+          ],
+          "separated": false,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"authentic, industrial\",\n      \"fit_score\": 3,\n      \"evidence\": \"The photograph shows complex industrial machinery in a large factory setting.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "49-harsh-dark-alley.jpg",
+          "expected": "off_brand",
+          "scene": "Person walking down a dark alley",
+          "tone_label": "aesthetic, minimalist, casual",
+          "fit_score": 4,
+          "evidence": "The silhouette of the person walking down the dimly lit alley creates a strong, aesthetic mood.",
+          "label_word_count": 3,
+          "words_off_list": [],
+          "separated": false,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"aesthetic, minimalist, casual\",\n      \"fit_score\": 4,\n      \"evidence\": \"The silhouette of the person walking down the dimly lit alley creates a strong, aesthetic mood.\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "model": "gemma4:e2b",
+      "runs": [
+        {
+          "file": "01-warm-human-latte-hands.jpg",
+          "expected": "on_brand",
+          "scene": "Hands, latte art, warm light",
+          "tone_label": "authentic, genuine, casual, lifestyle",
+          "fit_score": 5,
+          "evidence": "The close-up shot of hands holding a latte suggests a casual lifestyle moment.",
+          "label_word_count": 4,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"authentic, genuine, casual, lifestyle\",\n      \"fit_score\": 5,\n      \"evidence\": \"The close-up shot of hands holding a latte suggests a casual lifestyle moment.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "04-warm-human-picnic-table.jpg",
+          "expected": "on_brand",
+          "scene": "People around an outdoor table",
+          "tone_label": "natural, genuine, lifestyle, casual",
+          "fit_score": 5,
+          "evidence": "The group is casually gathered outdoors in a grassy field enjoying a meal.",
+          "label_word_count": 4,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"natural, genuine, lifestyle, casual\",\n      \"fit_score\": 5,\n      \"evidence\": \"The group is casually gathered outdoors in a grassy field enjoying a meal.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "05-warm-human-picnic-blanket.jpg",
+          "expected": "on_brand",
+          "scene": "People on a picnic blanket",
+          "tone_label": "authentic, genuine, lifestyle, casual",
+          "fit_score": 5,
+          "evidence": "The people are engaged in a relaxed social setting with drinks and food.",
+          "label_word_count": 4,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"authentic, genuine, lifestyle, casual\",\n      \"fit_score\": 5,\n      \"evidence\": \"The people are engaged in a relaxed social setting with drinks and food.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "07-warm-human-kitchen-whisk.jpg",
+          "expected": "on_brand",
+          "scene": "Person cooking with a whisk",
+          "tone_label": "lifestyle, casual, bright, natural",
+          "fit_score": 5,
+          "evidence": "The scene depicts a casual activity of baking or cooking in a bright kitchen setting.",
+          "label_word_count": 4,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"lifestyle, casual, bright, natural\",\n      \"fit_score\": 5,\n      \"evidence\": \"The scene depicts a casual activity of baking or cooking in a bright kitchen setting.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "08-warm-human-kitchen-window.jpg",
+          "expected": "on_brand",
+          "scene": "Person reading by a kitchen window",
+          "tone_label": "lifestyle, casual, genuine",
+          "fit_score": 5,
+          "evidence": "The woman is casually dressed and engaged in reading in a bright kitchen setting.",
+          "label_word_count": 3,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"lifestyle, casual, genuine\",\n      \"fit_score\": 5,\n      \"evidence\": \"The woman is casually dressed and engaged in reading in a bright kitchen setting.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "09-warm-human-bakery-tray.jpg",
+          "expected": "on_brand",
+          "scene": "Person holding bread at a bakery",
+          "tone_label": "casual, lifestyle, candid",
+          "fit_score": 5,
+          "evidence": "The woman is casually dressed and engaged in the act of preparing food.",
+          "label_word_count": 3,
+          "words_off_list": [],
+          "separated": true,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"casual, lifestyle, candid\",\n      \"fit_score\": 5,\n      \"evidence\": \"The woman is casually dressed and engaged in the act of preparing food.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "32-cold-tech-drive-bays.jpg",
+          "expected": "off_brand",
+          "scene": "Stacked drive bays, no people",
+          "tone_label": "premium, minimalist",
+          "fit_score": 4,
+          "evidence": "The close-up view of the server hardware suggests a premium and minimalist technical aesthetic.",
+          "label_word_count": 2,
+          "words_off_list": [],
+          "separated": false,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"premium, minimalist\",\n      \"fit_score\": 4,\n      \"evidence\": \"The close-up view of the server hardware suggests a premium and minimalist technical aesthetic.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "36-cold-tech-circuit-mesh.jpg",
+          "expected": "off_brand",
+          "scene": "Circuit boards behind mesh",
+          "tone_label": "aesthetic, premium",
+          "fit_score": 4,
+          "evidence": "The vibrant neon purple lighting and intricate circuit board patterns give the image a high-tech, aesthetic feel.",
+          "label_word_count": 2,
+          "words_off_list": [],
+          "separated": false,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"aesthetic, premium\",\n      \"fit_score\": 4,\n      \"evidence\": \"The vibrant neon purple lighting and intricate circuit board patterns give the image a high-tech, aesthetic feel.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "39-cold-tech-yellow-robot.jpg",
+          "expected": "off_brand",
+          "scene": "Yellow factory robot arm",
+          "tone_label": "authentic, genuine",
+          "fit_score": 4,
+          "evidence": "The photograph shows an industrial setting with workers present, suggesting an authentic work environment.",
+          "label_word_count": 2,
+          "words_off_list": [],
+          "separated": false,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"authentic, genuine\",\n      \"fit_score\": 4,\n      \"evidence\": \"The photograph shows an industrial setting with workers present, suggesting an authentic work environment.\"\n    }\n  ]\n}"
+        },
+        {
+          "file": "49-harsh-dark-alley.jpg",
+          "expected": "off_brand",
+          "scene": "Person walking down a dark alley",
+          "tone_label": "authentic, genuine, casual",
+          "fit_score": 4,
+          "evidence": "The silhouette of a person walking down the street suggests a candid or casual moment.",
+          "label_word_count": 3,
+          "words_off_list": [],
+          "separated": false,
+          "checks": {
+            "json_ok": true,
+            "only_expected_ids": true,
+            "fields_ok": true,
+            "ids": [
+              "B1"
+            ],
+            "error": null
+          },
+          "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"authentic, genuine, casual\",\n      \"fit_score\": 4,\n      \"evidence\": \"The silhouette of a person walking down the street suggests a candid or casual moment.\"\n    }\n  ]\n}"
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "model": "gemma4:e4b",
-  "prompt": "You evaluate one marketing photograph. Score only the criteria listed below.\nDo not score exposure, contrast, color palette, framing, or sharpness. Another system measures those.\nDo not add criteria that were not listed.\nReturn one JSON object and no other text.\n\nTarget tone: approachable, competent\n\nCriteria:\n- B1: Tone and approachability. The photograph fits the target tone stored in the rubric, and the judgment cites something visible. Required fields: tone_label (short string), fit_score (integer 1-5), evidence (one sentence).\n\nUse this JSON shape:\n{\n  \"criteria\": [\n    {\n      \"id\": \"<criterion id>\",\n      \"name\": \"<criterion name>\",\n      \"tone_label\": \"<short label for the tone you actually see>\",\n      \"fit_score\": <integer 1 to 5, where 5 is a strong fit to the target tone>,\n      \"evidence\": \"<one sentence that names something visible in this photograph>\"\n    }\n  ]\n}\n\nRules:\n- The criteria array contains only the ids listed above, in that order.\n- fit_score is an integer from 1 to 5.\n- evidence must name a visible subject, object, place, or light. Do not invent words, logos, or people that are not in the photograph.\n- If the photograph does not fit the target tone, say so with a low score. Do not force a passing judgment.\n",
+  "prompt": "You evaluate one marketing photograph. Score only the criteria listed below.\nDo not score exposure, contrast, color palette, framing, or sharpness. Another system measures those.\nDo not add criteria that were not listed.\nReturn one JSON object and no other text.\n\nTarget tone. A fitting photograph belongs in this set. It does not have to show every word:\nauthentic, aesthetic, carefree, bright, boho, natural, genuine, family, premium, minimalist, lifestyle, casual, candid\n\nCriteria:\n- id: B1\n  name: Tone and approachability\n  definition: The photograph fits the target tone stored in the rubric, and the judgment cites something visible.\n  required fields: tone_label (words from the target tone list), fit_score (integer 1-5), evidence (one sentence)\n\nUse this JSON shape:\n{\n  \"criteria\": [\n    {\n      \"id\": \"<criterion id>\",\n      \"name\": \"<criterion name>\",\n      \"tone_label\": \"<comma-separated words from the target tone that you actually see>\",\n      \"fit_score\": <integer 1 to 5, where 5 is a strong fit to the target tone>,\n      \"evidence\": \"<one sentence that names something visible in this photograph>\"\n    }\n  ]\n}\n\nRules:\n- The criteria array contains only the ids listed above, in that order.\n- name must be copied exactly from that criterion's name line.\n- fit_score is an integer from 1 to 5.\n- tone_label uses only words from the target tone list, lowercase and comma-separated. Name the words you actually see. Do not add a tone word that is not on that list.\n- evidence must name a visible subject, object, place, or light. Do not invent words, logos, or people that are not in the photograph.\n- If the photograph does not fit the target tone, say so with a low score. Do not force a passing judgment.\n",
   "options": {
     "temperature": 0.2,
     "num_predict": 256,
@@ -11,13 +11,13 @@
     {
       "file": "01-coffee-shop.jpg",
       "scene": "Hands holding a latte while milk is poured. Warm light, close crop, one person.",
-      "wall_seconds": 44.783,
-      "load_seconds": 27.39,
-      "prompt_eval_seconds": 15.647,
-      "eval_seconds": 1.555,
-      "eval_count": 84,
-      "gpu": "5697 MiB, 6144 MiB, 58 %",
-      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability.\",\n      \"tone_label\": \"competent\",\n      \"fit_score\": 4,\n      \"evidence\": \"The careful pouring of latte art suggests a high level of skill and competence in the preparation.\"\n    }\n  ]\n}",
+      "wall_seconds": 19.706,
+      "load_seconds": 17.459,
+      "prompt_eval_seconds": 1.029,
+      "eval_seconds": 1.179,
+      "eval_count": 90,
+      "gpu": "5478 MiB, 6144 MiB, 76 %",
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"aesthetic, premium, lifestyle, casual\",\n      \"fit_score\": 4,\n      \"evidence\": \"The careful latte art and the dark, moody lighting give the image a premium and aesthetic feel.\"\n    }\n  ]\n}",
       "thinking": "",
       "checks": {
         "json_ok": true,
@@ -28,18 +28,18 @@
         ],
         "error": null
       },
-      "tokens_per_second": 54.02
+      "tokens_per_second": 76.34
     },
     {
       "file": "02-glass-office.jpg",
       "scene": "Bright open office. One person working at a wooden desk among monitors and plants.",
-      "wall_seconds": 1.957,
-      "load_seconds": 0.009,
-      "prompt_eval_seconds": 0.612,
-      "eval_seconds": 1.29,
-      "eval_count": 79,
-      "gpu": "5722 MiB, 6144 MiB, 79 %",
-      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability.\",\n      \"tone_label\": \"competent\",\n      \"fit_score\": 4,\n      \"evidence\": \"The organized workspace with various tools suggests a competent and professional environment.\"\n    }\n  ]\n}",
+      "wall_seconds": 1.48,
+      "load_seconds": 0.013,
+      "prompt_eval_seconds": 0.52,
+      "eval_seconds": 0.896,
+      "eval_count": 66,
+      "gpu": "5513 MiB, 6144 MiB, 75 %",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"lifestyle, casual, natural\", \"fit_score\": 4, \"evidence\": \"The setting, which appears to be a bright, airy room with wooden furniture, suggests a relaxed lifestyle.\"}]}",
       "thinking": "",
       "checks": {
         "json_ok": true,
@@ -50,18 +50,18 @@
         ],
         "error": null
       },
-      "tokens_per_second": 61.24
+      "tokens_per_second": 73.66
     },
     {
       "file": "03-neon-city.jpg",
       "scene": "Night city seen through a dense blue neon mesh. No people.",
-      "wall_seconds": 1.6,
+      "wall_seconds": 1.613,
       "load_seconds": 0.009,
-      "prompt_eval_seconds": 0.489,
-      "eval_seconds": 1.058,
-      "eval_count": 80,
-      "gpu": "5732 MiB, 6144 MiB, 71 %",
-      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability.\",\n      \"tone_label\": \"technical\",\n      \"fit_score\": 2,\n      \"evidence\": \"The dense network of bright blue lines creates a highly technical and complex visual.\"\n    }\n  ]\n}",
+      "prompt_eval_seconds": 0.491,
+      "eval_seconds": 1.042,
+      "eval_count": 81,
+      "gpu": "5504 MiB, 6144 MiB, 74 %",
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"aesthetic, bright\",\n      \"fit_score\": 4,\n      \"evidence\": \"The bright, glowing blue lines create a highly aesthetic and energetic visual.\"\n    }\n  ]\n}",
       "thinking": "",
       "checks": {
         "json_ok": true,
@@ -72,7 +72,7 @@
         ],
         "error": null
       },
-      "tokens_per_second": 75.61
+      "tokens_per_second": 77.74
     }
   ]
 }
