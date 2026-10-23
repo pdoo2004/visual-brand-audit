@@ -30,7 +30,9 @@ dependencies = [
     "uvicorn[standard]>=0.29",
     "python-multipart>=0.0.9",
     "jsonschema",
-    "scikit-image"
+    "scikit-image",
+    "scikit-learn",
+    "opencv-python"
 ]
 
 # Optional dev dependencies
