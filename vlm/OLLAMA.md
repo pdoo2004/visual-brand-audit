@@ -26,7 +26,7 @@ That sends the B1 prompt in `prompt_template.py` and one image to:
 
 `POST http://127.0.0.1:11434/api/chat`
 
-The body uses model `gemma4:e4b`, thinking off, temperature 0.2, and `num_ctx` 2048. The reply is the B1 JSON. The backend client (backlog 4.5) should send the same kind of request. In deployment the host changes from localhost to the vLLM endpoint. The JSON shape does not.
+The body uses model `gemma4:e4b`, thinking off, temperature 0.2, and `num_ctx` 2048. The reply is the B1 JSON. This Ollama-native path is the Sprint 1 local check. The shared server contract is `POST /v1/chat/completions`, documented in `serve/README.md`. Ollama and vLLM both accept it. Changing to a larger Gemma changes `VLM_MODEL` and the host, not the request shape.
 
 On a 6 GB GPU the model uses about 5.7 GB, so the short context is required. The first photograph takes about 20–27 seconds while the weights load. Later photographs take about 1–2 seconds.
 

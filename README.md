@@ -20,10 +20,10 @@ A scoring engine combines both layers against a configurable rubric and produces
 | Web Crawler | Playwright + BeautifulSoup, bounded page traversal |
 | Image Preprocessor | Filters logos/icons, standardizes photos for analysis |
 | Computer Vision Analyzer | OpenCV/NumPy/scikit-learn — quantifiable attributes |
-| Model Serving | Self-hosted Gemma 4 over HTTP — qualitative judgments |
+| Model Serving | vLLM over `POST /v1/chat/completions`. Default `google/gemma-4-E4B-it`; a larger Gemma is a `VLM_MODEL` change |
 | Scoring Engine | Combines CV + VLM output against JSON rubric |
 | Data Storage | Relational DB for results + file cache for images |
 
 ## Stack
 
-Python 3.11+, FastAPI, React, OpenCV, Pillow, NumPy, scikit-learn, BeautifulSoup, Playwright, Gemma 4 (31B). No paid APIs or licenses required.
+Python 3.11+, FastAPI, React, OpenCV, Pillow, NumPy, scikit-learn, BeautifulSoup, Playwright, Gemma 4 E4B (31B remains the larger-host candidate). No paid APIs or licenses required.
