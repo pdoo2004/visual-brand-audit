@@ -25,6 +25,7 @@ dependencies = [
     "pandas",
     "h5py",
     "Pillow",
+    "pydantic",
 ]
 
 # Optional dev dependencies
