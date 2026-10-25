@@ -9,6 +9,7 @@ from brandlens.api import db as database
 from brandlens.api import health
 from brandlens.api.config import Settings
 from brandlens.api.routers import jobs as jobs_router
+from brandlens.api.routers import urls as urls_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -43,4 +44,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(jobs_router.router)
+    app.include_router(urls_router.router)
     return app

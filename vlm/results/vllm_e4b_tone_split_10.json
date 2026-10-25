@@ -1,0 +1,119 @@
+{
+  "server": "http://127.0.0.1:8000/v1",
+  "model": "google/gemma-4-E4B-it",
+  "expect": "on_brand scores 4 or 5. off_brand scores 1 or 2.",
+  "runs": [
+    {
+      "group": "on_brand",
+      "file": "01-warm-human-latte-hands.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "casual, lifestyle, natural",
+      "evidence": "The photograph shows hands holding a cup of coffee against a blurred background.",
+      "separated": true,
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"casual, lifestyle, natural\",\n      \"fit_score\": 4,\n      \"evidence\": \"The photograph shows hands holding a cup of coffee against a blurred background.\"\n    }\n  ]\n}"
+    },
+    {
+      "group": "on_brand",
+      "file": "04-warm-human-picnic-table.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 5,
+      "tone_label": "casual, lifestyle, natural, family",
+      "evidence": "A group of people are gathered outdoors around a table eating together.",
+      "separated": true,
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"casual, lifestyle, natural, family\", \"fit_score\": 5, \"evidence\": \"A group of people are gathered outdoors around a table eating together.\"}]}"
+    },
+    {
+      "group": "on_brand",
+      "file": "05-warm-human-picnic-blanket.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "casual, lifestyle, candid",
+      "evidence": "The three individuals are gathered outdoors in a casual setting.",
+      "separated": true,
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"casual, lifestyle, candid\", \"fit_score\": 4, \"evidence\": \"The three individuals are gathered outdoors in a casual setting.\"}]}"
+    },
+    {
+      "group": "on_brand",
+      "file": "07-warm-human-kitchen-whisk.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "lifestyle, casual, natural",
+      "evidence": "A woman is standing in a kitchen, looking at a recipe book while preparing ingredients on a wooden counter.",
+      "separated": true,
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"lifestyle, casual, natural\",\n      \"fit_score\": 4,\n      \"evidence\": \"A woman is standing in a kitchen, looking at a recipe book while preparing ingredients on a wooden counter.\"\n    }\n  ]\n}"
+    },
+    {
+      "group": "on_brand",
+      "file": "08-warm-human-kitchen-window.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "casual, lifestyle, natural",
+      "evidence": "A person wearing a brown sweater is standing in a kitchen area near a window.",
+      "separated": true,
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"casual, lifestyle, natural\", \"fit_score\": 4, \"evidence\": \"A person wearing a brown sweater is standing in a kitchen area near a window.\"}]}"
+    },
+    {
+      "group": "on_brand",
+      "file": "09-warm-human-bakery-tray.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "casual, lifestyle, candid",
+      "evidence": "A person in a striped tank top is standing in a kitchen setting.",
+      "separated": true,
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"casual, lifestyle, candid\", \"fit_score\": 4, \"evidence\": \"A person in a striped tank top is standing in a kitchen setting.\"}]}"
+    },
+    {
+      "group": "off_brand",
+      "file": "32-cold-tech-drive-bays.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 2,
+      "tone_label": "minimalist",
+      "evidence": "The photograph focuses tightly on a row of server racks against a dark background.",
+      "separated": true,
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist\", \"fit_score\": 2, \"evidence\": \"The photograph focuses tightly on a row of server racks against a dark background.\"}]}"
+    },
+    {
+      "group": "off_brand",
+      "file": "36-cold-tech-circuit-mesh.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 2,
+      "tone_label": "minimalist",
+      "evidence": "The photograph is dominated by circuit boards and a glowing tube under a mesh.",
+      "separated": true,
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist\", \"fit_score\": 2, \"evidence\": \"The photograph is dominated by circuit boards and a glowing tube under a mesh.\"}]}"
+    },
+    {
+      "group": "off_brand",
+      "file": "39-cold-tech-yellow-robot.jpg",
+      "ok": false,
+      "errors": [
+        "B1 tone_label contains \"industrial\", which is not a target tone word"
+      ],
+      "fit_score": null,
+      "tone_label": "",
+      "evidence": "",
+      "separated": false,
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist, industrial\", \"fit_score\": 2, \"evidence\": \"The photograph shows a large industrial robotic arm in a warehouse-like setting.\"}]}"
+    },
+    {
+      "group": "off_brand",
+      "file": "49-harsh-dark-alley.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 2,
+      "tone_label": "minimalist, natural",
+      "evidence": "The photograph features a solitary silhouette standing on a dark, brick-paved alleyway.",
+      "separated": true,
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist, natural\", \"fit_score\": 2, \"evidence\": \"The photograph features a solitary silhouette standing on a dark, brick-paved alleyway.\"}]}"
+    }
+  ]
+}
