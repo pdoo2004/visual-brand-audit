@@ -10,8 +10,8 @@ Change `VLM_MODEL` and restart the server. The request shape stays the same.
 
 | Size | `VLM_MODEL` | Where it runs |
 |---|---|---|
-| E4B (selected) | `google/gemma-4-E4B-it` | GPU host with about 24 GB for the BF16 weights |
-| E2B | `google/gemma-4-E2B-it` | Same kind of host |
+| E4B (selected) | `google/gemma-4-E4B-it` | GPU host. BF16 weights are about 15 GB, so plan on about 24 GB |
+| E2B | `google/gemma-4-E2B-it` | Same kind of host as BF16 E4B |
 | 26B-A4B | `google/gemma-4-26B-A4B-it` | About 80 GB |
 | 31B | `google/gemma-4-31B-it` | About 80 GB |
 
@@ -37,7 +37,7 @@ python serve/infer_one.py samples/01-coffee-shop.jpg
 
 ## This laptop
 
-The RTX 3060 has 6 GB. vLLM's BF16 E4B checkpoint does not fit. Ollama's `gemma4:e4b` tag does, and it speaks the same `/v1/chat/completions` path.
+The RTX 3060 has 6 GB. vLLM's BF16 E4B checkpoint does not fit. Google's 3.7 GB mobile checkpoint (`google/gemma-4-E4B-it-qat-mobile-ct`) also does not load: `vllm/vllm-openai:gemma4` (vLLM 0.19.1.dev6) and `vllm/vllm-openai:gemma4-unified` both reject its compressed-tensors layout. Ollama's `gemma4:e4b` tag fits, and it speaks the same `/v1/chat/completions` path.
 
 ```powershell
 ollama pull gemma4:e4b

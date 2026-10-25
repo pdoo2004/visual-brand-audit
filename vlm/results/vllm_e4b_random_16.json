@@ -1,0 +1,151 @@
+{
+  "server": "http://127.0.0.1:8000/v1",
+  "model": "google/gemma-4-E4B-it",
+  "selection": "16 photos drawn from the 50 not used in the first 10, seed 25",
+  "runs": [
+    {
+      "file": "31-cold-tech-server-aisle.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 3,
+      "tone_label": "minimalist",
+      "evidence": "The photograph focuses tightly on a row of black server racks against a white background.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist\", \"fit_score\": 3, \"evidence\": \"The photograph focuses tightly on a row of black server racks against a white background.\"}]}"
+    },
+    {
+      "file": "02-warm-human-cafe-drink.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "lifestyle, casual, natural",
+      "evidence": "A hand is holding a coffee cup in what appears to be a cafe setting.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"lifestyle, casual, natural\", \"fit_score\": 4, \"evidence\": \"A hand is holding a coffee cup in what appears to be a cafe setting.\"}]}"
+    },
+    {
+      "file": "20-calm-competent-papers-shelves.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "casual, lifestyle, natural",
+      "evidence": "The man and woman are casually interacting while looking at a document.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"casual, lifestyle, natural\", \"fit_score\": 4, \"evidence\": \"The man and woman are casually interacting while looking at a document.\"}]}"
+    },
+    {
+      "file": "26-formal-distant-podium-panel.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 3,
+      "tone_label": "premium, lifestyle",
+      "evidence": "The two men in suits are standing near a large window in a modern office setting.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"premium,lifestyle\", \"fit_score\": 3, \"evidence\": \"The two men in suits are standing near a large window in a modern office setting.\"}]}"
+    },
+    {
+      "file": "51-generic-stock-headsets.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "lifestyle, casual, natural",
+      "evidence": "The woman in the foreground is smiling directly at the camera while wearing a white collared shirt.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"lifestyle, casual, natural\", \"fit_score\": 4, \"evidence\": \"The woman in the foreground is smiling directly at the camera while wearing a white collared shirt.\"}]}"
+    },
+    {
+      "file": "40-cold-tech-white-robot.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 3,
+      "tone_label": "minimalist",
+      "evidence": "The white robotic arm is displayed on a clean white surface against a dark background.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist\", \"fit_score\": 3, \"evidence\": \"The white robotic arm is displayed on a clean white surface against a dark background.\"}]}"
+    },
+    {
+      "file": "06-warm-human-recipe-book.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "casual, lifestyle, candid",
+      "evidence": "The photograph captures a person looking down at an open book while wearing an apron.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"casual, lifestyle, candid\", \"fit_score\": 4, \"evidence\": \"The photograph captures a person looking down at an open book while wearing an apron.\"}]}"
+    },
+    {
+      "file": "23-formal-distant-long-table.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 3,
+      "tone_label": "minimalist, casual",
+      "evidence": "The modern conference room with its simple furniture and clean lines suggests a professional yet casual setting.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist,casual\", \"fit_score\": 3, \"evidence\": \"The modern conference room with its simple furniture and clean lines suggests a professional yet casual setting.\"}]}"
+    },
+    {
+      "file": "54-generic-stock-seated-headset.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 3,
+      "tone_label": "casual, lifestyle",
+      "evidence": "The man is seated at a desk with a whiteboard behind him while holding a tablet.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"casual, lifestyle\", \"fit_score\": 3, \"evidence\": \"The man is seated at a desk with a whiteboard behind him while holding a tablet.\"}]}"
+    },
+    {
+      "file": "57-generic-stock-office-lineup.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "casual, lifestyle, natural",
+      "evidence": "The three young people are casually gathered in a bright, modern room.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"casual, lifestyle, natural\", \"fit_score\": 4, \"evidence\": \"The three young people are casually gathered in a bright, modern room.\"}]}"
+    },
+    {
+      "file": "46-harsh-glare-corridor.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 3,
+      "tone_label": "minimalist",
+      "evidence": "The photograph shows a long, empty hallway with plain walls and a tiled floor.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist\", \"fit_score\": 3, \"evidence\": \"The photograph shows a long, empty hallway with plain walls and a tiled floor.\"}]}"
+    },
+    {
+      "file": "35-cold-tech-neon-sign.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 3,
+      "tone_label": "minimalist, casual",
+      "evidence": "The photograph is a dark, moody street scene with minimal visible detail.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist, casual\", \"fit_score\": 3, \"evidence\": \"The photograph is a dark, moody street scene with minimal visible detail.\"}]}"
+    },
+    {
+      "file": "13-calm-competent-window-laptop.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "lifestyle, casual, natural",
+      "evidence": "The man is casually dressed in a light blue button-down shirt while working at a desk.",
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"lifestyle, casual, natural\",\n      \"fit_score\": 4,\n      \"evidence\": \"The man is casually dressed in a light blue button-down shirt while working at a desk.\"\n    }\n  ]\n}"
+    },
+    {
+      "file": "14-calm-competent-typing-desk.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "lifestyle, casual, natural",
+      "evidence": "The woman is seated at a table working on a laptop in a bright indoor setting.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"lifestyle, casual, natural\", \"fit_score\": 4, \"evidence\": \"The woman is seated at a table working on a laptop in a bright indoor setting.\"}]}"
+    },
+    {
+      "file": "19-calm-competent-library.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 4,
+      "tone_label": "authentic, lifestyle, casual",
+      "evidence": "The photograph shows a room filled with bookshelves and wooden tables.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"authentic,lifestyle,casual\", \"fit_score\": 4, \"evidence\": \"The photograph shows a room filled with bookshelves and wooden tables.\"}]}"
+    },
+    {
+      "file": "42-harsh-paper-floor.jpg",
+      "ok": true,
+      "errors": [],
+      "fit_score": 3,
+      "tone_label": "minimalist, casual",
+      "evidence": "The photograph shows a collection of papers and briefcases scattered across a wooden floor.",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"minimalist,casual\", \"fit_score\": 3, \"evidence\": \"The photograph shows a collection of papers and briefcases scattered across a wooden floor.\"}]}"
+    }
+  ]
+}

@@ -1,7 +1,10 @@
 # vLLM OpenAI server. The model id is the only required change when
-# moving from E4B to a larger Gemma. This process needs a GPU that can
-# hold the BF16 weights (about 24 GB for E4B, about 80 GB for 31B).
-# The laptop uses Ollama instead; see README.md in this folder.
+# moving from E4B to a larger Gemma. BF16 E4B weights are about 15 GB
+# and need a GPU with about 24 GB. This laptop uses Ollama instead;
+# see README.md in this folder.
+#
+# vLLM 0.19 reads --limit-mm-per-prompt with json.loads, and the model
+# id is a positional argument. The image entrypoint is already `vllm serve`.
 
 services:
   vllm:
@@ -16,14 +19,13 @@ services:
     volumes:
       - hf-cache:/root/.cache/huggingface
     command:
-      - --model
       - ${VLM_MODEL:-google/gemma-4-E4B-it}
       - --max-model-len
       - ${VLM_MAX_MODEL_LEN:-4096}
       - --gpu-memory-utilization
       - "0.90"
       - --limit-mm-per-prompt
-      - image=1,audio=0
+      - '{"image": 1, "audio": 0}'
       - --host
       - 0.0.0.0
       - --port
