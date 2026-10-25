@@ -38,6 +38,7 @@ dependencies = [
 # Optional dev dependencies
 [project.optional-dependencies]
 dev = ["pytest", "sphinx", "sphinx-rtd-theme", "coverage", "httpx"]
+subject = ["transformers", "torch", "torchvision"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

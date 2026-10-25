@@ -1,4 +1,4 @@
-"""Validate the shared image-only input contract."""
+"""Offline unit tests for analysis_input."""
 
 import io
 import unittest
@@ -7,6 +7,28 @@ from dataclasses import FrozenInstanceError
 from PIL import Image
 
 from brandlens.analysis.analysis_input import AnalysisInput
+from brandlens.analysis.subject.region import SubjectRegion
+
+
+def region(*coords, **kwargs):
+    return SubjectRegion(*(coords or (.25, .25, .75, .75)),
+                         reliable=kwargs.pop('reliable', True), source='manual', **kwargs)
+
+class TestSubjectAnalysisInput(unittest.TestCase):
+
+    def test_input_backward_compatibility(self):
+        with Image.new('RGB', (10, 10)) as image:
+            self.assertIsNone(AnalysisInput(image).subject_region)
+
+    def test_invalid_input(self):
+        for image in ('x', Image.new('L', (5, 5)), Image.new('RGB', (0, 5))):
+            with self.subTest(image=image), self.assertRaises((TypeError, ValueError)):
+                AnalysisInput(image)
+        with Image.new('RGB', (5, 5)) as image:
+            with self.assertRaises(TypeError):
+                AnalysisInput(image, (.1, .1, .9, .9))
+            with self.assertRaises(ValueError):
+                AnalysisInput(image, region(), 'ambiguous')
 
 
 class TestAnalysisInput(unittest.TestCase):
@@ -51,3 +73,7 @@ class TestAnalysisInput(unittest.TestCase):
                 self.assertEqual(image.n_frames, 2)
                 with self.assertRaises(ValueError):
                     AnalysisInput(image)
+
+
+if __name__ == "__main__":
+    unittest.main()
