@@ -1,10 +1,10 @@
 {
   "model": "gemma4:e4b",
-  "prompt": "You evaluate one marketing photograph. Score only the criteria listed below.\nDo not score exposure, contrast, color palette, framing, or sharpness. Another system measures those.\nDo not add criteria that were not listed.\nReturn one JSON object and no other text.\n\nTarget tone: approachable, competent\n\nCriteria:\n- id: B1\n  name: Tone and approachability\n  definition: The photograph fits the target tone stored in the rubric, and the judgment cites something visible.\n  required fields: tone_label (short string), fit_score (integer 1-5), evidence (one sentence)\n\nUse this JSON shape:\n{\n  \"criteria\": [\n    {\n      \"id\": \"<criterion id>\",\n      \"name\": \"<criterion name>\",\n      \"tone_label\": \"<short label for the tone you actually see>\",\n      \"fit_score\": <integer 1 to 5, where 5 is a strong fit to the target tone>,\n      \"evidence\": \"<one sentence that names something visible in this photograph>\"\n    }\n  ]\n}\n\nRules:\n- The criteria array contains only the ids listed above, in that order.\n- name must be copied exactly from that criterion's name line.\n- fit_score is an integer from 1 to 5.\n- evidence must name a visible subject, object, place, or light. Do not invent words, logos, or people that are not in the photograph.\n- If the photograph does not fit the target tone, say so with a low score. Do not force a passing judgment.\n",
+  "prompt": "You evaluate one marketing photograph. Score only the criteria listed below.\nDo not score exposure, contrast, color palette, framing, or sharpness. Another system measures those.\nDo not add criteria that were not listed.\nReturn one JSON object and no other text.\n\nTarget tone. A fitting photograph belongs in this set. It does not have to show every word:\nauthentic, aesthetic, carefree, bright, boho, natural, genuine, family, premium, minimalist, lifestyle, casual, candid\n\nCriteria:\n- id: B1\n  name: Tone and approachability\n  definition: The photograph fits the target tone stored in the rubric, and the judgment cites something visible.\n  required fields: tone_label (words from the target tone list), fit_score (integer 1-5), evidence (one sentence)\n\nUse this JSON shape:\n{\n  \"criteria\": [\n    {\n      \"id\": \"<criterion id>\",\n      \"name\": \"<criterion name>\",\n      \"tone_label\": \"<comma-separated words from the target tone that you actually see>\",\n      \"fit_score\": <integer 1 to 5, where 5 is a strong fit to the target tone>,\n      \"evidence\": \"<one sentence that names something visible in this photograph>\"\n    }\n  ]\n}\n\nRules:\n- The criteria array contains only the ids listed above, in that order.\n- name must be copied exactly from that criterion's name line.\n- fit_score is an integer from 1 to 5.\n- tone_label uses only words from the target tone list, lowercase and comma-separated. Name the words you actually see. Do not add a tone word that is not on that list.\n- evidence must name a visible subject, object, place, or light. Do not invent words, logos, or people that are not in the photograph.\n- If the photograph does not fit the target tone, say so with a low score. Do not force a passing judgment.\n",
   "runs": [
     {
       "file": "01-coffee-shop.jpg",
-      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"approachable\",\n      \"fit_score\": 4,\n      \"evidence\": \"The close-up focus on the latte art and the hands holding the cup gives the image a warm and inviting feel.\"\n    }\n  ]\n}",
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"aesthetic, premium, lifestyle, casual\",\n      \"fit_score\": 4,\n      \"evidence\": \"The careful latte art and the dark, moody lighting give the image a premium and aesthetic feel.\"\n    }\n  ]\n}",
       "checks": {
         "json_ok": true,
         "only_expected_ids": true,
@@ -14,12 +14,12 @@
         ],
         "error": null
       },
-      "wall_seconds": 19.283,
-      "gpu": "5741 MiB, 6144 MiB, 75 %"
+      "wall_seconds": 19.706,
+      "gpu": "5478 MiB, 6144 MiB, 76 %"
     },
     {
       "file": "02-glass-office.jpg",
-      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"competent\", \"fit_score\": 4, \"evidence\": \"The organized display of various items on the wooden table suggests a competent and professional setup.\"}]}",
+      "content": "{\"criteria\": [{\"id\": \"B1\", \"name\": \"Tone and approachability\", \"tone_label\": \"lifestyle, casual, natural\", \"fit_score\": 4, \"evidence\": \"The setting, which appears to be a bright, airy room with wooden furniture, suggests a relaxed lifestyle.\"}]}",
       "checks": {
         "json_ok": true,
         "only_expected_ids": true,
@@ -29,12 +29,12 @@
         ],
         "error": null
       },
-      "wall_seconds": 1.229,
-      "gpu": "5753 MiB, 6144 MiB, 72 %"
+      "wall_seconds": 1.48,
+      "gpu": "5513 MiB, 6144 MiB, 75 %"
     },
     {
       "file": "03-neon-city.jpg",
-      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"technical/complex\",\n      \"fit_score\": 2,\n      \"evidence\": \"The image is dominated by intricate, glowing blue lines forming a complex network over a cityscape.\"\n    }\n  ]\n}",
+      "content": "{\n  \"criteria\": [\n    {\n      \"id\": \"B1\",\n      \"name\": \"Tone and approachability\",\n      \"tone_label\": \"aesthetic, bright\",\n      \"fit_score\": 4,\n      \"evidence\": \"The bright, glowing blue lines create a highly aesthetic and energetic visual.\"\n    }\n  ]\n}",
       "checks": {
         "json_ok": true,
         "only_expected_ids": true,
@@ -44,8 +44,8 @@
         ],
         "error": null
       },
-      "wall_seconds": 1.56,
-      "gpu": "5753 MiB, 6144 MiB, 74 %"
+      "wall_seconds": 1.613,
+      "gpu": "5504 MiB, 6144 MiB, 74 %"
     }
   ]
 }
