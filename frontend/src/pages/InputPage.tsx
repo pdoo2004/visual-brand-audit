@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitUpload } from "../api/submitUpload";
-import FileDropzone from "../components/FileDropzone";
+import { errorMessage, submitUpload } from "../api";import FileDropzone from "../components/FileDropzone";
 import { Button, Card, Checkbox } from "../components/ui";
 import { METHOD_GROUPS, RUBRICS } from "../config/criteria";
 import { checkFiles, mergeFiles, validateForm, type FileProblem, type FormErrors } from "../lib/validation";
@@ -56,7 +55,7 @@ export default function InputPage() {
       const job = await submitUpload({ files, rubricId: rubric.rubricId, criterionIds });
       navigate(`/jobs/${job.job_id}`);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Try again.");
+      setSubmitError(errorMessage(err));
       setSubmitting(false);
     }
   }
