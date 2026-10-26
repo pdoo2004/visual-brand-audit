@@ -17,7 +17,12 @@ from brandlens.api.schemas.enums import (
 from brandlens.api.schemas.errors import ErrorBody, ErrorResponse
 from brandlens.api.schemas.feedback import FeedbackRecord, FeedbackSubmission
 from brandlens.api.schemas.health import HealthResponse
-from brandlens.api.schemas.jobs import JobAccepted, JobProgress, JobStatus
+from brandlens.api.schemas.jobs import (
+    JobAccepted,
+    JobProgress,
+    JobStatus,
+    RejectedUpload,
+)
 from brandlens.api.schemas.requests import (
     MAX_CRAWL_PAGES,
     AnalysisOptions,
@@ -55,6 +60,7 @@ __all__ = [
     "JobState",
     "JobStatus",
     "RejectReason",
+    "RejectedUpload",
     "ResultsSummary",
     "RubricInfo",
     "RubricList",

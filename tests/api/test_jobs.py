@@ -102,7 +102,7 @@ def test_submit_rejects_unsupported_content_type(client):
         data={"rubric_id": "default-v1-draft"},
         files=[("files", ("logo.gif", b"GIF89a", "image/gif"))],
     )
-    assert r.status_code == 422
+    assert r.status_code == 415
 
 
 def test_submit_rejects_bad_rubric_slug(client):
@@ -200,3 +200,54 @@ def test_two_jobs_are_independent(client):
     body_b = client.get(f"/api/v1/jobs/{id_b}").json()
     assert body_a["progress"]["images_total"] == 1
     assert body_b["progress"]["images_total"] == 2
+
+
+# ---------------------------------------------------------------------------
+# Partial acceptance and upload hardening (SCRUM-125)
+# ---------------------------------------------------------------------------
+
+def _post_upload(client, files):
+    return client.post("/api/v1/analyses/uploads", data={"rubric_id": "default-v1-draft"}, files=files)
+
+
+def test_good_files_accepted_and_bad_ones_reported(client):
+    r = _post_upload(client, [
+        ("files", ("ok.png", _png_bytes(), "image/png")),
+        ("files", ("notes.txt", b"hello", "text/plain")),
+        ("files", ("empty.png", b"", "image/png")),
+    ])
+    assert r.status_code == 202
+    body = r.json()
+    assert {x["filename"]: x["code"] for x in body["rejected"]} == {
+        "notes.txt": "UNSUPPORTED_FILE_TYPE",
+        "empty.png": "VALIDATION_ERROR",
+    }
+    status = client.get(body["status_url"]).json()
+    assert status["progress"]["images_total"] == 1
+
+
+def test_clean_upload_has_empty_rejected_list(client):
+    assert _post_upload(client, [("files", ("a.png", _png_bytes(), "image/png"))]).json()["rejected"] == []
+
+
+def test_all_invalid_returns_error_and_creates_no_job(client):
+    r = _post_upload(client, [
+        ("files", ("a.txt", b"x", "text/plain")),
+        ("files", ("b.txt", b"y", "text/plain")),
+    ])
+    assert r.status_code == 415
+    detail = r.json()["detail"]
+    assert detail["code"] == "UNSUPPORTED_FILE_TYPE" and len(detail["details"]) == 2
+
+
+def test_content_type_spoofing_is_rejected(client):
+    r = _post_upload(client, [("files", ("fake.png", b"not really an image", "image/png"))])
+    assert r.status_code == 415
+
+
+def test_path_traversal_filename_is_neutralised(client, tmp_path):
+    r = _post_upload(client, [("files", ("../../evil.png", _png_bytes(), "image/png"))])
+    assert r.status_code == 202
+    assert not (tmp_path.parent / "evil.png").exists()
+    saved = list((tmp_path / "raw").rglob("*evil.png"))
+    assert len(saved) == 1 and saved[0].parent.parent == tmp_path / "raw"

@@ -6,8 +6,16 @@ from uuid import UUID
 from pydantic import Field, model_validator
 
 from brandlens.api.schemas.base import BaseSchema, UtcTimestamp
-from brandlens.api.schemas.enums import InputType, JobState
+from brandlens.api.schemas.enums import ErrorCode, InputType, JobState
 from brandlens.api.schemas.errors import ErrorBody
+
+
+class RejectedUpload(BaseSchema):
+    """A file in an upload batch that was not accepted (the rest of the batch still runs)."""
+
+    filename: str
+    code: ErrorCode
+    message: str
 
 
 class JobAccepted(BaseSchema):
@@ -18,15 +26,23 @@ class JobAccepted(BaseSchema):
     input_type: InputType
     created_at: UtcTimestamp
     status_url: str
+    rejected: list[RejectedUpload] = Field(default_factory=list)  # uploads only
 
     @classmethod
-    def for_job(cls, job_id: UUID, input_type: InputType, created_at: UtcTimestamp) -> Self:
+    def for_job(
+        cls,
+        job_id: UUID,
+        input_type: InputType,
+        created_at: UtcTimestamp,
+        rejected: list[RejectedUpload] | None = None,
+    ) -> Self:
         """Build the response so every endpoint formats `status_url` the same way."""
         return cls(
             job_id=job_id,
             input_type=input_type,
             created_at=created_at,
             status_url=f"/api/v1/jobs/{job_id}",
+            rejected=rejected or [],
         )
 
 
