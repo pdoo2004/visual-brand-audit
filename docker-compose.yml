@@ -1,0 +1,82 @@
+# BrandLens – full-stack Docker Compose
+#
+# Default (no profile):
+#   docker compose up
+#   api and frontend start. The API talks to Ollama on the host machine.
+#   Copy .env.example to .env and set BRANDLENS_MODEL_BASE_URL /
+#   BRANDLENS_MODEL_NAME to match your local setup.
+#
+# GPU profile (vLLM instead of Ollama):
+#   HF_TOKEN=<token> BRANDLENS_MODEL_BASE_URL=http://vlm:8000/v1 \
+#     docker compose --profile gpu up
+
+services:
+
+  # ── FastAPI / Uvicorn backend ─────────────────────────────────────────────
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      BRANDLENS_HOST: "0.0.0.0"
+      BRANDLENS_DB_PATH: "data/brandlens.db"
+      BRANDLENS_UPLOAD_DIR: "data/uploads/raw"
+      BRANDLENS_PROCESSED_DIR: "data/uploads/processed"
+      BRANDLENS_RUBRIC_PATH: "config/brand_standards.json"
+      # Browser connects through nginx, so the visible origin is http://localhost.
+      BRANDLENS_CORS_ORIGINS: "http://localhost,http://localhost:5173,http://127.0.0.1:5173"
+      # Point at the vlm service when the gpu profile is active; otherwise use
+      # Ollama on the Docker Desktop host (host.docker.internal resolves there).
+      BRANDLENS_MODEL_BASE_URL: "${BRANDLENS_MODEL_BASE_URL:-http://host.docker.internal:11434/v1}"
+      BRANDLENS_MODEL_NAME: "${BRANDLENS_MODEL_NAME:-gemma4:e4b}"
+    volumes:
+      # Persist the database and uploads on the host.
+      - ./data:/app/data
+      # Mount the rubric config read-only.
+      - ./config:/app/config:ro
+
+  # ── React / Nginx frontend ────────────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+  # ── vLLM model server (GPU required) ─────────────────────────────────────
+  # Activate with:  docker compose --profile gpu up
+  # Weights are downloaded once to the hf-cache named volume.
+  # Set BRANDLENS_MODEL_BASE_URL=http://vlm:8000/v1 so the api container
+  # routes inference requests here instead of the host Ollama.
+  vlm:
+    image: vllm/vllm-openai:gemma4
+    ipc: host
+    shm_size: 16gb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      HF_TOKEN: "${HF_TOKEN:-}"
+    volumes:
+      - hf-cache:/root/.cache/huggingface
+    command:
+      - "${VLM_MODEL:-google/gemma-4-E4B-it}"
+      - --max-model-len
+      - "${VLM_MAX_MODEL_LEN:-4096}"
+      - --gpu-memory-utilization
+      - "0.90"
+      - --limit-mm-per-prompt
+      - '{"image": 1, "audio": 0}'
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+    profiles:
+      - gpu
+
+volumes:
+  hf-cache:

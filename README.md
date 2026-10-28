@@ -76,6 +76,45 @@ python3 vlm/run_local.py --model qwen2.5vl:3b vlm/samples/01-coffee-shop.jpg
 
 See `vlm/OLLAMA.md` for setup details and `vlm/BENCHMARK.md` for the model selection rationale. Do not pull `gemma4:26b` or `gemma4:31b` on a laptop — those weights are for the GPU host.
 
+## Running with Docker
+
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+### 1. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` if needed. The defaults point the API at Ollama running on the host machine (`host.docker.internal:11434`). Pull the model first if you haven't:
+
+```bash
+ollama pull gemma4:e4b
+```
+
+### 2. Start the stack
+
+```bash
+docker compose up --build
+```
+
+- Frontend: http://localhost
+- API: http://localhost:8000
+- API docs: http://localhost:8000/docs
+
+### 3. GPU host (vLLM instead of Ollama)
+
+On a machine with a GPU and the NVIDIA Container Toolkit, the `gpu` profile starts a vLLM server instead:
+
+```bash
+HF_TOKEN=<your-token> \
+BRANDLENS_MODEL_BASE_URL=http://vlm:8000/v1 \
+BRANDLENS_MODEL_NAME=google/gemma-4-E4B-it \
+docker compose --profile gpu up --build
+```
+
+Gemma 4 E4B weights are gated on Hugging Face — `HF_TOKEN` is required on the first run. Weights are cached in the `hf-cache` Docker volume so subsequent starts skip the download.
+
 ## Architecture
 
 | Component | Role |
