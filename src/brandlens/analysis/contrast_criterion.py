@@ -20,15 +20,33 @@ class ContrastCriterion(CriterionBase):
     criterion_id = "contrast"
     method_id = "pillow_grayscale_contrast"
     method_version = "1"
-    
+
     def __init__(self, settings: dict[str, Any] | None = None):
-        super().__init__(
-            settings,
-            defaults={
-                "near_black_max": 10,
-                "near_white_min": 245,
+        super().__init__(settings, defaults=self.default_settings())
+
+    @classmethod
+    def settings_spec(cls) -> dict[str, Any]:
+        return {
+            "near_black_max": {
+                "type": "number",
+                "default": 10,
+                "description": "0–255; below near_white_min.",
             },
-        )
+            "near_white_min": {
+                "type": "number",
+                "default": 245,
+                "description": "0–255; above near_black_max.",
+            },
+        }
+
+    @classmethod
+    def measurement_specs(cls) -> dict[str, Any]:
+        return {
+            "luminance_std": {"type": "number", "unit": "grayscale_0_255"},
+            "p5_p95_range": {"type": "number", "unit": "grayscale_0_255"},
+            "near_black_fraction": {"type": "number", "unit": "fraction_0_1"},
+            "near_white_fraction": {"type": "number", "unit": "fraction_0_1"},
+        }
 
     def _validate_settings(self, settings: dict[str, Any]) -> None:
         validate_cutoffs(settings)
@@ -51,10 +69,4 @@ class ContrastCriterion(CriterionBase):
         }
         return self._make_result(
             measurements,
-            units={
-                "luminance_std": "grayscale_0_255",
-                "p5_p95_range": "grayscale_0_255",
-                "near_black_fraction": "fraction_0_1",
-                "near_white_fraction": "fraction_0_1",
-            },
         )

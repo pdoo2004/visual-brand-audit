@@ -39,15 +39,50 @@ class ColorPaletteCriterion(CriterionBase):
     method_version = "1"
 
     def __init__(self, settings: dict[str, Any] | None = None):
-        super().__init__(
-            settings,
-            defaults={
-                "n_clusters": 5,
-                "random_seed": 42,
-                "max_sample_pixels": 50_000,
-                "brand_palette": None,
+        super().__init__(settings, defaults=self.default_settings())
+
+    @classmethod
+    def settings_spec(cls) -> dict[str, Any]:
+        return {
+            "n_clusters": {
+                "type": "integer",
+                "default": 5,
+                "description": "Positive maximum color count.",
             },
-        )
+            "random_seed": {
+                "type": "integer",
+                "default": 42,
+                "description": "0 through 2**32 - 1.",
+            },
+            "max_sample_pixels": {
+                "type": "integer",
+                "default": 50000,
+                "nullable": True,
+                "description": "At least n_clusters; null fits all pixels.",
+            },
+            "brand_palette": {
+                "type": "array",
+                "default": None,
+                "nullable": True,
+                "description": "Nonempty #RRGGBB list; null leaves "
+                "distance unavailable.",
+            },
+        }
+
+    @classmethod
+    def measurement_specs(cls) -> dict[str, Any]:
+        return {
+            "dominant_colors": {
+                "type": "array",
+                "unit": "RGB_0_255_hex_CIELAB_D65_proportion_0_1",
+                "description": "Each color contains rgb, hex, lab, and proportion.",
+            },
+            "palette_distance": {
+                "type": "number",
+                "unit": "delta_e_76",
+                "nullable": True,
+            },
+        }
 
     def _validate_settings(self, settings: dict[str, Any]) -> None:
         for name in ("n_clusters", "random_seed"):
@@ -195,10 +230,6 @@ class ColorPaletteCriterion(CriterionBase):
                 "palette_distance": self._palette_distance(colors)
                 if has_palette
                 else None,
-            },
-            units={
-                "dominant_colors": "RGB_0_255_hex_CIELAB_D65_proportion_0_1",
-                "palette_distance": "delta_e_76",
             },
             status="available" if has_palette else "unavailable_needs_review",
             reasons=[]

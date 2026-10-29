@@ -17,12 +17,44 @@ class SubjectFramingCriterion(CriterionBase):
     that a subject was cropped.
     """
 
-    criterion_id = "framing"
+    criterion_id = "framing_subject_position"
     method_id = "normalized_subject_box_geometry"
     method_version = "1"
 
     def __init__(self, settings: dict[str, Any] | None = None):
-        super().__init__(settings, defaults={"edge_margin_fraction": 0.02})
+        super().__init__(settings, defaults=self.default_settings())
+
+    @classmethod
+    def settings_spec(cls) -> dict[str, Any]:
+        return {
+            "edge_margin_fraction": {
+                "type": "number",
+                "default": 0.02,
+                "description": "Near-edge cutoff, 0–0.5.",
+            }
+        }
+
+    @classmethod
+    def measurement_specs(cls) -> dict[str, Any]:
+        return {
+            "subject_center_x": {"type": "number", "unit": "fraction"},
+            "subject_center_y": {"type": "number", "unit": "fraction"},
+            "subject_box_area_fraction": {"type": "number", "unit": "fraction"},
+            "center_distance": {"type": "number", "unit": "image_diagonal_fraction"},
+            "nearest_thirds_distance": {
+                "type": "number",
+                "unit": "image_diagonal_fraction",
+            },
+            "left_margin": {"type": "number", "unit": "fraction"},
+            "right_margin": {"type": "number", "unit": "fraction"},
+            "top_margin": {"type": "number", "unit": "fraction"},
+            "bottom_margin": {"type": "number", "unit": "fraction"},
+            "near_edge": {"type": "boolean", "unit": "boolean"},
+        }
+
+    @classmethod
+    def input_requirements(cls) -> dict[str, Any]:
+        return {**super().input_requirements(), "reliable_subject_region": True}
 
     def _validate_settings(self, settings: dict[str, Any]) -> None:
         value = settings["edge_margin_fraction"]
@@ -39,7 +71,8 @@ class SubjectFramingCriterion(CriterionBase):
         box = data.subject_region
         if box is None or not box.reliable:
             return self._make_result(
-                {}, {}, status="unavailable_needs_review",
+                {},
+                status="unavailable_needs_review",
                 reasons=[data.subject_unavailable_reason or
                          "Primary subject region is missing or unreliable."],
             )
@@ -66,9 +99,6 @@ class SubjectFramingCriterion(CriterionBase):
                 for value in margins.values()
             ),
         }
-        units = dict.fromkeys(measurements, "fraction")
-        units.update(center_distance="image_diagonal_fraction",
-                     nearest_thirds_distance="image_diagonal_fraction", near_edge="boolean")
-        result = self._make_result(measurements, units)
+        result = self._make_result(measurements)
         result["subject_region"] = box.to_dict()
         return result
