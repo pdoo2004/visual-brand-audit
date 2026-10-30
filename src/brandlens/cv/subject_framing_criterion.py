@@ -3,7 +3,7 @@
 from math import hypot, isfinite
 from typing import Any
 
-from .analysis_input import AnalysisInput
+from .cv_input import CVInput
 from .criterion_base import CriterionBase
 
 
@@ -63,9 +63,9 @@ class SubjectFramingCriterion(CriterionBase):
         if not isfinite(value) or not 0 <= value <= 0.5:
             raise ValueError("edge_margin_fraction must be between 0 and 0.5.")
 
-    def analyze(self, data: AnalysisInput) -> dict[str, Any]:
+    def analyze(self, data: CVInput) -> dict[str, Any]:
         """Return geometry or an explicit unavailable status for missing subject."""
-        if not isinstance(data, AnalysisInput):
+        if not isinstance(data, CVInput):
             raise TypeError("data must be an AnalysisInput.")
         data.__post_init__()  # Revalidate the borrowed, mutable Pillow image.
         box = data.subject_region

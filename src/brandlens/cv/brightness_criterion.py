@@ -5,7 +5,7 @@ from typing import Any
 import numpy as np
 
 from ._intensity import get_intensity, measure_fractions, validate_cutoffs
-from .analysis_input import AnalysisInput
+from .cv_input import CVInput
 from .criterion_base import CriterionBase
 
 
@@ -50,14 +50,14 @@ class BrightnessCriterion(CriterionBase):
     def _validate_settings(self, settings: dict[str, Any]) -> None:
         validate_cutoffs(settings)
 
-    def analyze(self, data: AnalysisInput) -> dict[str, Any]:
+    def analyze(self, data: CVInput) -> dict[str, Any]:
         """Return mean_luminance (0–255) and fractions (0–1).
 
         Values use rounded grayscale intensity, not physical luminance.
         Raises TypeError/ValueError for invalid inputs. Does not evaluate
         subject readability, modify the input, or assign a brand score.
         """
-        if not isinstance(data, AnalysisInput):
+        if not isinstance(data, CVInput):
             raise TypeError("data must be an AnalysisInput object.")
         intensity = get_intensity(data.image)
         measurements = {

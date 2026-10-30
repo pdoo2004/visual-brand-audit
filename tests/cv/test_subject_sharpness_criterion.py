@@ -6,9 +6,9 @@ import unittest
 import numpy as np
 from PIL import Image, ImageFilter
 
-from brandlens.analysis.analysis_input import AnalysisInput
-from brandlens.analysis.subject.region import SubjectRegion
-from brandlens.analysis.subject_sharpness_criterion import SubjectSharpnessCriterion
+from brandlens.cv.cv_input import CVInput
+from brandlens.cv.subject.region import SubjectRegion
+from brandlens.cv.subject_sharpness_criterion import SubjectSharpnessCriterion
 
 
 def region(*coords, **kwargs):
@@ -28,7 +28,7 @@ class TestSubjectSharpnessCriterion(unittest.TestCase):
 
     def test_known_laplacian_variance_and_emphasis(self):
         with self.image() as image:
-            m = SubjectSharpnessCriterion().analyze(AnalysisInput(image, region()))['measurements']
+            m = SubjectSharpnessCriterion().analyze(CVInput(image, region()))['measurements']
         self.assertEqual(m['subject_laplacian_variance'], 1020**2)
         self.assertEqual(m['background_laplacian_variance'], 0)
         self.assertEqual(m['detail_emphasis_index'], 1)
@@ -36,21 +36,21 @@ class TestSubjectSharpnessCriterion(unittest.TestCase):
 
     def test_background_more_detailed(self):
         with self.image(False) as image:
-            m = SubjectSharpnessCriterion().analyze(AnalysisInput(image, region()))['measurements']
+            m = SubjectSharpnessCriterion().analyze(CVInput(image, region()))['measurements']
         self.assertEqual(m['detail_emphasis_index'], -1)
 
     def test_blur_reduces_detail(self):
         with self.image() as image, image.filter(ImageFilter.GaussianBlur(2)) as blurred:
             criterion = SubjectSharpnessCriterion()
-            a = criterion.analyze(AnalysisInput(image, region()))['measurements']
-            b = criterion.analyze(AnalysisInput(blurred, region()))['measurements']
+            a = criterion.analyze(CVInput(image, region()))['measurements']
+            b = criterion.analyze(CVInput(blurred, region()))['measurements']
             self.assertLess(b['subject_laplacian_variance'], a['subject_laplacian_variance'])
 
     def test_box_edge_does_not_create_detail(self):
         a = np.zeros((64, 64, 3), dtype='uint8')
         a[16:48, 16:48] = 255
         with Image.fromarray(a) as image:
-            result = SubjectSharpnessCriterion().analyze(AnalysisInput(image, region()))
+            result = SubjectSharpnessCriterion().analyze(CVInput(image, region()))
         m = result['measurements']
         self.assertEqual(m['subject_laplacian_variance'], 0)
         self.assertEqual(m['background_laplacian_variance'], 0)
@@ -61,14 +61,14 @@ class TestSubjectSharpnessCriterion(unittest.TestCase):
         with self.image() as image:
             for box, missing in ((region(0, 0, 1, 1), 'background'),
                                  (region(.5, .5, .51, .51), 'subject')):
-                result = SubjectSharpnessCriterion().analyze(AnalysisInput(image, box))
+                result = SubjectSharpnessCriterion().analyze(CVInput(image, box))
                 self.assertIsNone(result['measurements'][missing+'_laplacian_variance'])
                 self.assertEqual(result['status'], 'unavailable_needs_review')
 
     def test_tiny_image_missing_and_unreliable_subject(self):
         with Image.new('RGB', (2, 2)) as image:
             for box in (region(), region(reliable=False), None):
-                result = SubjectSharpnessCriterion().analyze(AnalysisInput(image, box))
+                result = SubjectSharpnessCriterion().analyze(CVInput(image, box))
                 self.assertEqual(result['status'], 'unavailable_needs_review')
 
     def test_settings_validation(self):
@@ -81,7 +81,7 @@ class TestSubjectSharpnessCriterion(unittest.TestCase):
             image.info['example'] = 'preserve'
             original = image.tobytes()
             for criterion in (SubjectSharpnessCriterion(),):
-                data = AnalysisInput(image, region())
+                data = CVInput(image, region())
                 a, b = criterion.analyze(data), criterion.analyze(data)
                 self.assertEqual(a, b)
                 json.dumps(a, allow_nan=False)

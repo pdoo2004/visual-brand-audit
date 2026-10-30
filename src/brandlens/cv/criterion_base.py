@@ -5,7 +5,7 @@ from copy import deepcopy
 from inspect import getdoc
 from typing import Any
 
-from .analysis_input import AnalysisInput
+from .cv_input import CVInput
 
 
 class CriterionBase(ABC):
@@ -96,7 +96,7 @@ class CriterionBase(ABC):
         """Validate values and cross-setting constraints in the implementation."""
 
     @abstractmethod
-    def analyze(self, data: AnalysisInput) -> dict[str, Any]:
+    def analyze(self, data: CVInput) -> dict[str, Any]:
         """Measure standardized input without modifying it or assigning a score."""
         raise NotImplementedError
 

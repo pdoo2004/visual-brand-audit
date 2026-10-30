@@ -2,8 +2,8 @@
 
 import unittest
 
-from brandlens.analysis.subject.detector_base import DetectionResult, SubjectCandidate
-from brandlens.analysis.subject.selector import SingleSubjectSelector
+from brandlens.cv.subject.detector_base import DetectionResult, SubjectCandidate
+from brandlens.cv.subject.selector import SingleSubjectSelector
 
 
 def candidate(score=.9, label='person'):

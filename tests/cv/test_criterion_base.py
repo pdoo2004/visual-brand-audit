@@ -3,7 +3,7 @@
 import json
 import unittest
 
-from brandlens.analysis.criterion_base import CriterionBase
+from brandlens.cv.criterion_base import CriterionBase
 
 
 class ExampleCriterion(CriterionBase):

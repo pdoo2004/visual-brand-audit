@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-from .analysis_input import AnalysisInput
+from .cv_input import CVInput
 from .criterion_base import CriterionBase
 
 
@@ -205,7 +205,7 @@ class ColorPaletteCriterion(CriterionBase):
         )
         return float(np.dot(weights, distances.min(axis=1)))
 
-    def analyze(self, data: AnalysisInput) -> dict[str, Any]:
+    def analyze(self, data: CVInput) -> dict[str, Any]:
         """Return dominant_colors and palette_distance in the shared envelope.
 
         Each color contains rgb, hex, lab and proportion. Colors are sorted by
@@ -217,10 +217,10 @@ class ColorPaletteCriterion(CriterionBase):
         and use unavailable_needs_review with a reason. Invalid inputs raise
         TypeError/ValueError. Never modifies or closes the input image.
         """
-        if not isinstance(data, AnalysisInput):
+        if not isinstance(data, CVInput):
             raise TypeError("data must be an AnalysisInput object.")
         # Revalidate because a borrowed Pillow image remains mutable.
-        AnalysisInput(data.image)
+        CVInput(data.image)
         pixels = np.array(data.image, dtype=np.uint8).reshape(-1, 3)
         colors = self._extract_colors(pixels)
         has_palette = self._settings["brand_palette"] is not None

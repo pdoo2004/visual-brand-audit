@@ -7,8 +7,8 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, SchemaError, ValidationError
 
-from .criterion_base import CriterionBase
-from .registry import CV_REGISTRY
+from .cv.criterion_base import CriterionBase
+from .cv.registry import CV_REGISTRY
 
 DEFAULT_SCHEMA_PATH = (
     Path(__file__).resolve().parents[3] / "config" / "brand_standards.schema.json"

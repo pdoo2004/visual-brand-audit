@@ -5,7 +5,7 @@ from typing import Any
 import numpy as np
 
 from ._intensity import get_intensity, measure_fractions, validate_cutoffs
-from .analysis_input import AnalysisInput
+from .cv_input import CVInput
 from .criterion_base import CriterionBase
 
 
@@ -51,14 +51,14 @@ class ContrastCriterion(CriterionBase):
     def _validate_settings(self, settings: dict[str, Any]) -> None:
         validate_cutoffs(settings)
 
-    def analyze(self, data: AnalysisInput) -> dict[str, Any]:
+    def analyze(self, data: CVInput) -> dict[str, Any]:
         """Return luminance_std, p5_p95_range and extreme fractions.
 
         Population standard deviation ranges from 0 to 127.5. P95 minus P5
         ranges from 0 to 255. Fractions range from 0 to 1. This measures global
         spread, not subject/background separation. Invalid inputs raise errors.
         """
-        if not isinstance(data, AnalysisInput):
+        if not isinstance(data, CVInput):
             raise TypeError("data must be an AnalysisInput object.")
         intensity = get_intensity(data.image)
         p5, p95 = np.percentile(intensity, [5, 95], method="linear")

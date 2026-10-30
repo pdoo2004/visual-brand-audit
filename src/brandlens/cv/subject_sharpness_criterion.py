@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 
-from .analysis_input import AnalysisInput
+from .cv_input import CVInput
 from .criterion_base import CriterionBase
 
 
@@ -76,7 +76,7 @@ class SubjectSharpnessCriterion(CriterionBase):
         if value < 2:
             raise ValueError("min_region_pixels must be at least 2.")
 
-    def analyze(self, data: AnalysisInput) -> dict[str, Any]:
+    def analyze(self, data: CVInput) -> dict[str, Any]:
         """Return regional variances and their normalized difference.
 
         Emphasis index = (subject variance - background variance) / their sum.
@@ -84,7 +84,7 @@ class SubjectSharpnessCriterion(CriterionBase):
         When both variances are zero, the index is None with a review reason.
         Partial measurements can accompany unavailable_needs_review.
         """
-        if not isinstance(data, AnalysisInput):
+        if not isinstance(data, CVInput):
             raise TypeError("data must be an AnalysisInput.")
         data.__post_init__()
         box = data.subject_region
