@@ -5,8 +5,8 @@ from typing import Any
 import numpy as np
 
 from ._intensity import get_intensity, measure_fractions, validate_cutoffs
-from .cv_input import CVInput
 from .criterion_base import CriterionBase
+from .cv_input import CVInput
 
 
 class ContrastCriterion(CriterionBase):

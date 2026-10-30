@@ -4,8 +4,8 @@ from typing import Any
 
 import numpy as np
 
-from .cv_input import CVInput
 from .criterion_base import CriterionBase
+from .cv_input import CVInput
 
 
 class SubjectSharpnessCriterion(CriterionBase):

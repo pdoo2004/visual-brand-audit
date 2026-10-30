@@ -6,10 +6,10 @@ from pathlib import Path
 
 from PIL import Image
 
-from brandlens.cv.cv_input import CVInput
+from brandlens.api.schemas.results import CriterionResult
 from brandlens.cv.brightness_criterion import BrightnessCriterion
 from brandlens.cv.contrast_criterion import ContrastCriterion
-from brandlens.api.schemas.results import CriterionResult
+from brandlens.cv.cv_input import CVInput
 from brandlens.scoring import score_image
 from brandlens.vlm.validate import ParsedCriterion
 

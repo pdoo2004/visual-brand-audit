@@ -6,8 +6,8 @@ import unittest
 
 from PIL import Image
 
-from brandlens.cv.cv_input import CVInput
 from brandlens.cv.contrast_criterion import ContrastCriterion
+from brandlens.cv.cv_input import CVInput
 
 
 class TestContrastCriterion(unittest.TestCase):

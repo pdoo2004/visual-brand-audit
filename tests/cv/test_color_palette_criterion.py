@@ -6,8 +6,8 @@ import unittest
 import numpy as np
 from PIL import Image
 
-from brandlens.cv.cv_input import CVInput
 from brandlens.cv.color_palette_criterion import ColorPaletteCriterion
+from brandlens.cv.cv_input import CVInput
 
 
 class TestColorPaletteCriterion(unittest.TestCase):

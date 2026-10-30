@@ -6,8 +6,8 @@ import unittest
 
 from PIL import Image
 
-from brandlens.cv.cv_input import CVInput
 from brandlens.cv.brightness_criterion import BrightnessCriterion
+from brandlens.cv.cv_input import CVInput
 
 
 class TestBrightnessCriterion(unittest.TestCase):
