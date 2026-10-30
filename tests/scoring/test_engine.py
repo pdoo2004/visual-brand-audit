@@ -6,10 +6,10 @@ from pathlib import Path
 
 from PIL import Image
 
-from brandlens.analysis.analysis_input import AnalysisInput
-from brandlens.analysis.brightness_criterion import BrightnessCriterion
-from brandlens.analysis.contrast_criterion import ContrastCriterion
 from brandlens.api.schemas.results import CriterionResult
+from brandlens.cv.brightness_criterion import BrightnessCriterion
+from brandlens.cv.contrast_criterion import ContrastCriterion
+from brandlens.cv.cv_input import CVInput
 from brandlens.scoring import score_image
 from brandlens.vlm.validate import ParsedCriterion
 
@@ -305,8 +305,8 @@ class TestScoringEngine(unittest.TestCase):
     def test_analyzer_envelope_and_api_schema(self):
         rubric = json.loads(RUBRIC_PATH.read_text(encoding="utf-8"))
         with Image.new("RGB", (4, 4), (128, 128, 128)) as image:
-            brightness = BrightnessCriterion().analyze(AnalysisInput(image))
-            contrast = ContrastCriterion().analyze(AnalysisInput(image))
+            brightness = BrightnessCriterion().analyze(CVInput(image))
+            contrast = ContrastCriterion().analyze(CVInput(image))
         result = score_image(
             rubric,
             cv_results={

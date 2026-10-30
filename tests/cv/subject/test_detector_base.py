@@ -2,7 +2,7 @@
 
 import unittest
 
-from brandlens.analysis.subject.detector_base import SubjectDetectorBase
+from brandlens.cv.subject.detector_base import SubjectDetectorBase
 
 
 class TestSubjectDetectorBase(unittest.TestCase):

@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.1.0",
+  "rubric_id": "brightness-contrast-demo",
+  "name": "Brightness and contrast backend demo",
+  "flag_threshold": null,
+  "brand_palette": [
+    "#004977",
+    "#D03027",
+    "#FFFFFF"
+  ],
+  "criteria": [
+    {
+      "criterion_id": "exposure_brightness",
+      "name": "Exposure and brightness",
+      "definition": "The photograph is neither badly underexposed nor blown out, and the subject is readable.",
+      "evaluation_evidence": "Mean luminance, the share of near-black pixels, the share of near-white pixels, and a pass or fail against configured thresholds.",
+      "method": "cv",
+      "weight": null,
+      "params": {
+        "mean_luminance_min": 40,
+        "mean_luminance_max": 215,
+        "near_black_fraction_max": 0.2,
+        "near_white_fraction_max": 0.2,
+        "threshold_status": "placeholder"
+      },
+      "required_measurements": [
+        "mean_luminance",
+        "near_black_fraction",
+        "near_white_fraction"
+      ],
+      "implementation_id": "pillow_grayscale_brightness",
+      "settings": {
+        "near_black_max": 10,
+        "near_white_min": 245
+      }
+    },
+    {
+      "criterion_id": "contrast",
+      "name": "Contrast",
+      "definition": "Tonal separation is strong enough that the subject separates from the background. Both flat and harsh images should be flagged.",
+      "evaluation_evidence": "Spread of luminance values, a highlight and shadow check, and a pass or fail against configured thresholds.",
+      "method": "cv",
+      "weight": null,
+      "params": {
+        "luminance_std_min": 20,
+        "luminance_std_max": 90,
+        "p5_p95_range_min": 50,
+        "p5_p95_range_max": 240,
+        "near_black_fraction_max": 0.2,
+        "near_white_fraction_max": 0.2,
+        "threshold_status": "placeholder"
+      },
+      "required_measurements": [
+        "luminance_std",
+        "p5_p95_range",
+        "near_black_fraction",
+        "near_white_fraction"
+      ],
+      "implementation_id": "pillow_grayscale_contrast",
+      "settings": {
+        "near_black_max": 10,
+        "near_white_min": 245
+      }
+    }
+  ],
+  "metadata": {
+    "status": "test",
+    "source_decision": "Subtask 1.2",
+    "interface_contract": "Subtask 1.4",
+    "weights_status": "unset",
+    "palette_status": "placeholder_not_brand_confirmed",
+    "tone_status": "placeholder_not_brand_confirmed",
+    "on_unavailable": "unavailable_needs_review",
+    "scoring_ready": false,
+    "notes": [
+      "Numerical thresholds and palette colors are provisional and require confirmation or calibration.",
+      "Whole-image exposure and contrast statistics alone do not establish subject readability or subject-background separation.",
+      "Unavailable criteria must not suppress available results.",
+      "required_measurements identifies required evaluator outputs for both CV and VLM methods.",
+      "CV settings configure measurements; params are retained for the scoring component.",
+      "Schema 1.1.0 uses the native framing/sharpness measurement names. Scoring rules must adopt these names before those criteria can be scored with configured bounds.",
+      "Demonstration subset containing brightness and contrast only; settings and provisional scoring thresholds are copied from the original rubric."
+    ]
+  }
+}

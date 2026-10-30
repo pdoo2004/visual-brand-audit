@@ -6,8 +6,8 @@ import unittest
 import numpy as np
 from PIL import Image
 
-from brandlens.analysis.analysis_input import AnalysisInput
-from brandlens.analysis.color_palette_criterion import ColorPaletteCriterion
+from brandlens.cv.color_palette_criterion import ColorPaletteCriterion
+from brandlens.cv.cv_input import CVInput
 
 
 class TestColorPaletteCriterion(unittest.TestCase):
@@ -79,7 +79,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
     def test_uniform_image_returns_one_color_and_zero_match_distance(self):
         image = self.image([(255, 255, 255)] * 10)
         result = ColorPaletteCriterion({"brand_palette": ["#FFFFFF"]}).analyze(
-            AnalysisInput(image)
+            CVInput(image)
         )
         colors = result["measurements"]["dominant_colors"]
         self.assertEqual(len(colors), 1)
@@ -91,7 +91,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
     def test_known_black_white_weighted_distance(self):
         image = self.image([(0, 0, 0)] * 3 + [(255, 255, 255)])
         result = ColorPaletteCriterion({"brand_palette": ["#000000"]}).analyze(
-            AnalysisInput(image)
+            CVInput(image)
         )
         colors = result["measurements"]["dominant_colors"]
         self.assertEqual([c["proportion"] for c in colors], [0.75, 0.25])
@@ -103,12 +103,12 @@ class TestColorPaletteCriterion(unittest.TestCase):
     def test_each_color_matches_its_nearest_palette_entry(self):
         image = self.image([(0, 0, 0)] * 3 + [(255, 255, 255)])
         criterion = ColorPaletteCriterion({"brand_palette": ["#FFFFFF", "#000000"]})
-        result = criterion.analyze(AnalysisInput(image))
+        result = criterion.analyze(CVInput(image))
         self.assertEqual(result["measurements"]["palette_distance"], 0.0)
 
     def test_missing_palette_retains_colors_and_reports_reason(self):
         result = ColorPaletteCriterion().analyze(
-            AnalysisInput(self.image([(30, 40, 50)]))
+            CVInput(self.image([(30, 40, 50)]))
         )
         self.assertEqual(result["status"], "unavailable_needs_review")
         self.assertIsNone(result["measurements"]["palette_distance"])
@@ -116,7 +116,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
         self.assertTrue(result["reasons"])
 
     def test_palette_case_and_duplicates_do_not_change_distance(self):
-        data = AnalysisInput(self.image([(30, 40, 50)]))
+        data = CVInput(self.image([(30, 40, 50)]))
         a = ColorPaletteCriterion({"brand_palette": ["#aAbBcC"]}).analyze(data)
         b = ColorPaletteCriterion({"brand_palette": ["#AABBCC", "#AABBCC"]}).analyze(
             data
@@ -124,7 +124,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
         self.assertEqual(a["measurements"], b["measurements"])
 
     def test_real_kmeans_center_uses_lab_mean(self):
-        data = AnalysisInput(self.image([(0, 0, 0), (255, 255, 255)]))
+        data = CVInput(self.image([(0, 0, 0), (255, 255, 255)]))
         result = ColorPaletteCriterion(
             {"n_clusters": 1, "brand_palette": ["#000000"]}
         ).analyze(data)
@@ -137,7 +137,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
 
     def test_sampling_counts_all_pixels_not_just_sample(self):
         pixels = [(0, 0, 0)] * 151 + [(255, 255, 255)] * 50
-        data = AnalysisInput(self.image(pixels))
+        data = CVInput(self.image(pixels))
         result = ColorPaletteCriterion(
             {"n_clusters": 2, "max_sample_pixels": 31}
         ).analyze(data)
@@ -149,7 +149,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
         image = self.image([(255, 255, 255)] * 5001 + [(0, 0, 0)] * 5001)
         result = ColorPaletteCriterion(
             {"n_clusters": 2, "max_sample_pixels": 31}
-        ).analyze(AnalysisInput(image))
+        ).analyze(CVInput(image))
         colors = result["measurements"]["dominant_colors"]
         self.assertEqual([c["proportion"] for c in colors], [0.5, 0.5])
         self.assertEqual([c["hex"] for c in colors], ["#000000", "#FFFFFF"])
@@ -159,7 +159,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
         with Image.fromarray(
             rng.integers(0, 256, (12, 16, 3), dtype=np.uint8)
         ) as image:
-            data = AnalysisInput(image)
+            data = CVInput(image)
             for limit in (None, 41):
                 criterion = ColorPaletteCriterion(
                     {
@@ -182,7 +182,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
         image.info["example"] = "keep"
         pixels = image.tobytes()
         criterion = ColorPaletteCriterion({"brand_palette": ["#000000"]})
-        result = criterion.analyze(AnalysisInput(image))
+        result = criterion.analyze(CVInput(image))
         self.assertEqual(result["criterion_id"], "color_palette_fit")
         self.assertEqual(result["status"], "available")
         self.assertEqual(result["reasons"], [])
