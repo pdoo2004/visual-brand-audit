@@ -18,7 +18,7 @@ class BrightnessCriterion(CriterionBase):
     """
 
     criterion_id = "exposure_brightness"
-    method_id = "pillow_grayscale_brightness"
+    implementation_id = "pillow_grayscale_brightness"
     method_version = "1"
 
     def __init__(self, settings: dict[str, Any] | None = None):

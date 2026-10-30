@@ -18,7 +18,7 @@ class ContrastCriterion(CriterionBase):
     """
 
     criterion_id = "contrast"
-    method_id = "pillow_grayscale_contrast"
+    implementation_id = "pillow_grayscale_contrast"
     method_version = "1"
 
     def __init__(self, settings: dict[str, Any] | None = None):

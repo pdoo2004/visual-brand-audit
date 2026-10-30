@@ -35,7 +35,7 @@ class ColorPaletteCriterion(CriterionBase):
     """
 
     criterion_id = "color_palette_fit"
-    method_id = "lab_kmeans_weighted_nearest_delta_e_76"
+    implementation_id = "lab_kmeans_weighted_nearest_delta_e_76"
     method_version = "1"
 
     def __init__(self, settings: dict[str, Any] | None = None):

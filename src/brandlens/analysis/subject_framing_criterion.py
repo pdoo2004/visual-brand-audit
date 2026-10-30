@@ -18,7 +18,7 @@ class SubjectFramingCriterion(CriterionBase):
     """
 
     criterion_id = "framing_subject_position"
-    method_id = "normalized_subject_box_geometry"
+    implementation_id = "normalized_subject_box_geometry"
     method_version = "1"
 
     def __init__(self, settings: dict[str, Any] | None = None):

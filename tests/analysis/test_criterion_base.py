@@ -8,7 +8,7 @@ from brandlens.analysis.criterion_base import CriterionBase
 
 class ExampleCriterion(CriterionBase):
     criterion_id = "example"
-    method_id = "example_method"
+    implementation_id = "example_method"
     method_version = "1"
     def analyze(self, data):
         return self._make_result({"value": 2.0}, {"value": "example_units"})

@@ -77,7 +77,7 @@ class CriterionBase(ABC):
                 spec.pop("default", None)
         return {
             "criterion_id": cls.criterion_id,
-            "implementation_id": cls.method_id,
+            "implementation_id": cls.implementation_id,
             "method_version": cls.method_version,
             "method": "cv",
             "name": cls.__name__,
@@ -132,7 +132,7 @@ class CriterionBase(ABC):
             "status": status,
             "measurements": deepcopy(measurements),
             "method": {
-                "id": self.method_id,
+                "id": self.implementation_id,
                 "version": self.method_version,
                 "parameters": self.settings,
             },
