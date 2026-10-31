@@ -394,3 +394,26 @@ def get_job_criterion_scores(
     for r in rows:
         grouped.setdefault(r["image_id"], []).append(r)
     return grouped
+
+
+def get_job_latest_feedback(
+    conn: sqlite3.Connection, job_id: str
+) -> dict[str, sqlite3.Row]:
+    """Latest whole-image feedback row for each image in a job, keyed by image_id.
+
+    Uses the ordering from database-schema.md (`created_at DESC, feedback_id DESC`).
+    Criterion-specific feedback is left out on purpose: it must not show up as a
+    verdict on the whole image.
+    """
+    rows = conn.execute(
+        """SELECT f.*
+           FROM feedback AS f
+           JOIN images AS i ON i.image_id = f.image_id
+           WHERE i.job_id = ? AND f.criterion_id IS NULL
+           ORDER BY f.created_at DESC, f.feedback_id DESC""",
+        (job_id,),
+    ).fetchall()
+    latest: dict[str, sqlite3.Row] = {}
+    for r in rows:
+        latest.setdefault(r["image_id"], r)  # first row seen is the newest
+    return latest
