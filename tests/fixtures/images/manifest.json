@@ -130,7 +130,21 @@
       "notes": "Primarily tests the over-crop / poor-headroom failure path for the subject framing criterion."
     },
     {
-      "file": "10-too-small.jpg",
+      "file": "10-warm-portrait.jpg",
+      "scene": "Portrait of a smiling young woman outdoors in golden hour light. Strong warm orange tones, sharp, well-framed.",
+      "source": "https://www.pexels.com/photo/young-woman-smiling-in-golden-hour-portrait-outdoors-30674285/",
+      "expected": {
+        "brightness": "pass",
+        "contrast": "pass",
+        "color_palette": "pass",
+        "subject_framing": "pass",
+        "subject_sharpness": "pass",
+        "tone": "pass"
+      },
+      "notes": "Second all-pass baseline. Different scene from 01-coffee-shop; confirms consistent pass behavior across varied subjects."
+    },
+    {
+      "file": "11-too-small.jpg",
       "scene": "Synthesized 32×32 solid-color patch.",
       "source": "synthesized",
       "filter_result": "rejected",
@@ -138,7 +152,7 @@
       "notes": "Exercises the min_short_side rejection path in filter_photo (default threshold: 64 px). Should never reach any scoring criterion."
     },
     {
-      "file": "11-banner-strip.jpg",
+      "file": "12-banner-strip.jpg",
       "scene": "Synthesized 1200×150 two-block banner (aspect ratio 8:1).",
       "source": "synthesized",
       "filter_result": "rejected",

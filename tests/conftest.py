@@ -98,14 +98,21 @@ def img_tight_crop():
 
 
 @pytest.fixture(scope="session")
+def img_warm_portrait():
+    img = _load("10-warm-portrait.jpg")
+    yield img
+    img.close()
+
+
+@pytest.fixture(scope="session")
 def img_too_small():
-    img = _load("10-too-small.jpg")
+    img = _load("11-too-small.jpg")
     yield img
     img.close()
 
 
 @pytest.fixture(scope="session")
 def img_banner_strip():
-    img = _load("11-banner-strip.jpg")
+    img = _load("12-banner-strip.jpg")
     yield img
     img.close()

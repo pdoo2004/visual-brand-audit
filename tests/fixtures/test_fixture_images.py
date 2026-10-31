@@ -26,6 +26,10 @@ def test_image_loads_as_rgb(entry):
         assert rgb.size[0] > 0 and rgb.size[1] > 0
 
 
+def test_ten_scoreable_images():
+    assert len(_scoreable) == 10, f"Expected 10 scoreable images, got {len(_scoreable)}"
+
+
 def test_manifest_covers_all_criteria():
     required = {"brightness", "contrast", "color_palette", "subject_framing", "subject_sharpness", "tone"}
     for entry in _scoreable:
