@@ -417,3 +417,49 @@ def get_job_latest_feedback(
     for r in rows:
         latest.setdefault(r["image_id"], r)  # first row seen is the newest
     return latest
+
+
+# ---------------------------------------------------------------------------
+# Reviewer feedback (SCRUM-160 / task 7.8)
+# ---------------------------------------------------------------------------
+
+
+def image_exists(conn: sqlite3.Connection, image_id: str) -> bool:
+    return conn.execute("SELECT 1 FROM images WHERE image_id = ?", (image_id,)).fetchone() is not None
+
+
+def image_has_criterion(conn: sqlite3.Connection, image_id: str, criterion_id: str) -> bool:
+    """True when the image has a stored result for this criterion (feedback target check)."""
+    return (
+        conn.execute(
+            "SELECT 1 FROM criterion_scores WHERE image_id = ? AND criterion_id = ?",
+            (image_id, criterion_id),
+        ).fetchone()
+        is not None
+    )
+
+
+def insert_feedback(
+    conn: sqlite3.Connection,
+    *,
+    image_id: str,
+    verdict: str,
+    criterion_id: str | None = None,
+    comment: str | None = None,
+) -> sqlite3.Row:
+    """Append one feedback row and return it. Older rows are kept as history."""
+    feedback_id = str(uuid.uuid4())
+    conn.execute(
+        "INSERT INTO feedback (feedback_id, image_id, criterion_id, verdict, comment, created_at)"
+        " VALUES (?, ?, ?, ?, ?, ?)",
+        (feedback_id, image_id, criterion_id, verdict, comment, _now()),
+    )
+    return conn.execute("SELECT * FROM feedback WHERE feedback_id = ?", (feedback_id,)).fetchone()
+
+
+def list_feedback(conn: sqlite3.Connection, image_id: str) -> list[sqlite3.Row]:
+    """All feedback for one image, newest first (same ordering as the 'latest' query)."""
+    return conn.execute(
+        "SELECT * FROM feedback WHERE image_id = ? ORDER BY created_at DESC, feedback_id DESC",
+        (image_id,),
+    ).fetchall()
