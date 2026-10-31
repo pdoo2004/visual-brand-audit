@@ -1,0 +1,149 @@
+{
+  "purpose": "Representative image dataset for criterion-level scoring tests. Each image is chosen to predictably pass or fail one or more scoring criteria so tests can assert expected outcomes without running the full pipeline.",
+  "license": "Pexels license — free to use, no attribution required. Not a Capital One asset.",
+  "criteria": ["brightness", "contrast", "color_palette", "subject_framing", "subject_sharpness", "tone"],
+  "images": [
+    {
+      "file": "01-coffee-shop.jpg",
+      "scene": "Hands holding a latte while milk is poured. Warm light, close crop, one person.",
+      "source": "https://www.pexels.com/photo/302899/",
+      "expected": {
+        "brightness": "pass",
+        "contrast": "pass",
+        "color_palette": "pass",
+        "subject_framing": "pass",
+        "subject_sharpness": "pass",
+        "tone": "pass"
+      },
+      "notes": "Baseline on-brand image. Warm, well-exposed, human presence, clear subject."
+    },
+    {
+      "file": "02-glass-office.jpg",
+      "scene": "Bright open office. One person working at a wooden desk among monitors and plants.",
+      "source": "https://www.pexels.com/photo/380769/",
+      "expected": {
+        "brightness": "pass",
+        "contrast": "pass",
+        "color_palette": "borderline",
+        "subject_framing": "pass",
+        "subject_sharpness": "pass",
+        "tone": "borderline"
+      },
+      "notes": "Cooler palette and corporate setting. Color and tone criteria may flag depending on rubric thresholds."
+    },
+    {
+      "file": "03-neon-city.jpg",
+      "scene": "Night city seen through a dense blue neon mesh. No people.",
+      "source": "https://www.pexels.com/photo/373543/",
+      "expected": {
+        "brightness": "fail",
+        "contrast": "pass",
+        "color_palette": "fail",
+        "subject_framing": "fail",
+        "subject_sharpness": "pass",
+        "tone": "fail"
+      },
+      "notes": "Dark, neon-blue palette, no human subject. Tests darkness, off-palette color, no-person framing, and cold tone."
+    },
+    {
+      "file": "04-dim-portrait.jpg",
+      "scene": "Portrait of a woman in dim indoor light with heavy shadows.",
+      "source": "https://www.pexels.com/photo/portrait-of-a-woman-in-dim-light-4040828/",
+      "expected": {
+        "brightness": "fail",
+        "contrast": "pass",
+        "color_palette": "borderline",
+        "subject_framing": "pass",
+        "subject_sharpness": "pass",
+        "tone": "borderline"
+      },
+      "notes": "Primarily tests the underexposure / low luminance failure path for the brightness criterion."
+    },
+    {
+      "file": "05-overexposed-sunlight.jpg",
+      "scene": "Girl standing in direct harsh sunlight with blown-out highlights.",
+      "source": "https://www.pexels.com/photo/girl-standing-in-the-sunlight-10034275/",
+      "expected": {
+        "brightness": "fail",
+        "contrast": "fail",
+        "color_palette": "borderline",
+        "subject_framing": "pass",
+        "subject_sharpness": "pass",
+        "tone": "borderline"
+      },
+      "notes": "Primarily tests the overexposure failure path. Blown highlights also compress contrast."
+    },
+    {
+      "file": "06-foggy-low-contrast.jpg",
+      "scene": "Trees in heavy fog. Flat, hazy, almost no tonal range.",
+      "source": "https://www.pexels.com/photo/trees-during-foggy-weather-6871/",
+      "expected": {
+        "brightness": "pass",
+        "contrast": "fail",
+        "color_palette": "borderline",
+        "subject_framing": "fail",
+        "subject_sharpness": "pass",
+        "tone": "fail"
+      },
+      "notes": "Primarily tests the low-contrast failure path. Also fails framing (no identifiable subject) and tone (no people)."
+    },
+    {
+      "file": "07-cold-blue-office.jpg",
+      "scene": "Office room with a dominant blue wall and cool-toned lighting.",
+      "source": "https://www.pexels.com/photo/office-room-with-blue-wall-3958959/",
+      "expected": {
+        "brightness": "pass",
+        "contrast": "pass",
+        "color_palette": "fail",
+        "subject_framing": "borderline",
+        "subject_sharpness": "pass",
+        "tone": "borderline"
+      },
+      "notes": "Primarily tests the off-palette / cold-dominant-color failure path for the color palette criterion."
+    },
+    {
+      "file": "08-motion-blur.jpg",
+      "scene": "Artistic portrait of a woman with strong motion blur effect.",
+      "source": "https://www.pexels.com/photo/artistic-portrait-of-woman-with-motion-blur-effect-34609669/",
+      "expected": {
+        "brightness": "pass",
+        "contrast": "pass",
+        "color_palette": "pass",
+        "subject_framing": "pass",
+        "subject_sharpness": "fail",
+        "tone": "borderline"
+      },
+      "notes": "Primarily tests the blur / low-sharpness failure path for the subject sharpness criterion."
+    },
+    {
+      "file": "09-tight-crop.jpg",
+      "scene": "Extreme close-up half-face portrait; forehead and chin are cut off by the frame.",
+      "source": "https://www.pexels.com/photo/half-face-closeup-18336181/",
+      "expected": {
+        "brightness": "pass",
+        "contrast": "pass",
+        "color_palette": "pass",
+        "subject_framing": "fail",
+        "subject_sharpness": "pass",
+        "tone": "pass"
+      },
+      "notes": "Primarily tests the over-crop / poor-headroom failure path for the subject framing criterion."
+    },
+    {
+      "file": "10-too-small.jpg",
+      "scene": "Synthesized 32×32 solid-color patch.",
+      "source": "synthesized",
+      "filter_result": "rejected",
+      "expected": {},
+      "notes": "Exercises the min_short_side rejection path in filter_photo (default threshold: 64 px). Should never reach any scoring criterion."
+    },
+    {
+      "file": "11-banner-strip.jpg",
+      "scene": "Synthesized 1200×150 two-block banner (aspect ratio 8:1).",
+      "source": "synthesized",
+      "filter_result": "rejected",
+      "expected": {},
+      "notes": "Exercises the max_aspect_ratio rejection path in filter_photo (default limit: 5.0). Represents a web banner or letterbox graphic."
+    }
+  ]
+}
