@@ -11,7 +11,7 @@ from .cv.criterion_base import CriterionBase
 from .cv.registry import CV_REGISTRY
 
 DEFAULT_SCHEMA_PATH = (
-    Path(__file__).resolve().parents[3] / "config" / "brand_standards.schema.json"
+    Path(__file__).resolve().parents[2] / "config" / "brand_standards.schema.json"
 )
 
 
@@ -212,5 +212,5 @@ def load_cv_config(
         entry["settings"] = criteria[cid].settings
 
     # Return configuration data and ready-to-use CV objects separately.
-    # The caller's execution loop will pass an AnalysisInput to each object.
+    # The caller's execution loop will pass a CVInput to each object.
     return rubric, criteria
