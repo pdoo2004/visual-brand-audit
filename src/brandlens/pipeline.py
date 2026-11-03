@@ -19,47 +19,6 @@ from brandlens.scoring import score_image
 from brandlens.vlm.criteria import RECOMMENDED_TONES
 
 
-def _check_vlm_entry(entry):
-    """Reject configuration that the unchanged fixed-B1 client cannot honor.
-
-    This is an adapter compatibility check, not another JSON-schema load.
-    The existing client ignores request criteria when rendering its prompt.
-    Until that interface changes, accepting arbitrary configured tones here
-    would silently analyze different tones from those selected by the brand.
-    """
-    cid = entry["criterion_id"]
-    if cid != "tone_approachability":
-        raise ConfigurationError(f"Existing VLM client does not support criterion {cid}.")
-
-    params = entry["params"]
-    target = params.get("target_tone")
-    labels = params.get("allowed_labels")
-    if not isinstance(target, str) or not isinstance(labels, list) or any(
-        not isinstance(label, str) for label in labels
-    ):
-        raise ConfigurationError(
-            f"{cid}: target_tone and allowed_labels must match the fixed B1 tone list."
-        )
-    supported = {word.casefold() for word in RECOMMENDED_TONES}
-    target_words = {word.strip().casefold() for word in target.split(",")}
-    label_words = {word.strip().casefold() for word in labels}
-    if target_words != supported or label_words != supported or len(labels) != len(label_words):
-        raise ConfigurationError(
-            f"{cid}: configured tones differ from the existing VLM's fixed B1 tone list. "
-            "Align the configuration with the VLM owner; no tones were overridden."
-        )
-
-    for name, expected in (("fit_score_min", 1), ("fit_score_max", 5)):
-        value = params.get(name, expected)
-        if type(value) is not int or value != expected:
-            raise ConfigurationError(f"{cid}: existing VLM client requires {name}={expected}.")
-    unknown = set(entry["required_measurements"]) - {"label", "fit_score", "evidence"}
-    if unknown:
-        raise ConfigurationError(
-            f"{cid}: existing VLM client does not produce: {', '.join(sorted(unknown))}."
-        )
-
-
 def _make_cv_input(image, criteria, subject_detector, subject_selector):
     """Share one optional subject-selection decision across all CV criteria."""
     needs_subject = any(
@@ -81,6 +40,82 @@ def _make_cv_input(image, criteria, subject_detector, subject_selector):
         subject_region=decision.subject_region,
         subject_unavailable_reason=decision.reason,
     )
+    
+    
+def _check_vlm_entry(entry):
+    """Check that the brand configuration matches the current VLM behavior.
+
+    KRISHNA REVIEW:
+        The current client builds a fixed B1 prompt instead of using the
+        criterion details supplied in ModelRequest. Its validator also uses
+        RECOMMENDED_TONES rather than the brand's configured allowed_labels.
+
+        These checks prevent the pipeline from accepting configuration that
+        the current VLM would ignore.
+
+        Please confirm whether this fixed behavior is intentional. I believe 
+        that RECOMMENDED_TONES should be replaced with the brand's configured allowed_labels.
+        Also, allowed_labels vs target_tone differences should be clarified. 
+        JSON should control the target tones, connect those values to both
+        prompt generation and output validation, then revise these checks.
+    """
+    # The existing client evaluates B1 only. The brand JSON uses
+    # "tone_approachability" as the corresponding criterion ID.
+    cid = entry["criterion_id"]
+    if cid != "tone_approachability":
+        raise ConfigurationError(
+            f"Existing VLM client does not support criterion {cid}."
+        )
+
+    params = entry["params"]
+    target = params.get("target_tone")
+    labels = params.get("allowed_labels")
+
+    # Current configuration format: target_tone is comma-separated text,
+    # while allowed_labels is a list of permitted response labels.
+    if not isinstance(target, str) or not isinstance(labels, list) or any(
+        not isinstance(label, str) for label in labels
+    ):
+        raise ConfigurationError(
+            f"{cid}: target_tone and allowed_labels must match the fixed B1 tone list."
+        )
+
+    # Ignore capitalization, surrounding spaces, and ordering when comparing.
+    supported = {word.casefold() for word in RECOMMENDED_TONES}
+    target_words = {word.strip().casefold() for word in target.split(",")}
+    label_words = {word.strip().casefold() for word in labels}
+
+    # Require the COMPLETE fixed vocabulary, not merely a supported subset.
+    # Example: JSON selecting only "premium, minimalist" would otherwise pass,
+    # even though the current client still evaluates against all 13 tones.
+    # Also reject duplicate allowed labels after normalization.
+    #
+    # QUESTION:
+    # Should target_tone and allowed_labels represent the same vocabulary,
+    # or do they have distinct intended purposes?
+    if target_words != supported or label_words != supported or len(labels) != len(label_words):
+        raise ConfigurationError(
+            f"{cid}: configured tones differ from the existing VLM's fixed B1 tone list. "
+            "Align the configuration with the VLM owner; no tones were overridden."
+        )
+
+    # The current model-output validator requires integer scores from 1 to 5.
+    # Keep the configured scoring scale consistent with that output.
+    # Exact type checking also rejects booleans, which Python treats as integers.
+    for name, expected in (("fit_score_min", 1), ("fit_score_max", 5)):
+        value = params.get(name, expected)
+        if type(value) is not int or value != expected:
+            raise ConfigurationError(
+                f"{cid}: existing VLM client requires {name}={expected}."
+            )
+
+    # These are the fields available to scoring from the current judgment.
+    # The scorer reads the model's "tone_label" field as "label".
+    unknown = set(entry["required_measurements"]) - {"label", "fit_score", "evidence"}
+    if unknown:
+        raise ConfigurationError(
+            f"{cid}: existing VLM client does not produce: {', '.join(sorted(unknown))}."
+        )
 
 
 def _run_vlm(image, entries, client):
