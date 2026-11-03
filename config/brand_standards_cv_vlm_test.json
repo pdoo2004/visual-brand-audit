@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.1.0",
+  "rubric_id": "cv-vlm-integration-test",
+  "name": "CV/VLM integration fixture, not approved brand standards",
+  "flag_threshold": null,
+  "brand_palette": [
+    "#004977",
+    "#D03027",
+    "#FFFFFF"
+  ],
+  "criteria": [
+    {
+      "criterion_id": "exposure_brightness",
+      "name": "Exposure and brightness",
+      "definition": "The photograph is neither badly underexposed nor blown out, and the subject is readable.",
+      "evaluation_evidence": "Mean luminance, the share of near-black pixels, the share of near-white pixels, and a pass or fail against configured thresholds.",
+      "method": "cv",
+      "weight": null,
+      "params": {
+        "mean_luminance_min": 40,
+        "mean_luminance_max": 215,
+        "near_black_fraction_max": 0.2,
+        "near_white_fraction_max": 0.2,
+        "threshold_status": "placeholder"
+      },
+      "required_measurements": [
+        "mean_luminance",
+        "near_black_fraction",
+        "near_white_fraction"
+      ],
+      "implementation_id": "pillow_grayscale_brightness",
+      "settings": {
+        "near_black_max": 10,
+        "near_white_min": 245
+      }
+    },
+    {
+      "criterion_id": "contrast",
+      "name": "Contrast",
+      "definition": "Tonal separation is strong enough that the subject separates from the background. Both flat and harsh images should be flagged.",
+      "evaluation_evidence": "Spread of luminance values, a highlight and shadow check, and a pass or fail against configured thresholds.",
+      "method": "cv",
+      "weight": null,
+      "params": {
+        "luminance_std_min": 20,
+        "luminance_std_max": 90,
+        "p5_p95_range_min": 50,
+        "p5_p95_range_max": 240,
+        "near_black_fraction_max": 0.2,
+        "near_white_fraction_max": 0.2,
+        "threshold_status": "placeholder"
+      },
+      "required_measurements": [
+        "luminance_std",
+        "p5_p95_range",
+        "near_black_fraction",
+        "near_white_fraction"
+      ],
+      "implementation_id": "pillow_grayscale_contrast",
+      "settings": {
+        "near_black_max": 10,
+        "near_white_min": 245
+      }
+    },
+    {
+      "criterion_id": "tone_approachability",
+      "name": "Tone and approachability",
+      "definition": "The photograph fits the configured target tone, supported by something visible in the photograph.",
+      "evaluation_evidence": "A tone label, an integer fit score from 1 to 5, and one sentence citing visible evidence.",
+      "method": "vlm",
+      "weight": null,
+      "params": {
+        "target_tone": "authentic, aesthetic, carefree, bright, boho, natural, genuine, family, premium, minimalist, lifestyle, casual, candid",
+        "allowed_labels": [
+          "authentic",
+          "aesthetic",
+          "carefree",
+          "bright",
+          "boho",
+          "natural",
+          "genuine",
+          "family",
+          "premium",
+          "minimalist",
+          "lifestyle",
+          "casual",
+          "candid"
+        ],
+        "fit_score_min": 1,
+        "fit_score_max": 5,
+        "score_mapping": "linear_1_5_to_0_100",
+        "threshold_status": "placeholder"
+      },
+      "required_measurements": [
+        "label",
+        "fit_score",
+        "evidence"
+      ]
+    }
+  ],
+  "metadata": {
+    "status": "test",
+    "source_decision": "Subtask 1.2",
+    "interface_contract": "Subtask 1.4",
+    "weights_status": "unset",
+    "palette_status": "placeholder_not_brand_confirmed",
+    "tone_status": "test_only_existing_vlm_contract",
+    "on_unavailable": "unavailable_needs_review",
+    "scoring_ready": false,
+    "notes": [
+      "Test-only configuration for task 8.2; not approved brand standards.",
+      "Brightness/contrast thresholds are the existing provisional draft values.",
+      "Tone labels explicitly match the unchanged fixed-B1 VLM client.",
+      "The original brand_standards.json remains unchanged; its approachable/competent labels require VLM-owner alignment.",
+      "No scoring, prompt, validation, serving, or API implementation is changed by this fixture."
+    ]
+  }
+}
