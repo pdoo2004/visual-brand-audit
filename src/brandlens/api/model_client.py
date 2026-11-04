@@ -14,7 +14,6 @@ The client is synchronous because the job worker runs in a background thread.
 from __future__ import annotations
 
 import logging
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Self
@@ -24,6 +23,7 @@ import httpx
 from brandlens.api.config import Settings
 from brandlens.api.schemas.vlm import ModelRequest
 from brandlens.serving.contract import build_chat_request, parse_chat_response
+from brandlens.serving.prompt_template import render_prompt as _render_prompt
 from brandlens.vlm.validate import ParsedCriterion, validate_model_output
 
 log = logging.getLogger(__name__)
@@ -39,13 +39,7 @@ _JSON_ERRORS = frozenset(
 
 
 def _render_b1_prompt() -> str:
-    """Load the locked B1 prompt from the repo's vlm script."""
-    vlm_dir = Path(__file__).resolve().parents[3] / "vlm"
-    if str(vlm_dir) not in sys.path:
-        sys.path.insert(0, str(vlm_dir))
-    from prompt_template import render_prompt
-
-    return render_prompt(["B1"])
+    return _render_prompt(["B1"])
 
 
 class ModelFailure(Exception):

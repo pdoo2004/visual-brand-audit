@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+build/
+dist/
+
+# Tests / tooling
+.pytest_cache/
+.ruff_cache/
+.tox/
+tests/
+docs/
+examples/
+context/
+scratch/
+
+# Data (mounted as a volume at runtime)
+data/
+demo.db
+demo.db-shm
+demo.db-wal
+
+# VLM experiment files
+vlm/
+
+# Git / IDE
+.git/
+.github/
+.vscode/
+.claude/
+
+# Env files
+.env

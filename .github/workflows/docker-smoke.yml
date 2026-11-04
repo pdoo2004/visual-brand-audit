@@ -1,0 +1,39 @@
+name: docker-smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -t brandlens-api .
+
+      - name: Start API container
+        run: |
+          docker run -d --name api \
+            -p 8000:8000 \
+            -e BRANDLENS_MODEL_BASE_URL=http://localhost:11434/v1 \
+            brandlens-api
+
+      - name: Wait for startup
+        run: |
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8000/health && exit 0
+            sleep 2
+          done
+          echo "API did not become healthy in time" && docker logs api && exit 1
+
+      - name: Confirm health response
+        run: |
+          curl -sf http://localhost:8000/health | grep '"status":"ok"'
+
+      - name: Teardown
+        if: always()
+        run: docker rm -f api
