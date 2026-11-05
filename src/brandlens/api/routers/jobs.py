@@ -1,7 +1,8 @@
 """Upload submission and job-status polling endpoints.
 
-POST /api/v1/analyses/uploads  →  202 JobAccepted
-GET  /api/v1/jobs/{job_id}     →  200 JobStatus
+POST /api/v1/analyses/uploads      →  202 JobAccepted
+GET  /api/v1/jobs/{job_id}         →  200 JobStatus
+GET  /api/v1/jobs/{job_id}/results →  200 JobResults (409 while the job is still running)
 """
 
 from __future__ import annotations
@@ -26,12 +27,14 @@ from fastapi import (
 from pydantic import ValidationError
 
 from brandlens.api import db as database
+from brandlens.api.results import build_job_results
 from brandlens.api.schemas import (
     ErrorBody,
     ErrorCode,
     InputType,
     JobAccepted,
     JobProgress,
+    JobResults,
     JobState,
     JobStatus,
     RejectedUpload,
@@ -258,3 +261,44 @@ def get_job_status(job_id: str, request: Request) -> JobStatus:
         updated_at=datetime.fromisoformat(row["updated_at"]),
         error=error,
     )
+
+
+@router.get(
+    "/jobs/{job_id}/results",
+    response_model=JobResults,
+    summary="Get stored results for a finished job",
+    responses={
+        404: {"description": "Unknown job_id"},
+        409: {"description": "Job has not finished yet (JOB_NOT_FINISHED)"},
+    },
+)
+def get_job_results(job_id: str, request: Request) -> JobResults:
+    db_path: Path = request.app.state.db_path
+
+    try:
+        UUID(job_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=404,
+            detail=_error(ErrorCode.NOT_FOUND, f"Job {job_id!r} not found."),
+        )
+
+    with database.get_conn(db_path) as conn:
+        job = database.get_job(conn, job_id)
+        if job is None:
+            raise HTTPException(
+                status_code=404,
+                detail=_error(ErrorCode.NOT_FOUND, f"Job {job_id!r} not found."),
+            )
+        if not JobState(job["status"]).is_terminal:
+            raise HTTPException(
+                status_code=409,
+                detail=_error(
+                    ErrorCode.JOB_NOT_FINISHED,
+                    f"Job {job_id!r} is still {job['status']}; results are not ready.",
+                ),
+            )
+        results = build_job_results(conn, job_id)
+
+    assert results is not None  # the job row was just read in the same transaction
+    return results
