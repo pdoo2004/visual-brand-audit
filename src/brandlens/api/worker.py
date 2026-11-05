@@ -35,11 +35,9 @@ from PIL import Image
 
 from brandlens.api import db as database
 from brandlens.preprocessing.image_io import load_image
-from brandlens.preprocessing.photo_filter import FilterSettings, filter_photo
-from brandlens.preprocessing.standardization import (
-    StandardizationSettings,
-    standardize_image,
-)
+from brandlens.preprocessing.photo_filter import FilterSettings, filter_reject_reason
+from brandlens.preprocessing.preprocessor import preprocess_image
+from brandlens.preprocessing.standardization import StandardizationSettings
 
 log = logging.getLogger(__name__)
 
@@ -182,17 +180,19 @@ def _process_image(
         log.warning("job %s image %s: load failed: %s", job_id, image_id, exc)
         return "failed"
 
-    filtered = filter_photo(image, _FILTER)
-    if filtered is None:
-        _mark_filtered(db_path, image_id, _filter_reject_reason(image))
-        return "filtered_out"
-
+    # Filtering and standardizing live in brandlens.preprocessing; the worker
+    # only decides what to record. Analysis receives the standardized image and
+    # must not preprocess it again.
     try:
-        standardized = standardize_image(filtered, _STD)
+        standardized = preprocess_image(image, _FILTER, _STD)
     except Exception as exc:  # noqa: BLE001
-        _mark_failed(db_path, image_id, "STANDARDIZE_ERROR", str(exc))
-        log.warning("job %s image %s: standardization failed: %s", job_id, image_id, exc)
+        _mark_failed(db_path, image_id, "PREPROCESS_ERROR", str(exc))
+        log.warning("job %s image %s: preprocessing failed: %s", job_id, image_id, exc)
         return "failed"
+    if standardized is None:
+        reason = filter_reject_reason(image, _FILTER) or "unprocessable"
+        _mark_filtered(db_path, image_id, reason)
+        return "filtered_out"
 
     out_path = processed_dir / f"{image_id}.png"
     standardized.save(out_path, format="PNG")
@@ -244,16 +244,6 @@ def _load_reject_reason(message: str) -> str | None:
     if "format" in msg or "cannot identify" in msg:
         return "unsupported_format"
     return None
-
-
-def _filter_reject_reason(image) -> str:
-    w, h = image.size
-    short, long = min(w, h), max(w, h)
-    if short < _FILTER.min_short_side:
-        return "too_small"
-    if long / short > _FILTER.max_aspect_ratio:
-        return "extreme_aspect_ratio"
-    return "unprocessable"
 
 
 def _mark_filtered(db_path: Path, image_id: str, reason: str) -> None:

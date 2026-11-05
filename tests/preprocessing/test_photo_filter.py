@@ -2,7 +2,11 @@ import unittest
 
 from PIL import Image
 
-from brandlens.preprocessing.photo_filter import FilterSettings, filter_photo
+from brandlens.preprocessing.photo_filter import (
+    FilterSettings,
+    filter_photo,
+    filter_reject_reason,
+)
 
 
 class TestFilterSettings(unittest.TestCase):
@@ -126,3 +130,43 @@ class TestFilterPhoto(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFilterRejectReason(unittest.TestCase):
+    """Test the rejection reason, which must agree with filter_photo."""
+
+    def test_passing_image_has_no_reason(self):
+        with Image.new("RGB", (200, 100)) as image:
+            self.assertIsNone(filter_reject_reason(image))
+
+    def test_too_small(self):
+        with Image.new("RGB", (63, 200)) as image:
+            self.assertEqual(filter_reject_reason(image), "too_small")
+
+    def test_extreme_aspect_ratio(self):
+        with Image.new("RGB", (501, 100)) as image:
+            self.assertEqual(filter_reject_reason(image), "extreme_aspect_ratio")
+
+    def test_exact_limits_pass(self):
+        with Image.new("RGB", (320, 64)) as image:
+            self.assertIsNone(filter_reject_reason(image))
+
+    def test_custom_settings_are_used(self):
+        settings = FilterSettings(min_short_side=100, max_aspect_ratio=2.0)
+        with Image.new("RGB", (150, 80)) as small, Image.new("RGB", (500, 120)) as wide:
+            self.assertEqual(filter_reject_reason(small, settings), "too_small")
+            self.assertEqual(filter_reject_reason(wide, settings), "extreme_aspect_ratio")
+
+    def test_agrees_with_filter_photo(self):
+        for size in ((200, 100), (63, 200), (501, 100), (64, 64), (1000, 10)):
+            with self.subTest(size=size):
+                with Image.new("RGB", size) as image:
+                    passed = filter_photo(image) is not None
+                    self.assertEqual(passed, filter_reject_reason(image) is None)
+
+    def test_invalid_inputs_raise_like_filter_photo(self):
+        with self.assertRaises(TypeError):
+            filter_reject_reason("not an image")
+        with Image.new("RGB", (100, 100)) as image:
+            with self.assertRaises(TypeError):
+                filter_reject_reason(image, settings="bad")

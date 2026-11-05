@@ -247,3 +247,66 @@ def test_upload_of_several_images_end_to_end(tmp_path: Path):
         results = client.get(f"/api/v1/jobs/{job_id}/results").json()
         assert len(results["images"]) == 4
         assert {i["status"] for i in results["images"]} == {"scored"}
+
+
+def test_worker_preprocesses_through_the_shared_preprocessor(env, monkeypatch):
+    """Filtering/standardizing is done once per image, by preprocess_image."""
+    calls = []
+    real = worker.preprocess_image
+
+    def counting(image, *args, **kwargs):
+        calls.append(image.size)
+        return real(image, *args, **kwargs)
+
+    monkeypatch.setattr(worker, "preprocess_image", counting)
+    job_id, records = _make_job(env, [_png(), _png(120, 90)])
+    _run(env, job_id, records, analyze=_scored(80.0))
+
+    assert len(calls) == 2
+    assert [i.status for i in _results(env, job_id).images] == ["scored", "scored"]
+
+
+def test_analysis_receives_the_standardized_image_once(env):
+    """The image handed to analysis is already standardized (RGB, size-capped)."""
+    seen = []
+
+    def analyze(image, criterion_ids):
+        seen.append((image.mode, image.size))
+        return ImageAnalysis(status="scored", overall_score=50.0, flagged=False, criteria=[])
+
+    job_id, records = _make_job(env, [_png(4000, 3000)])
+    _run(env, job_id, records, analyze=analyze)
+
+    assert len(seen) == 1
+    mode, (w, h) = seen[0]
+    assert mode == "RGB" and max(w, h) <= 2048
+
+
+def test_filter_reasons_come_from_the_shared_filter(env):
+    job_id, records = _make_job(env, [_png(40, 40), _png(600, 100), _png(100, 100)])
+    _run(env, job_id, records, analyze=_scored(70.0))
+    images = _results(env, job_id).images
+    assert [i.status for i in images] == ["filtered_out", "filtered_out", "scored"]
+    assert images[0].reject_reason == "too_small"
+    assert images[1].reject_reason == "extreme_aspect_ratio"
+
+
+def test_preprocessing_error_fails_only_that_image(env, monkeypatch):
+    real = worker.preprocess_image
+    state = {"n": 0}
+
+    def flaky(image, *args, **kwargs):
+        state["n"] += 1
+        if state["n"] == 1:
+            raise ValueError("boom")
+        return real(image, *args, **kwargs)
+
+    monkeypatch.setattr(worker, "preprocess_image", flaky)
+    job_id, records = _make_job(env, [_png(), _png()])
+    _run(env, job_id, records, analyze=_scored(60.0))
+
+    with database.get_conn(env["db"]) as conn:
+        rows = database.get_job_images(conn, job_id)
+    assert rows[0]["status"] == "failed" and rows[0]["error_code"] == "PREPROCESS_ERROR"
+    assert rows[1]["status"] == "scored"
+    assert _job_status(env, job_id) == "completed_with_errors"

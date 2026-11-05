@@ -32,20 +32,25 @@ class FilterSettings:
         if not isfinite(self.max_aspect_ratio) or self.max_aspect_ratio < 1:
             raise ValueError("max_aspect_ratio must be finite and at least 1.")
 
-def filter_photo(
+def filter_reject_reason(
     image: Image.Image,
     settings: FilterSettings | None = None,
-) -> Image.Image | None:
-    """Return the original image if it passes the filter, otherwise None.
+) -> str | None:
+    """Return why the filter rejects an image, or None if it passes.
 
-    Checks minimum side length and longest-to-shortest side ratio.
-    Does not modify the image or confirm that it is a photograph.
-    
+    This is the one place the filter thresholds are applied; filter_photo uses
+    it, so a caller that records a rejection reason cannot drift from the
+    filter's actual decision.
+
     Args:
         image (Image.Image): Input Pillow image. It is not modified.
         settings (FilterSettings | None): Filtering thresholds.
             If None, the default FilterSettings are used.
 
+    Returns:
+        str | None: "too_small" if the shorter side is below the minimum,
+        "extreme_aspect_ratio" if the longer-to-shorter ratio is above the
+        maximum, or None if the image passes.
     """
     if not isinstance(image, Image.Image):
         raise TypeError("image must be a Pillow Image. Image object.")
@@ -63,8 +68,29 @@ def filter_photo(
     if short_side <= 0:
         raise ValueError("Image dimensions must be positive.")
     if short_side < settings.min_short_side:
-        return None
+        return "too_small"
     if long_side / short_side > settings.max_aspect_ratio:
+        return "extreme_aspect_ratio"
+
+    return None
+
+
+def filter_photo(
+    image: Image.Image,
+    settings: FilterSettings | None = None,
+) -> Image.Image | None:
+    """Return the original image if it passes the filter, otherwise None.
+
+    Checks minimum side length and longest-to-shortest side ratio.
+    Does not modify the image or confirm that it is a photograph.
+    
+    Args:
+        image (Image.Image): Input Pillow image. It is not modified.
+        settings (FilterSettings | None): Filtering thresholds.
+            If None, the default FilterSettings are used.
+
+    """
+    if filter_reject_reason(image, settings) is not None:
         return None
 
     return image
