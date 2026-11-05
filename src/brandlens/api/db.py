@@ -7,12 +7,14 @@ built-in sqlite3 module. Every public function expects an open Connection
 
 from __future__ import annotations
 
+import json
 import sqlite3
 import uuid
-from collections.abc import Generator
+from collections.abc import Generator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 # Reference DDL from database-schema.md, adapted with IF NOT EXISTS guards.
 _DDL = """\
@@ -274,3 +276,121 @@ def query_job_progress(
            GROUP BY j.job_id""",
         (job_id,),
     ).fetchone()
+
+
+# ---------------------------------------------------------------------------
+# Result persistence (SCRUM-158 / task 7.7)
+# ---------------------------------------------------------------------------
+
+_CRITERION_COLUMNS = (
+    "criterion_id", "score", "weight", "source", "label",
+    "explanation", "evidence_json", "availability",
+)
+
+
+def _criterion_row(job_id: str, image_id: str, criterion: Mapping[str, Any], ts: str) -> tuple:
+    """Flatten one criterion mapping into the column order of `criterion_scores`."""
+    evidence = list(criterion.get("evidence") or [])
+    return (
+        image_id,
+        criterion["criterion_id"],
+        job_id,
+        criterion.get("score"),
+        criterion["weight"],
+        criterion["source"],
+        criterion.get("label"),
+        criterion.get("explanation"),
+        json.dumps(evidence),
+        criterion["availability"],
+        ts,
+        ts,
+    )
+
+
+def save_image_result(
+    conn: sqlite3.Connection,
+    image_id: str,
+    *,
+    status: str,
+    criteria: Sequence[Mapping[str, Any]] = (),
+    measurements: Mapping[str, Any] | None = None,
+    overall_score: float | None = None,
+    flagged: bool | int | None = None,
+    width: int | None = None,
+    height: int | None = None,
+    processed_path: str | None = None,
+    reject_reason: str | None = None,
+    error_code: str | None = None,
+    error_message: str | None = None,
+) -> None:
+    """Store one image's final outcome: the image row plus its criterion rows.
+
+    Runs inside the caller's transaction, so the image header and its criterion
+    rows are written together or not at all. Calling it again for the same image
+    replaces the earlier criterion rows (safe to retry). Each criterion mapping
+    needs ``criterion_id``, ``weight``, ``source`` and ``availability``; ``score``,
+    ``label``, ``explanation`` and ``evidence`` are optional. Raises ``LookupError``
+    if the image does not exist.
+    """
+    row = conn.execute("SELECT job_id FROM images WHERE image_id = ?", (image_id,)).fetchone()
+    if row is None:
+        raise LookupError(f"image {image_id!r} not found")
+    job_id = row["job_id"]
+    ts = _now()
+
+    conn.execute(
+        """UPDATE images
+           SET status = ?, width = ?, height = ?, processed_path = ?,
+               reject_reason = ?, measurements_json = ?, overall_score = ?,
+               flagged = ?, error_code = ?, error_message = ?, updated_at = ?
+           WHERE image_id = ?""",
+        (
+            status, width, height, processed_path, reject_reason,
+            json.dumps(measurements) if measurements is not None else None,
+            overall_score,
+            None if flagged is None else int(bool(flagged)),
+            error_code, error_message, ts, image_id,
+        ),
+    )
+    conn.execute("DELETE FROM criterion_scores WHERE image_id = ?", (image_id,))
+    conn.executemany(
+        "INSERT INTO criterion_scores (image_id, criterion_id, job_id, score, weight, source,"
+        " label, explanation, evidence_json, availability, created_at, updated_at)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [_criterion_row(job_id, image_id, c, ts) for c in criteria],
+    )
+
+
+def get_job(conn: sqlite3.Connection, job_id: str) -> sqlite3.Row | None:
+    """Return the job row (rubric, status, timestamps, error) or None if unknown."""
+    return conn.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,)).fetchone()
+
+
+def get_job_images(conn: sqlite3.Connection, job_id: str) -> list[sqlite3.Row]:
+    """All image rows for a job, in upload order."""
+    return conn.execute(
+        "SELECT * FROM images WHERE job_id = ? ORDER BY ordinal", (job_id,)
+    ).fetchall()
+
+
+def get_job_criterion_scores(
+    conn: sqlite3.Connection, job_id: str
+) -> dict[str, list[sqlite3.Row]]:
+    """Criterion rows for a whole job, grouped by image_id.
+
+    One query for the job (not one per image), ordered by the position the
+    criteria were selected in, so the results UI shows them in a stable order.
+    """
+    rows = conn.execute(
+        """SELECT cs.*
+           FROM criterion_scores AS cs
+           JOIN job_criteria AS jc
+             ON jc.job_id = cs.job_id AND jc.criterion_id = cs.criterion_id
+           WHERE cs.job_id = ?
+           ORDER BY cs.image_id, jc.position""",
+        (job_id,),
+    ).fetchall()
+    grouped: dict[str, list[sqlite3.Row]] = {}
+    for r in rows:
+        grouped.setdefault(r["image_id"], []).append(r)
+    return grouped
