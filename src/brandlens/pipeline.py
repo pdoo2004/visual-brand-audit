@@ -67,54 +67,28 @@ def _check_vlm_entry(entry):
             f"Existing VLM client does not support criterion {cid}."
         )
 
-    params = entry["params"]
-    target = params.get("target_tone")
-    labels = params.get("allowed_labels")
+    target = entry["settings"].get("target_tone")
 
-    # Current configuration format: target_tone is comma-separated text,
-    # while allowed_labels is a list of permitted response labels.
-    if not isinstance(target, str) or not isinstance(labels, list) or any(
-        not isinstance(label, str) for label in labels
-    ):
+    if not isinstance(target, str):
         raise ConfigurationError(
-            f"{cid}: target_tone and allowed_labels must match the fixed B1 tone list."
+            f"{cid}: settings.target_tone must be comma-separated text."
         )
 
-    # Ignore capitalization, surrounding spaces, and ordering when comparing.
-    supported = {word.casefold() for word in RECOMMENDED_TONES}
+    supported = {word.strip().casefold() for word in RECOMMENDED_TONES}
     target_words = {word.strip().casefold() for word in target.split(",")}
-    label_words = {word.strip().casefold() for word in labels}
 
-    # Require the COMPLETE fixed vocabulary, not merely a supported subset.
-    # Example: JSON selecting only "premium, minimalist" would otherwise pass,
-    # even though the current client still evaluates against all 13 tones.
-    # Also reject duplicate allowed labels after normalization.
-    #
-    # QUESTION:
-    # Should target_tone and allowed_labels represent the same vocabulary,
-    # or do they have distinct intended purposes?
-    if target_words != supported or label_words != supported or len(labels) != len(label_words):
+    if "" in target_words:
         raise ConfigurationError(
-            f"{cid}: configured tones differ from the existing VLM's fixed B1 tone list. "
-            "Align the configuration with the VLM owner; no tones were overridden."
+            f"{cid}: target_tone must contain at least one tone "
+            "and no empty comma-separated items."
         )
 
-    # The current model-output validator requires integer scores from 1 to 5.
-    # Keep the configured scoring scale consistent with that output.
-    # Exact type checking also rejects booleans, which Python treats as integers.
-    for name, expected in (("fit_score_min", 1), ("fit_score_max", 5)):
-        value = params.get(name, expected)
-        if type(value) is not int or value != expected:
-            raise ConfigurationError(
-                f"{cid}: existing VLM client requires {name}={expected}."
-            )
-
-    # These are the fields available to scoring from the current judgment.
-    # The scorer reads the model's "tone_label" field as "label".
-    unknown = set(entry["required_measurements"]) - {"label", "fit_score", "evidence"}
-    if unknown:
+    # Accept any nonempty subset of the recommended tones.
+    unsupported = target_words - supported
+    if unsupported:
         raise ConfigurationError(
-            f"{cid}: existing VLM client does not produce: {', '.join(sorted(unknown))}."
+            f"{cid}: unsupported target tones: "
+            f"{', '.join(sorted(unsupported))}."
         )
 
 
@@ -134,7 +108,7 @@ def _run_vlm(image, entries, client):
                     name=entry["name"],
                     definition=entry["definition"],
                     evaluation_evidence=entry["evaluation_evidence"],
-                    allowed_labels=entry["params"]["allowed_labels"],
+                    allowed_labels=RECOMMENDED_TONES,  # for now allowed_labels is recommended labels
                 )
             ],
         )
