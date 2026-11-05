@@ -203,6 +203,7 @@ async def submit_upload(
         image_records=image_records,
         db_path=db_path,
         processed_dir=processed_dir / job_id,
+        analyze=getattr(request.app.state, "analyzer", None),
     )
 
     log.info(
