@@ -21,6 +21,7 @@ from brandlens.api.config import Settings
 from brandlens.api.model_client import ModelClient, ModelFailure
 from brandlens.api.schemas.vlm import ModelCriterion, ModelRequest
 from brandlens.serving.models import MAX_TOKENS, TEMPERATURE
+from brandlens.vlm.criteria import RECOMMENDED_TONES
 
 RUBRIC = Path("config/brand_standards.json")
 
@@ -44,7 +45,7 @@ def request_() -> ModelRequest:
         criteria=[ModelCriterion(
             criterion_id=c["criterion_id"], name=c["name"], definition=c["definition"],
             evaluation_evidence=c["evaluation_evidence"],
-            allowed_labels=c["params"]["allowed_labels"],
+            allowed_labels=list(RECOMMENDED_TONES),
         )],
     )
 

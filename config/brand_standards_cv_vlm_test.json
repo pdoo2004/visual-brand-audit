@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.1.0",
+  "rubric_id": "cv-vlm-integration-test",
+  "name": "CV/VLM integration fixture, configured demonstration",
+  "flag_threshold": 60,
+  "brand_palette": [
+    "#004977",
+    "#D03027",
+    "#FFFFFF"
+  ],
+  "criteria": [
+    {
+      "name": "Exposure and brightness",
+      "criterion_id": "exposure_brightness",
+      "implementation_id": "pillow_grayscale_brightness",
+      "definition": "The photograph is neither badly underexposed nor blown out, and the subject is readable.",
+      "evaluation_evidence": "Mean luminance, the share of near-black pixels, the share of near-white pixels, and a pass or fail against configured thresholds.",
+      "method": "cv",
+      "weight": 0.3,
+      "settings": {
+        "near_black_max": 10,
+        "near_white_min": 245
+      },
+      "required_measurements": [
+        "mean_luminance",
+        "near_black_fraction",
+        "near_white_fraction"
+      ],
+      "params": {
+        "mean_luminance_min": 40,
+        "mean_luminance_max": 215,
+        "near_black_fraction_max": 0.2,
+        "near_white_fraction_max": 0.2,
+        "threshold_status": "configured_demo_not_calibrated"
+      }
+    },
+    {
+      "name": "Contrast",
+      "criterion_id": "contrast",
+      "implementation_id": "pillow_grayscale_contrast",
+      "definition": "Tonal separation is strong enough that the subject separates from the background. Both flat and harsh images should be flagged.",
+      "evaluation_evidence": "Spread of luminance values, a highlight and shadow check, and a pass or fail against configured thresholds.",
+      "method": "cv",
+      "weight": 0.3,
+      "settings": {
+        "near_black_max": 10,
+        "near_white_min": 245
+      },
+      "required_measurements": [
+        "luminance_std",
+        "p5_p95_range",
+        "near_black_fraction",
+        "near_white_fraction"
+      ],
+      "params": {
+        "luminance_std_min": 20,
+        "luminance_std_max": 90,
+        "p5_p95_range_min": 50,
+        "p5_p95_range_max": 240,
+        "near_black_fraction_max": 0.2,
+        "near_white_fraction_max": 0.2,
+        "threshold_status": "configured_demo_not_calibrated"
+      }
+    },
+    {
+      "name": "Tone and approachability",
+      "criterion_id": "tone_approachability",
+      "definition": "The photograph fits the configured target tone, supported by something visible in the photograph.",
+      "evaluation_evidence": "A tone label, an integer fit score from 1 to 5, and one sentence citing visible evidence.",
+      "method": "vlm",
+      "weight": 0.4,
+      "settings": {
+        "target_tone": "authentic, aesthetic"
+      },
+      "required_measurements": [
+        "fit_score"
+      ],
+      "params": {
+        "fit_score_min": 1,
+        "fit_score_max": 5,
+        "score_mapping": "linear_1_5_to_0_100",
+        "threshold_status": "configured_demo_not_calibrated"
+      }
+    }
+  ],
+  "metadata": {
+    "status": "configured_demo",
+    "source_decision": "Subtask 1.2",
+    "interface_contract": "Subtask 1.4",
+    "weights_status": "explicit_normalized_demo",
+    "palette_status": "example_colors_not_brand_approved",
+    "tone_status": "configured_target_pending_vlm_connection",
+    "on_unavailable": "unavailable_needs_review",
+    "scoring_ready": false,
+    "notes": [
+      "All thresholds and weights have explicit demonstration values. They are not calibrated or approved brand standards.",
+      "settings configure analysis; params configure scoring. CV implementation and measurement names remain native to the registry.",
+      "Relative criterion priorities are preserved from the six-criterion rubric and normalized across the selected subset.",
+      "Overall scores strictly below 60 are flagged. Unavailable criteria remain explicit; available weights are renormalized by the scorer.",
+      "Target tone lives only under settings.target_tone. allowed_labels and target_tone are not duplicated under params.",
+      "The current pipeline still reads tone fields from params and the current client uses fixed B1 tones. VLM-owner integration must honor settings.target_tone before this revised VLM configuration runs through score_photo.",
+      "required_measurements lists fit_score as the required measurement. Current scoring still reads label and visible evidence from the complete VLM judgment."
+    ],
+    "flag_threshold_status": "configured_demo_not_calibrated"
+  }
+}
