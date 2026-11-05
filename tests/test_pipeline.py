@@ -35,7 +35,7 @@ def test_standardized_selection_skips_unselected_components_and_preserves_image(
     image = Image.new("RGB", (100, 100))
     before = image.tobytes()
     try:
-        scored, cv, vlm = pipeline.score_standardized(
+        scored, cv, vlm = pipeline.score_standardized_image(
             image, configuration, criterion_ids=["brightness"], subject_detector=detector,
         )
         assert scored is scoring.return_value
@@ -59,7 +59,7 @@ def test_vlm_only_does_not_run_cv(components):
     client = Mock()
     image = Image.new("RGB", (100, 100))
     try:
-        _, cv, _ = pipeline.score_standardized(
+        _, cv, _ = pipeline.score_standardized_image(
             image, configuration, client, criterion_ids=["tone_approachability"],
         )
         assert cv == {}
@@ -75,7 +75,7 @@ def test_vlm_only_does_not_run_cv(components):
 def test_invalid_selection_stops_components(components, selection):
     configuration, scoring, model_run, preprocessing = components
     with pytest.raises((TypeError, ValueError)):
-        pipeline.score_standardized(None, configuration, criterion_ids=selection)
+        pipeline.score_standardized_image(None, configuration, criterion_ids=selection)
     scoring.assert_not_called()
     model_run.assert_not_called()
     preprocessing.assert_not_called()
@@ -86,7 +86,7 @@ def test_non_rgb_input_is_rejected_without_conversion(components):
     image = Image.new("L", (100, 100))
     try:
         with pytest.raises(ValueError, match="standardized"):
-            pipeline.score_standardized(image, configuration, criterion_ids=["brightness"])
+            pipeline.score_standardized_image(image, configuration, criterion_ids=["brightness"])
         assert image.getpixel((0, 0)) == 0
         preprocessing.assert_not_called()
         scoring.assert_not_called()
@@ -100,7 +100,7 @@ def test_standardized_failure_does_not_close_borrowed_image(components):
     image = Image.new("RGB", (100, 100))
     try:
         with pytest.raises(RuntimeError, match="CV failed"):
-            pipeline.score_standardized(image, configuration, criterion_ids=["brightness"])
+            pipeline.score_standardized_image(image, configuration, criterion_ids=["brightness"])
         assert image.getpixel((0, 0)) == (0, 0, 0)
         scoring.assert_not_called()
     finally:
@@ -117,7 +117,7 @@ def test_raw_wrapper_preprocesses_once_and_closes_only_owned_image(components, m
     analysis = Mock(return_value=(object(), {}, {}))
     if fails:
         analysis.side_effect = RuntimeError("Analysis failed")
-    monkeypatch.setattr(pipeline, "score_standardized", analysis)
+    monkeypatch.setattr(pipeline, "score_standardized_image", analysis)
     try:
         if fails:
             with pytest.raises(RuntimeError, match="Analysis failed"):
@@ -140,7 +140,7 @@ def test_filtered_out_image_does_not_reach_analysis(components, monkeypatch):
     preprocessing.side_effect = None
     preprocessing.return_value = None
     analysis = Mock()
-    monkeypatch.setattr(pipeline, "score_standardized", analysis)
+    monkeypatch.setattr(pipeline, "score_standardized_image", analysis)
     with pytest.raises(ValueError, match="geometry"):
         pipeline.score_photo(None, configuration)
     analysis.assert_not_called()
