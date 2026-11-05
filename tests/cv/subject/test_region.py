@@ -3,7 +3,7 @@
 import unittest
 from dataclasses import FrozenInstanceError
 
-from brandlens.analysis.subject.region import SubjectRegion
+from brandlens.cv.subject.region import SubjectRegion
 
 
 def region(*coords, **kwargs):

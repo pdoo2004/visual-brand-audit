@@ -8,7 +8,7 @@ from .subject.region import SubjectRegion
 
 
 @dataclass(frozen=True)
-class AnalysisInput:
+class CVInput:
     """A borrowed, standardized RGB/sRGB image.
 
     Criteria must not modify or close the image.

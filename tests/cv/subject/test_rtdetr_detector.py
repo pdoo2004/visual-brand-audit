@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 from PIL import Image
 
-from brandlens.analysis.subject.rtdetr_detector import RTDetrSubjectDetector
+from brandlens.cv.subject.rtdetr_detector import RTDetrSubjectDetector
 
 
 class TestRTDetrSubjectDetector(unittest.TestCase):

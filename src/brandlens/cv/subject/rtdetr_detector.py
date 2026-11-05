@@ -5,7 +5,7 @@ from typing import Any
 
 from PIL import Image
 
-from ..analysis_input import AnalysisInput
+from ..cv_input import CVInput
 from .detector_base import DetectionResult, SubjectCandidate, SubjectDetectorBase
 from .region import validate_fraction
 
@@ -64,7 +64,7 @@ class RTDetrSubjectDetector(SubjectDetectorBase):
 
     def detect(self, image: Image.Image) -> DetectionResult:
         """Normalize absolute xyxy pipeline boxes using the input width/height."""
-        AnalysisInput(image)
+        CVInput(image)
         pipe = self._get_pipeline()
         # Isolate third-party preprocessing from the caller's borrowed image.
         with image.copy() as working:

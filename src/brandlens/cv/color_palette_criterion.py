@@ -12,8 +12,8 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-from .analysis_input import AnalysisInput
 from .criterion_base import CriterionBase
+from .cv_input import CVInput
 
 
 class ColorPaletteCriterion(CriterionBase):
@@ -35,19 +35,54 @@ class ColorPaletteCriterion(CriterionBase):
     """
 
     criterion_id = "color_palette_fit"
-    method_id = "lab_kmeans_weighted_nearest_delta_e_76"
+    implementation_id = "lab_kmeans_weighted_nearest_delta_e_76"
     method_version = "1"
 
     def __init__(self, settings: dict[str, Any] | None = None):
-        super().__init__(
-            settings,
-            defaults={
-                "n_clusters": 5,
-                "random_seed": 42,
-                "max_sample_pixels": 50_000,
-                "brand_palette": None,
+        super().__init__(settings, defaults=self.default_settings())
+
+    @classmethod
+    def settings_spec(cls) -> dict[str, Any]:
+        return {
+            "n_clusters": {
+                "type": "integer",
+                "default": 5,
+                "description": "Positive maximum color count.",
             },
-        )
+            "random_seed": {
+                "type": "integer",
+                "default": 42,
+                "description": "0 through 2**32 - 1.",
+            },
+            "max_sample_pixels": {
+                "type": "integer",
+                "default": 50000,
+                "nullable": True,
+                "description": "At least n_clusters; null fits all pixels.",
+            },
+            "brand_palette": {
+                "type": "array",
+                "default": None,
+                "nullable": True,
+                "description": "Nonempty #RRGGBB list; null leaves "
+                "distance unavailable.",
+            },
+        }
+
+    @classmethod
+    def measurement_specs(cls) -> dict[str, Any]:
+        return {
+            "dominant_colors": {
+                "type": "array",
+                "unit": "RGB_0_255_hex_CIELAB_D65_proportion_0_1",
+                "description": "Each color contains rgb, hex, lab, and proportion.",
+            },
+            "palette_distance": {
+                "type": "number",
+                "unit": "delta_e_76",
+                "nullable": True,
+            },
+        }
 
     def _validate_settings(self, settings: dict[str, Any]) -> None:
         for name in ("n_clusters", "random_seed"):
@@ -170,7 +205,7 @@ class ColorPaletteCriterion(CriterionBase):
         )
         return float(np.dot(weights, distances.min(axis=1)))
 
-    def analyze(self, data: AnalysisInput) -> dict[str, Any]:
+    def analyze(self, data: CVInput) -> dict[str, Any]:
         """Return dominant_colors and palette_distance in the shared envelope.
 
         Each color contains rgb, hex, lab and proportion. Colors are sorted by
@@ -182,10 +217,10 @@ class ColorPaletteCriterion(CriterionBase):
         and use unavailable_needs_review with a reason. Invalid inputs raise
         TypeError/ValueError. Never modifies or closes the input image.
         """
-        if not isinstance(data, AnalysisInput):
+        if not isinstance(data, CVInput):
             raise TypeError("data must be an AnalysisInput object.")
         # Revalidate because a borrowed Pillow image remains mutable.
-        AnalysisInput(data.image)
+        CVInput(data.image)
         pixels = np.array(data.image, dtype=np.uint8).reshape(-1, 3)
         colors = self._extract_colors(pixels)
         has_palette = self._settings["brand_palette"] is not None
@@ -195,10 +230,6 @@ class ColorPaletteCriterion(CriterionBase):
                 "palette_distance": self._palette_distance(colors)
                 if has_palette
                 else None,
-            },
-            units={
-                "dominant_colors": "RGB_0_255_hex_CIELAB_D65_proportion_0_1",
-                "palette_distance": "delta_e_76",
             },
             status="available" if has_palette else "unavailable_needs_review",
             reasons=[]

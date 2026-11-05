@@ -1,4 +1,4 @@
-"""Numerical and interface tests for ContrastCriterion."""
+"""Numerical and interface tests for BrightnessCriterion."""
 
 import json
 import math
@@ -6,29 +6,29 @@ import unittest
 
 from PIL import Image
 
-from brandlens.analysis.analysis_input import AnalysisInput
-from brandlens.analysis.contrast_criterion import ContrastCriterion
+from brandlens.cv.brightness_criterion import BrightnessCriterion
+from brandlens.cv.cv_input import CVInput
 
 
-class TestContrastCriterion(unittest.TestCase):
+class TestBrightnessCriterion(unittest.TestCase):
     def analyze_values(self, values, settings=None):
         with Image.new("RGB", (len(values), 1)) as image:
             image.putdata([(v, v, v) for v in values])
-            return ContrastCriterion(settings).analyze(AnalysisInput(image))
+            return BrightnessCriterion(settings).analyze(CVInput(image))
 
     def test_default_partial_and_empty_settings(self):
         expected = {"near_black_max": 10, "near_white_min": 245}
         for settings in (None, {}):
-            self.assertEqual(ContrastCriterion(settings).settings, expected)
+            self.assertEqual(BrightnessCriterion(settings).settings, expected)
         self.assertEqual(
-            ContrastCriterion({"near_black_max": 20}).settings,
+            BrightnessCriterion({"near_black_max": 20}).settings,
             {"near_black_max": 20, "near_white_min": 245},
         )
 
     def test_settings_are_isolated(self):
         supplied = {"near_black_max": 20}
-        a = ContrastCriterion(supplied)
-        b = ContrastCriterion()
+        a = BrightnessCriterion(supplied)
+        b = BrightnessCriterion()
         supplied["near_black_max"] = 200
         snapshot = a.settings
         snapshot["near_white_min"] = 1
@@ -38,7 +38,7 @@ class TestContrastCriterion(unittest.TestCase):
     def test_invalid_settings_rejected(self):
         for settings in ([], "settings", True, {1: 10}, {"near_black_max": True}):
             with self.subTest(settings=settings), self.assertRaises(TypeError):
-                ContrastCriterion(settings)
+                BrightnessCriterion(settings)
         for settings in (
             {"typo": 10},
             {"near_black_max": -1},
@@ -46,13 +46,13 @@ class TestContrastCriterion(unittest.TestCase):
             {"near_black_max": 245, "near_white_min": 245},
         ):
             with self.subTest(settings=settings), self.assertRaises(ValueError):
-                ContrastCriterion(settings)
+                BrightnessCriterion(settings)
 
     def test_requires_analysis_input(self):
         with Image.new("RGB", (1, 1)) as image:
             for value in (image, None, {}, "image"):
                 with self.subTest(value=type(value)), self.assertRaises(TypeError):
-                    ContrastCriterion().analyze(value)
+                    BrightnessCriterion().analyze(value)
 
     def test_result_contract(self):
         result = self.analyze_values([0, 255])
@@ -68,10 +68,10 @@ class TestContrastCriterion(unittest.TestCase):
                 "reasons",
             },
         )
-        self.assertEqual(result["criterion_id"], "contrast")
-        self.assertEqual(result["method"]["id"], "pillow_grayscale_contrast")
+        self.assertEqual(result["criterion_id"], "exposure_brightness")
+        self.assertEqual(result["method"]["id"], "pillow_grayscale_brightness")
         self.assertEqual(result["method"]["version"], "1")
-        self.assertEqual(result["method"]["parameters"], ContrastCriterion().settings)
+        self.assertEqual(result["method"]["parameters"], BrightnessCriterion().settings)
         self.assertEqual(result["schema_version"], "1.0.0")
         self.assertEqual(result["status"], "available")
         self.assertEqual(result["reasons"], [])
@@ -103,8 +103,8 @@ class TestContrastCriterion(unittest.TestCase):
         with Image.new("RGB", (3, 2), (20, 30, 40)) as image:
             image.info["example"] = "keep"
             before = image.tobytes()
-            criterion = ContrastCriterion()
-            data = AnalysisInput(image)
+            criterion = BrightnessCriterion()
+            data = CVInput(image)
             first = criterion.analyze(data)
             second = criterion.analyze(data)
             self.assertEqual(first, second)
@@ -114,23 +114,22 @@ class TestContrastCriterion(unittest.TestCase):
             self.assertEqual(image.tobytes(), before)
             self.assertEqual(image.info, {"example": "keep"})
 
-    def test_uniform_and_single_pixel_have_zero_spread(self):
-        for value in (0, 128, 255):
+    def test_uniform_and_single_pixel_images(self):
+        for value in (0, 10, 128, 245, 255):
             for count in (1, 7):
                 with self.subTest(value=value, count=count):
                     m = self.analyze_values([value] * count)["measurements"]
-                    self.assertEqual(m["luminance_std"], 0.0)
-                    self.assertEqual(m["p5_p95_range"], 0.0)
+                    self.assertEqual(m["mean_luminance"], float(value))
+                    self.assertEqual(m["near_black_fraction"], float(value <= 10))
+                    self.assertEqual(m["near_white_fraction"], float(value >= 245))
 
-    def test_population_std_and_linear_percentiles(self):
-        m = self.analyze_values([0, 10, 20, 30])["measurements"]
-        self.assertAlmostEqual(m["luminance_std"], math.sqrt(125))
-        self.assertAlmostEqual(m["p5_p95_range"], 27.0)
+    def test_black_white_mean(self):
+        self.assertEqual(
+            self.analyze_values([0, 255])["measurements"]["mean_luminance"], 127.5
+        )
 
-    def test_equal_black_white_maximum_std(self):
-        m = self.analyze_values([0, 255])["measurements"]
-        self.assertEqual(m["luminance_std"], 127.5)
-        self.assertEqual(m["p5_p95_range"], 229.5)
-        # Enough pixels at each extreme makes the percentile range 255.
-        m = self.analyze_values([0] * 10 + [255] * 10)["measurements"]
-        self.assertEqual(m["p5_p95_range"], 255.0)
+    def test_pillow_rounded_rgb_mean(self):
+        with Image.new("RGB", (3, 1)) as image:
+            image.putdata([(255, 0, 0), (0, 255, 0), (0, 0, 255)])
+            result = BrightnessCriterion().analyze(CVInput(image))
+            self.assertEqual(result["measurements"]["mean_luminance"], 85.0)

@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 from PIL import Image
 
-from brandlens.analysis._intensity import (
+from brandlens.cv._intensity import (
     get_intensity,
     measure_fractions,
     validate_cutoffs,
