@@ -124,69 +124,120 @@ def _run_vlm(image, entries, client):
     return results
 
 
+def score_standardized_image(
+    image,
+    configuration,
+    vlm_client=None,
+    *,
+    criterion_ids=None,
+    subject_detector=None,
+    subject_selector=None,
+):
+    """Analyze and score a borrowed, already-standardized RGB/sRGB image.
+
+    Args:
+        image: Preprocessed Pillow image owned by the caller. This function
+            does not filter, standardize, resize, save a persistent PNG, or
+            close it. RGB mode is checked; sRGB provenance is the caller's
+            responsibility.
+        configuration: Loaded (rubric, criteria) tuple from load_cv_config().
+        vlm_client: Initialized judge(request, image_path) client when needed.
+        criterion_ids: Selected rubric IDs, or None to run all. An explicit
+            selection must be nonempty, unique, and contain known IDs.
+        subject_detector: Optional initialized detector for selected criteria.
+        subject_selector: Optional selector; defaults to SingleSubjectSelector.
+
+    Returns:
+        tuple: (ImageScore, cv_results, vlm_results) for the selected criteria.
+
+    Raises:
+        ValueError: Selection is invalid, a required client is absent, or an
+            image/component result is incompatible.
+        Existing configuration, detection, inference and scoring errors propagate.
+
+    Notes:
+        Only selected components run, and scoring receives the same selection.
+        The VLM's temporary PNG is removed on failure or success. Its existing
+        path-based client still needs that temporary file; preprocessing is
+        not repeated. Model failures propagate under the existing policy.
+    """
+    rubric, criteria = configuration
+    by_id = {entry["criterion_id"]: entry for entry in rubric["criteria"]}
+    if isinstance(criterion_ids, (str, bytes)):
+        raise TypeError("criterion_ids must be a sequence of criterion IDs.")
+    selected_ids = list(by_id) if criterion_ids is None else list(criterion_ids)
+    if not selected_ids:
+        raise ValueError("criterion_ids must list at least one criterion.")
+    if len(set(selected_ids)) != len(selected_ids):
+        raise ValueError("criterion_ids must not repeat a criterion.")
+    unknown = set(selected_ids) - set(by_id)
+    if unknown:
+        raise ValueError(f"Unknown criterion ids: {', '.join(sorted(unknown))}")
+
+    selected_cv = {
+        cid: criteria[cid] for cid in selected_ids if by_id[cid]["method"] == "cv"
+    }
+    selected_vlm = [by_id[cid] for cid in selected_ids if by_id[cid]["method"] == "vlm"]
+    for entry in selected_vlm:
+        _check_vlm_entry(entry)
+    if selected_vlm and vlm_client is None:
+        raise ValueError("VLM client is required when the JSON selects a VLM criterion.")
+
+    data = _make_cv_input(image, selected_cv, subject_detector, subject_selector)
+    cv_results = {cid: criterion.analyze(data) for cid, criterion in selected_cv.items()}
+    vlm_results = _run_vlm(image, selected_vlm, vlm_client)
+    scored = score_image(
+        rubric, cv_results=cv_results, vlm_results=vlm_results,
+        criterion_ids=selected_ids,
+    )
+    return scored, cv_results, vlm_results
+
+
 def score_photo(
     image,
     configuration,
     vlm_client=None,
     *,
+    criterion_ids=None,
     subject_detector=None,
     subject_selector=None,
     filter_settings=None,
     standardization_settings=None,
 ):
-    """Preprocess and score one loaded image using its configured components.
+    """Preprocess a raw Pillow image, then call score_standardized_image().
 
     Args:
-        image: Caller-owned Pillow image, before preprocessing. Load it outside
-            this function so uploaded and crawled images can use the same path.
-        configuration: The (rubric, criteria) tuple from load_cv_config(). Load
-            and validate it once outside an image-processing loop.
-        vlm_client: An initialized client providing the existing
-            judge(ModelRequest, image_path) interface and returning ModelResult. Required
-            only when the JSON selects a VLM criterion; caller owns its lifecycle.
-        subject_detector: Optional initialized detector with detect(image).
-            It runs once when selected CV criteria need a subject region.
-        subject_selector: Optional existing selector with select(detections).
-            Defaults to SingleSubjectSelector when a detector is needed.
-        filter_settings: Optional existing preprocessing geometry settings.
-        standardization_settings: Optional existing RGB/sRGB/resize settings.
+        image: Caller-owned image loaded outside this function.
+        configuration: Loaded (rubric, criteria) tuple.
+        vlm_client: Initialized model client, required for selected VLM entries.
+        criterion_ids: Optional subset of rubric criterion IDs to execute.
+        subject_detector: Optional initialized subject detector.
+        subject_selector: Optional subject selector.
+        filter_settings: Optional geometry-filter settings.
+        standardization_settings: Optional RGB/sRGB/resize settings.
 
     Returns:
-        tuple: (ImageScore, cv_results, vlm_results). Scores and weights come
-            from the unchanged scorer; result dictionaries retain measurements
-            and model judgments keyed by configured criterion ID.
+        tuple: (ImageScore, cv_results, vlm_results).
 
     Raises:
-        ConfigurationError: The selected configuration is incompatible with
-            the current fixed-B1 VLM client.
-        ValueError: A required VLM client is missing, preprocessing excludes
-            the image, or a component returns incompatible adapter data.
-        Existing preprocessing, detection, inference and scoring errors propagate.
+        ValueError: Preprocessing excludes the image.
+        Exceptions from preprocessing or score_standardized() propagate.
 
     Notes:
-        No configuration file is reread, no model is created, and no input image
-        is closed or modified here. Only the new standardized image and temporary
-        PNG are owned by this function. CV and VLM receive the same pixels.
-        Missing/ambiguous subjects remain explicit unavailable CV results.
-        VLM timeout/malformed-output fallback belongs to task 4.7, so ModelFailure
-        propagates. This function does not implement API jobs or persistence.
+        The caller owns the original image and initialized components. Only
+        the newly preprocessed image is owned and closed by this wrapper.
+        Workers that already preprocess must call score_standardized() directly.
     """
-    rubric, criteria = configuration
-    entries = [entry for entry in rubric["criteria"] if entry["method"] == "vlm"]
-    for entry in entries:
-        _check_vlm_entry(entry)
-    if entries and vlm_client is None:
-        raise ValueError("VLM client is required when the JSON selects a VLM criterion.")
-
     standardized = preprocess_image(image, filter_settings, standardization_settings)
     if standardized is None:
         raise ValueError("Image excluded by the preprocessor's geometry filter.")
     try:
-        data = _make_cv_input(standardized, criteria, subject_detector, subject_selector)
-        cv_results = {cid: criterion.analyze(data) for cid, criterion in criteria.items()}
-        vlm_results = _run_vlm(standardized, entries, vlm_client)
+        return score_standardized_image(
+            standardized, configuration, vlm_client,
+            criterion_ids=criterion_ids,
+            subject_detector=subject_detector,
+            subject_selector=subject_selector,
+        )
     finally:
         standardized.close()
 
-    scored = score_image(rubric, cv_results=cv_results, vlm_results=vlm_results)
-    return scored, cv_results, vlm_results
