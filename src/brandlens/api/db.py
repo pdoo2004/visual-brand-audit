@@ -463,3 +463,24 @@ def list_feedback(conn: sqlite3.Connection, image_id: str) -> list[sqlite3.Row]:
         "SELECT * FROM feedback WHERE image_id = ? ORDER BY created_at DESC, feedback_id DESC",
         (image_id,),
     ).fetchall()
+
+
+# ---------------------------------------------------------------------------
+# Batch orchestration helpers (SCRUM-167 / task 8.3)
+# ---------------------------------------------------------------------------
+
+
+def get_job_criterion_ids(conn: sqlite3.Connection, job_id: str) -> list[str]:
+    """The criteria selected for a job, in the order they were selected."""
+    rows = conn.execute(
+        "SELECT criterion_id FROM job_criteria WHERE job_id = ? ORDER BY position", (job_id,)
+    ).fetchall()
+    return [r["criterion_id"] for r in rows]
+
+
+def get_finished_image_ids(conn: sqlite3.Connection, job_id: str) -> set[str]:
+    """Images that already have a final status (used to avoid processing an image twice)."""
+    rows = conn.execute(
+        "SELECT image_id FROM images WHERE job_id = ? AND status IS NOT NULL", (job_id,)
+    ).fetchall()
+    return {r["image_id"] for r in rows}

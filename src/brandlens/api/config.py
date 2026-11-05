@@ -36,6 +36,15 @@ class Settings:
     model_api_key: str | None = None
     model_timeout_s: float = 60.0
     model_max_retries: int = 1  # contract: one retry, then the tone criterion is unavailable
+    # Which analysis the worker runs on each image: "placeholder" (stub scores, no model
+    # needed; the default so the API starts anywhere) or "pipeline" (real CV + VLM scoring).
+    analyzer: str = "placeholder"
+
+    def __post_init__(self) -> None:
+        if self.analyzer not in ("placeholder", "pipeline"):
+            raise ValueError(
+                f"analyzer must be 'placeholder' or 'pipeline', got {self.analyzer!r}"
+            )
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -58,4 +67,5 @@ class Settings:
             model_max_retries=int(
                 os.getenv("BRANDLENS_MODEL_MAX_RETRIES", str(cls.model_max_retries))
             ),
+            analyzer=os.getenv("BRANDLENS_ANALYZER", cls.analyzer).strip().lower(),
         )
