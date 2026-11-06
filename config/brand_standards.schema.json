@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "1.0.0"
+      "const": "1.1.0"
     },
     "rubric_id": {
       "type": "string",
@@ -25,7 +25,10 @@
       "minLength": 1
     },
     "flag_threshold": {
-      "type": ["number", "null"],
+      "type": [
+        "number",
+        "null"
+      ],
       "minimum": 0,
       "maximum": 100
     },
@@ -136,10 +139,16 @@
         },
         "method": {
           "type": "string",
-          "enum": ["cv", "vlm"]
+          "enum": [
+            "cv",
+            "vlm"
+          ]
         },
         "weight": {
-          "type": ["number", "null"],
+          "type": [
+            "number",
+            "null"
+          ],
           "minimum": 0,
           "maximum": 1
         },
@@ -154,6 +163,127 @@
             "type": "string",
             "minLength": 1
           }
+        },
+        "implementation_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "settings": {
+          "type": "object",
+          "description": "Analyzer settings: CV measurement options or VLM analysis options. CV implementation-specific settings are validated through the registry.",
+          "additionalProperties": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "cv"
+              }
+            },
+            "required": [
+              "method"
+            ]
+          },
+          "then": {
+            "required": [
+              "implementation_id",
+              "settings"
+            ]
+          },
+          "else": {
+            "required": [
+              "settings"
+            ],
+            "properties": {
+              "implementation_id": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "vlm"
+              },
+              "criterion_id": {
+                "const": "tone_approachability"
+              }
+            },
+            "required": [
+              "method",
+              "criterion_id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "settings": {
+                "$ref": "#/$defs/toneSettings"
+              },
+              "params": {
+                "$ref": "#/$defs/toneParams"
+              },
+              "required_measurements": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "fit_score",
+                    "label",
+                    "evidence"
+                  ]
+                },
+                "contains": {
+                  "const": "fit_score"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "toneSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_tone"
+      ],
+      "properties": {
+        "target_tone": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Desired tone description supplied to the VLM, for example approachable, competent. The VLM client must use this setting when constructing the prompt."
+        }
+      }
+    },
+    "toneParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fit_score_min",
+        "fit_score_max",
+        "threshold_status"
+      ],
+      "properties": {
+        "fit_score_min": {
+          "type": "integer",
+          "const": 1
+        },
+        "fit_score_max": {
+          "type": "integer",
+          "const": 5
+        },
+        "threshold_status": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "score_mapping": {
+          "const": "linear_1_5_to_0_100",
+          "description": "Required by the current scoring implementation to map fit scores to 0-100."
         }
       }
     }

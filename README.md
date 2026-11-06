@@ -11,21 +11,21 @@ Users upload photos or submit a website URL. The system crawls the site for imag
 
 A scoring engine combines both layers against a configurable rubric and produces criterion-level scores with human-readable explanations. Results are displayed in a React dashboard where reviewers can mark agreement or disagreement with the AI's assessment.
 
-## Current status (Sprint 1)
-
-The preprocessing library and the VLM tone-scoring prototype are complete. The FastAPI backend, React UI, web crawler, CV analyzer, and scoring engine are in progress.
+## Current status
 
 | Component | Status |
 |---|---|
-| Image preprocessing (`brandlens`) | Built |
-| VLM tone-scoring prototype | Built |
-| Database schema | Designed (`docs/architecture/database-schema.md`) |
-| Interface contracts | Designed (`docs/architecture/`) |
-| FastAPI backend | Planned |
-| React/TypeScript UI | Planned |
-| Web crawler | Planned |
-| CV analyzer | Planned |
-| Scoring engine | Planned |
+| Image preprocessing | Built |
+| CV analyzer (brightness, contrast, color palette, framing, sharpness) | Built |
+| VLM model client (Ollama / vLLM) | Built |
+| Scoring engine | Built |
+| FastAPI backend | Built |
+| React/TypeScript UI (upload, job polling, results dashboard) | Built |
+| Docker Compose (frontend + API + GPU model service) | Built |
+| Test dataset (12 fixture images, pytest fixtures) | Built |
+| Worker pipeline integration (CV + VLM wired into job worker) | In progress |
+| Web crawler | In progress |
+| Rubric threshold calibration | In progress |
 
 ## Getting started
 
@@ -40,6 +40,14 @@ Run the test suite:
 ```bash
 pytest tests/
 ```
+
+Run only the fixture image smoke tests:
+
+```bash
+pytest tests/fixtures/ -v
+```
+
+The `tests/fixtures/images/` directory contains 12 representative images (10 scoreable + 2 filter-rejection cases) covering all six scoring criteria. See `tests/fixtures/images/manifest.json` for per-image source attribution and expected verdicts.
 
 ### VLM tone scoring (local)
 
@@ -76,6 +84,45 @@ python3 vlm/run_local.py --model qwen2.5vl:3b vlm/samples/01-coffee-shop.jpg
 
 See `vlm/OLLAMA.md` for setup details and `vlm/BENCHMARK.md` for the model selection rationale. Do not pull `gemma4:26b` or `gemma4:31b` on a laptop — those weights are for the GPU host.
 
+## Running with Docker
+
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+### 1. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` if needed. The defaults point the API at Ollama running on the host machine (`host.docker.internal:11434`). Pull the model first if you haven't:
+
+```bash
+ollama pull gemma4:e4b
+```
+
+### 2. Start the stack
+
+```bash
+docker compose up --build
+```
+
+- Frontend: http://localhost
+- API: http://localhost:8000
+- API docs: http://localhost:8000/docs
+
+### 3. GPU host (vLLM instead of Ollama)
+
+On a machine with a GPU and the NVIDIA Container Toolkit, the `gpu` profile starts a vLLM server instead:
+
+```bash
+HF_TOKEN=<your-token> \
+BRANDLENS_MODEL_BASE_URL=http://vlm:8000/v1 \
+BRANDLENS_MODEL_NAME=google/gemma-4-E4B-it \
+docker compose --profile gpu up --build
+```
+
+Gemma 4 E4B weights are gated on Hugging Face — `HF_TOKEN` is required on the first run. Weights are cached in the `hf-cache` Docker volume so subsequent starts skip the download.
+
 ## Architecture
 
 | Component | Role |
@@ -88,6 +135,16 @@ See `vlm/OLLAMA.md` for setup details and `vlm/BENCHMARK.md` for the model selec
 | Model Serving | vLLM over `POST /v1/chat/completions`. Default `google/gemma-4-E4B-it`; a larger Gemma is a `VLM_MODEL` change |
 | Scoring Engine | Combines CV + VLM output against JSON rubric |
 | Data Storage | SQLite for results + file cache for images |
+
+## CI
+
+Three GitHub Actions workflows run on every push and pull request to `main`:
+
+| Workflow | What it checks |
+|---|---|
+| `lint` | Ruff static analysis |
+| `tests` | Full pytest suite |
+| `docker-smoke` | Builds the API image and confirms `GET /health` returns `{"status":"ok"}` |
 
 ## Stack
 
