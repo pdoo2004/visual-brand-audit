@@ -10,7 +10,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from brandlens.crawler.discovery import DiscoveryResult, DiscoverySettings, discover_images
+from brandlens.crawler.discovery import (
+    DiscoveryResult,
+    DiscoverySettings,
+    discover_images,
+)
 from brandlens.crawler.downloader import DownloadFailure, download_images
 from brandlens.pipeline import score_photo
 from brandlens.preprocessing.image_io import load_image

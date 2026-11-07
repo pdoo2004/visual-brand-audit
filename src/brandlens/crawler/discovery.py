@@ -177,12 +177,11 @@ async def discover_images(
             ]
             for raw in candidates:
                 absolute = _absolute(raw, base)
-                if absolute and not urlsplit(absolute).path.lower().endswith(_SKIP):
-                    if absolute not in seen_images:
-                        seen_images.add(absolute)
-                        images.append(absolute)
-                        if len(images) >= settings.max_images:
-                            break
+                if absolute and not urlsplit(absolute).path.lower().endswith(_SKIP) and absolute not in seen_images:
+                    seen_images.add(absolute)
+                    images.append(absolute)
+                    if len(images) >= settings.max_images:
+                        break
             if len(images) >= settings.max_images:
                 break
             for raw in parsed.links if settings.max_pages > 1 else []:

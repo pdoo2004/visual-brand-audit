@@ -5,10 +5,10 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-import brandlens.crawler_pipeline as crawler_pipeline
+from brandlens import crawler_pipeline
 from brandlens.config import load_cv_config
 from brandlens.crawler.discovery import DiscoveryResult
-from brandlens.crawler.downloader import DownloadResult, DownloadedImage
+from brandlens.crawler.downloader import DownloadedImage, DownloadResult
 
 ROOT = Path(__file__).resolve().parents[1]
 RUBRIC = ROOT / "config" / "test_config" / "brand_standards_brightness_contrast_test.json"

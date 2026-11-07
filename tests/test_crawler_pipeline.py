@@ -1,15 +1,14 @@
 """Standalone crawler retains previews even when fetched files are temporary."""
 
 import asyncio
-from pathlib import Path
 from types import SimpleNamespace
 
-from PIL import Image
 import pytest
+from PIL import Image
 
-import brandlens.crawler_pipeline as crawler_pipeline
+from brandlens import crawler_pipeline
 from brandlens.crawler.discovery import DiscoveryResult
-from brandlens.crawler.downloader import DownloadResult, DownloadedImage
+from brandlens.crawler.downloader import DownloadedImage, DownloadResult
 
 
 def test_temporary_images_preview_scores_and_measurements(tmp_path, monkeypatch):
