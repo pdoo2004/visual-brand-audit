@@ -43,22 +43,7 @@ def _make_cv_input(image, criteria, subject_detector, subject_selector):
     
     
 def _check_vlm_entry(entry):
-    """Check that the brand configuration matches the current VLM behavior.
-
-    KRISHNA REVIEW:
-        The current client builds a fixed B1 prompt instead of using the
-        criterion details supplied in ModelRequest. Its validator also uses
-        RECOMMENDED_TONES rather than the brand's configured allowed_labels.
-
-        These checks prevent the pipeline from accepting configuration that
-        the current VLM would ignore.
-
-        Please confirm whether this fixed behavior is intentional. I believe 
-        that RECOMMENDED_TONES should be replaced with the brand's configured allowed_labels.
-        Also, allowed_labels vs target_tone differences should be clarified. 
-        JSON should control the target tones, connect those values to both
-        prompt generation and output validation, then revise these checks.
-    """
+    """Check that the brand configuration matches the current VLM behavior."""
     # The existing client evaluates B1 only. The brand JSON uses
     # "tone_approachability" as the corresponding criterion ID.
     cid = entry["criterion_id"]
