@@ -12,6 +12,7 @@ from brandlens.crawler.downloader import DownloadedImage, DownloadResult
 
 ROOT = Path(__file__).resolve().parents[1]
 RUBRIC = ROOT / "config" / "test_config" / "brand_standards_brightness_contrast_test.json"
+SCHEMA_PATH = ROOT / "config" / "brand_standards.schema.json"
 
 
 def test_actual_cv_scores_include_all_measurements(tmp_path, monkeypatch):
@@ -32,7 +33,7 @@ def test_actual_cv_scores_include_all_measurements(tmp_path, monkeypatch):
     monkeypatch.setattr(crawler_pipeline, "download_images", download)
 
     result = asyncio.run(crawler_pipeline.run_crawler_pipeline(
-        "https://site.example/gallery", load_cv_config(RUBRIC), save_images=False,
+        "https://site.example/gallery", load_cv_config(RUBRIC, schema_path=SCHEMA_PATH), save_images=False,
     ))
 
     assert len(result.images) == 1
