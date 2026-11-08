@@ -1,0 +1,414 @@
+{
+  "generated_at": "2026-11-08T01:58:38.706220+00:00",
+  "mode": "offline-mock",
+  "config": "config\\brand_standards.json",
+  "images": [
+    {
+      "file": "01-coffee-shop.jpg",
+      "expectation": {
+        "tone_fit": "high",
+        "note": "Warm lifestyle / candid coffee scene; should fit Capital One tone list."
+      },
+      "status": "partial",
+      "overall_score": 69.95030015296618,
+      "flagged": false,
+      "summary": "Overall score 70/100 (partial). Needs review: framing_subject_position, sharpness_subject_emphasis.",
+      "criteria": [
+        {
+          "criterion_id": "exposure_brightness",
+          "score": 100.0,
+          "weight": 0.2142857142857143,
+          "source": "cv",
+          "label": null,
+          "explanation": "exposure brightness: passed (mean_luminance 95.6864 >= mean_luminance_min 40).",
+          "evidence": [
+            "mean_luminance 95.6864 >= mean_luminance_min 40",
+            "mean_luminance 95.6864 <= mean_luminance_max 215",
+            "near_black_fraction 0 <= near_black_fraction_max 0.2",
+            "near_white_fraction 0.00572307 <= near_white_fraction_max 0.2"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "contrast",
+          "score": 100.0,
+          "weight": 0.2142857142857143,
+          "source": "cv",
+          "label": null,
+          "explanation": "contrast: passed (luminance_std 68.6466 >= luminance_std_min 20).",
+          "evidence": [
+            "luminance_std 68.6466 >= luminance_std_min 20",
+            "luminance_std 68.6466 <= luminance_std_max 90",
+            "p5_p95_range 194 >= p5_p95_range_min 50",
+            "p5_p95_range 194 <= p5_p95_range_max 240",
+            "near_black_fraction 0 <= near_black_fraction_max 0.2",
+            "near_white_fraction 0.00572307 <= near_white_fraction_max 0.2"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "color_palette_fit",
+          "score": 19.826050535381633,
+          "weight": 0.28571428571428575,
+          "source": "cv",
+          "label": null,
+          "explanation": "color palette fit: score 20/100 (palette_distance 32.0696 mapped by linear_distance_to_0_100 with palette_distance_max 40 -> 19.8261).",
+          "evidence": [
+            "palette_distance 32.0696 mapped by linear_distance_to_0_100 with palette_distance_max 40 -> 19.8261"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "framing_subject_position",
+          "score": null,
+          "weight": 0.0,
+          "source": "cv",
+          "label": null,
+          "explanation": "framing subject position: needs review \u2014 No subject detector was supplied.",
+          "evidence": [],
+          "availability": "unavailable_needs_review"
+        },
+        {
+          "criterion_id": "sharpness_subject_emphasis",
+          "score": null,
+          "weight": 0.0,
+          "source": "cv",
+          "label": null,
+          "explanation": "sharpness subject emphasis: needs review \u2014 No subject detector was supplied.",
+          "evidence": [],
+          "availability": "unavailable_needs_review"
+        },
+        {
+          "criterion_id": "tone_approachability",
+          "score": 75.0,
+          "weight": 0.28571428571428575,
+          "source": "vlm",
+          "label": "casual, lifestyle, candid",
+          "explanation": "tone approachability: score 75/100 (label: casual, lifestyle, candid). Evidence: Hands and a latte under warm indoor light..",
+          "evidence": [
+            "Hands and a latte under warm indoor light.",
+            "fit_score 4 mapped by linear_1_5_to_0_100 from fit_score_min 1..fit_score_max 5 -> 75"
+          ],
+          "availability": "ok"
+        }
+      ],
+      "vlm_raw_keys": [
+        "tone_approachability"
+      ],
+      "cv_keys": [
+        "color_palette_fit",
+        "contrast",
+        "exposure_brightness",
+        "framing_subject_position",
+        "sharpness_subject_emphasis"
+      ],
+      "mismatches": []
+    },
+    {
+      "file": "02-glass-office.jpg",
+      "expectation": {
+        "tone_fit": "medium",
+        "note": "Bright workplace; lifestyle/casual possible; less warm than coffee."
+      },
+      "status": "partial",
+      "overall_score": 41.27775683804913,
+      "flagged": true,
+      "summary": "Overall score 41/100 (partial). Needs review: framing_subject_position, sharpness_subject_emphasis. Flagged below the rubric threshold.",
+      "criteria": [
+        {
+          "criterion_id": "exposure_brightness",
+          "score": 100.0,
+          "weight": 0.2142857142857143,
+          "source": "cv",
+          "label": null,
+          "explanation": "exposure brightness: passed (mean_luminance 111.939 >= mean_luminance_min 40).",
+          "evidence": [
+            "mean_luminance 111.939 >= mean_luminance_min 40",
+            "mean_luminance 111.939 <= mean_luminance_max 215",
+            "near_black_fraction 0.0862117 <= near_black_fraction_max 0.2",
+            "near_white_fraction 0.138571 <= near_white_fraction_max 0.2"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "contrast",
+          "score": 0.0,
+          "weight": 0.2142857142857143,
+          "source": "cv",
+          "label": null,
+          "explanation": "contrast: failed \u2014 p5_p95_range 248 <= p5_p95_range_max 240.",
+          "evidence": [
+            "luminance_std 84.6329 >= luminance_std_min 20",
+            "luminance_std 84.6329 <= luminance_std_max 90",
+            "p5_p95_range 248 >= p5_p95_range_min 50",
+            "p5_p95_range 248 <= p5_p95_range_max 240",
+            "near_black_fraction 0.0862117 <= near_black_fraction_max 0.2",
+            "near_white_fraction 0.138571 <= near_white_fraction_max 0.2"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "color_palette_fit",
+          "score": 19.47214893317192,
+          "weight": 0.28571428571428575,
+          "source": "cv",
+          "label": null,
+          "explanation": "color palette fit: score 19/100 (palette_distance 32.2111 mapped by linear_distance_to_0_100 with palette_distance_max 40 -> 19.4721).",
+          "evidence": [
+            "palette_distance 32.2111 mapped by linear_distance_to_0_100 with palette_distance_max 40 -> 19.4721"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "framing_subject_position",
+          "score": null,
+          "weight": 0.0,
+          "source": "cv",
+          "label": null,
+          "explanation": "framing subject position: needs review \u2014 No subject detector was supplied.",
+          "evidence": [],
+          "availability": "unavailable_needs_review"
+        },
+        {
+          "criterion_id": "sharpness_subject_emphasis",
+          "score": null,
+          "weight": 0.0,
+          "source": "cv",
+          "label": null,
+          "explanation": "sharpness subject emphasis: needs review \u2014 No subject detector was supplied.",
+          "evidence": [],
+          "availability": "unavailable_needs_review"
+        },
+        {
+          "criterion_id": "tone_approachability",
+          "score": 50.0,
+          "weight": 0.28571428571428575,
+          "source": "vlm",
+          "label": "lifestyle, casual, natural",
+          "explanation": "tone approachability: score 50/100 (label: lifestyle, casual, natural). Evidence: A bright open office with one person at a desk..",
+          "evidence": [
+            "A bright open office with one person at a desk.",
+            "fit_score 3 mapped by linear_1_5_to_0_100 from fit_score_min 1..fit_score_max 5 -> 50"
+          ],
+          "availability": "ok"
+        }
+      ],
+      "vlm_raw_keys": [
+        "tone_approachability"
+      ],
+      "cv_keys": [
+        "color_palette_fit",
+        "contrast",
+        "exposure_brightness",
+        "framing_subject_position",
+        "sharpness_subject_emphasis"
+      ],
+      "mismatches": []
+    },
+    {
+      "file": "03-neon-city.jpg",
+      "expectation": {
+        "tone_fit": "low",
+        "note": "Technical night city, no people; should not read as approachable lifestyle."
+      },
+      "status": "partial",
+      "overall_score": 61.44967154039675,
+      "flagged": false,
+      "summary": "Overall score 61/100 (partial). Needs review: framing_subject_position, sharpness_subject_emphasis.",
+      "criteria": [
+        {
+          "criterion_id": "exposure_brightness",
+          "score": 100.0,
+          "weight": 0.2142857142857143,
+          "source": "cv",
+          "label": null,
+          "explanation": "exposure brightness: passed (mean_luminance 76.4099 >= mean_luminance_min 40).",
+          "evidence": [
+            "mean_luminance 76.4099 >= mean_luminance_min 40",
+            "mean_luminance 76.4099 <= mean_luminance_max 215",
+            "near_black_fraction 0.0792703 <= near_black_fraction_max 0.2",
+            "near_white_fraction 0.0185012 <= near_white_fraction_max 0.2"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "contrast",
+          "score": 100.0,
+          "weight": 0.2142857142857143,
+          "source": "cv",
+          "label": null,
+          "explanation": "contrast: passed (luminance_std 61.2162 >= luminance_std_min 20).",
+          "evidence": [
+            "luminance_std 61.2162 >= luminance_std_min 20",
+            "luminance_std 61.2162 <= luminance_std_max 90",
+            "p5_p95_range 207 >= p5_p95_range_min 50",
+            "p5_p95_range 207 <= p5_p95_range_max 240",
+            "near_black_fraction 0.0792703 <= near_black_fraction_max 0.2",
+            "near_white_fraction 0.0185012 <= near_white_fraction_max 0.2"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "color_palette_fit",
+          "score": 40.073850391388596,
+          "weight": 0.28571428571428575,
+          "source": "cv",
+          "label": null,
+          "explanation": "color palette fit: score 40/100 (palette_distance 23.9705 mapped by linear_distance_to_0_100 with palette_distance_max 40 -> 40.0739).",
+          "evidence": [
+            "palette_distance 23.9705 mapped by linear_distance_to_0_100 with palette_distance_max 40 -> 40.0739"
+          ],
+          "availability": "ok"
+        },
+        {
+          "criterion_id": "framing_subject_position",
+          "score": null,
+          "weight": 0.0,
+          "source": "cv",
+          "label": null,
+          "explanation": "framing subject position: needs review \u2014 No subject detector was supplied.",
+          "evidence": [],
+          "availability": "unavailable_needs_review"
+        },
+        {
+          "criterion_id": "sharpness_subject_emphasis",
+          "score": null,
+          "weight": 0.0,
+          "source": "cv",
+          "label": null,
+          "explanation": "sharpness subject emphasis: needs review \u2014 No subject detector was supplied.",
+          "evidence": [],
+          "availability": "unavailable_needs_review"
+        },
+        {
+          "criterion_id": "tone_approachability",
+          "score": 25.0,
+          "weight": 0.28571428571428575,
+          "source": "vlm",
+          "label": "aesthetic, bright",
+          "explanation": "tone approachability: score 25/100 (label: aesthetic, bright). Evidence: A night city seen through blue neon mesh with no people..",
+          "evidence": [
+            "A night city seen through blue neon mesh with no people.",
+            "fit_score 2 mapped by linear_1_5_to_0_100 from fit_score_min 1..fit_score_max 5 -> 25"
+          ],
+          "availability": "ok"
+        }
+      ],
+      "vlm_raw_keys": [
+        "tone_approachability"
+      ],
+      "cv_keys": [
+        "color_palette_fit",
+        "contrast",
+        "exposure_brightness",
+        "framing_subject_position",
+        "sharpness_subject_emphasis"
+      ],
+      "mismatches": []
+    }
+  ],
+  "fallback_coffee": {
+    "file": "01-coffee-shop.jpg",
+    "expectation": {
+      "tone_fit": "high",
+      "note": "Warm lifestyle / candid coffee scene; should fit Capital One tone list."
+    },
+    "status": "partial",
+    "overall_score": 67.93042021415265,
+    "flagged": false,
+    "summary": "Overall score 68/100 (partial). Needs review: framing_subject_position, sharpness_subject_emphasis, tone_approachability.",
+    "criteria": [
+      {
+        "criterion_id": "exposure_brightness",
+        "score": 100.0,
+        "weight": 0.3,
+        "source": "cv",
+        "label": null,
+        "explanation": "exposure brightness: passed (mean_luminance 95.6864 >= mean_luminance_min 40).",
+        "evidence": [
+          "mean_luminance 95.6864 >= mean_luminance_min 40",
+          "mean_luminance 95.6864 <= mean_luminance_max 215",
+          "near_black_fraction 0 <= near_black_fraction_max 0.2",
+          "near_white_fraction 0.00572307 <= near_white_fraction_max 0.2"
+        ],
+        "availability": "ok"
+      },
+      {
+        "criterion_id": "contrast",
+        "score": 100.0,
+        "weight": 0.3,
+        "source": "cv",
+        "label": null,
+        "explanation": "contrast: passed (luminance_std 68.6466 >= luminance_std_min 20).",
+        "evidence": [
+          "luminance_std 68.6466 >= luminance_std_min 20",
+          "luminance_std 68.6466 <= luminance_std_max 90",
+          "p5_p95_range 194 >= p5_p95_range_min 50",
+          "p5_p95_range 194 <= p5_p95_range_max 240",
+          "near_black_fraction 0 <= near_black_fraction_max 0.2",
+          "near_white_fraction 0.00572307 <= near_white_fraction_max 0.2"
+        ],
+        "availability": "ok"
+      },
+      {
+        "criterion_id": "color_palette_fit",
+        "score": 19.826050535381633,
+        "weight": 0.4,
+        "source": "cv",
+        "label": null,
+        "explanation": "color palette fit: score 20/100 (palette_distance 32.0696 mapped by linear_distance_to_0_100 with palette_distance_max 40 -> 19.8261).",
+        "evidence": [
+          "palette_distance 32.0696 mapped by linear_distance_to_0_100 with palette_distance_max 40 -> 19.8261"
+        ],
+        "availability": "ok"
+      },
+      {
+        "criterion_id": "framing_subject_position",
+        "score": null,
+        "weight": 0.0,
+        "source": "cv",
+        "label": null,
+        "explanation": "framing subject position: needs review \u2014 No subject detector was supplied.",
+        "evidence": [],
+        "availability": "unavailable_needs_review"
+      },
+      {
+        "criterion_id": "sharpness_subject_emphasis",
+        "score": null,
+        "weight": 0.0,
+        "source": "cv",
+        "label": null,
+        "explanation": "sharpness subject emphasis: needs review \u2014 No subject detector was supplied.",
+        "evidence": [],
+        "availability": "unavailable_needs_review"
+      },
+      {
+        "criterion_id": "tone_approachability",
+        "score": null,
+        "weight": 0.0,
+        "source": "vlm",
+        "label": null,
+        "explanation": "tone approachability: needs review \u2014 VLM timeout: request timed out",
+        "evidence": [],
+        "availability": "unavailable_needs_review"
+      }
+    ],
+    "vlm_raw_keys": [
+      "tone_approachability"
+    ],
+    "cv_keys": [
+      "color_palette_fit",
+      "contrast",
+      "exposure_brightness",
+      "framing_subject_position",
+      "sharpness_subject_emphasis"
+    ],
+    "mismatches": [
+      "tone unavailable (unavailable_needs_review): VLM timeout: request timed out"
+    ]
+  },
+  "fallback_note": "Forced ModelFailure on 01-coffee-shop.jpg \u2192 PASS: partial CV-only score with tone needs-review.",
+  "follow_ups": [
+    "No blocking mismatches in this run. Re-run with --live before midterm if Ollama/vLLM is up."
+  ]
+}
