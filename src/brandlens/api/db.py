@@ -478,9 +478,19 @@ def get_job_criterion_ids(conn: sqlite3.Connection, job_id: str) -> list[str]:
     return [r["criterion_id"] for r in rows]
 
 
+def get_job_image_statuses(conn: sqlite3.Connection, job_id: str) -> dict[str, str]:
+    """Final status of every image in the job that has one, whichever run stored it.
+
+    The job's overall status is derived from this, not from the images a single
+    run happened to process: a re-run skips images that already have a result.
+    """
+    rows = conn.execute(
+        "SELECT image_id, status FROM images WHERE job_id = ? AND status IS NOT NULL",
+        (job_id,),
+    ).fetchall()
+    return {r["image_id"]: r["status"] for r in rows}
+
+
 def get_finished_image_ids(conn: sqlite3.Connection, job_id: str) -> set[str]:
     """Images that already have a final status (used to avoid processing an image twice)."""
-    rows = conn.execute(
-        "SELECT image_id FROM images WHERE job_id = ? AND status IS NOT NULL", (job_id,)
-    ).fetchall()
-    return {r["image_id"] for r in rows}
+    return set(get_job_image_statuses(conn, job_id))

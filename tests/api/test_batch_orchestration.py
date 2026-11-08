@@ -310,3 +310,72 @@ def test_preprocessing_error_fails_only_that_image(env, monkeypatch):
     assert rows[0]["status"] == "failed" and rows[0]["error_code"] == "PREPROCESS_ERROR"
     assert rows[1]["status"] == "scored"
     assert _job_status(env, job_id) == "completed_with_errors"
+
+
+# --- the job status reflects every stored image, not only the ones processed this run ----
+
+
+def _partial(image, criterion_ids):
+    return ImageAnalysis(
+        status="partial", overall_score=55.0, flagged=False,
+        criteria=[
+            {"criterion_id": "exposure_brightness", "score": 55.0, "weight": 1.0,
+             "source": "cv", "availability": "ok"},
+            {"criterion_id": "contrast", "score": None, "weight": 0.0, "source": "vlm",
+             "availability": "unavailable_needs_review"},
+        ],
+    )
+
+
+def _boom(image, criterion_ids):
+    raise RuntimeError("model exploded")
+
+
+def test_rerun_keeps_completed_with_errors_when_an_image_failed(env):
+    job_id, records = _make_job(env, [_png(), _png()])
+    n = {"i": 0}
+
+    def analyze(image, criterion_ids):
+        n["i"] += 1
+        return _boom(image, criterion_ids) if n["i"] == 1 else _scored(70.0)(image, criterion_ids)
+
+    _run(env, job_id, records, analyze)
+    assert _job_status(env, job_id) == "completed_with_errors"
+
+    _run(env, job_id, records, analyze)  # every image already has a result: nothing reruns
+    assert n["i"] == 2
+    assert _job_status(env, job_id) == "completed_with_errors"
+
+
+def test_rerun_keeps_completed_with_errors_when_an_image_is_partial(env):
+    job_id, records = _make_job(env, [_png(), _png()])
+    n = {"i": 0}
+
+    def analyze(image, criterion_ids):
+        n["i"] += 1
+        return _partial(image, criterion_ids) if n["i"] == 1 else _scored(80.0)(image, criterion_ids)
+
+    _run(env, job_id, records, analyze)
+    _run(env, job_id, records, analyze)
+    assert [i.status for i in _results(env, job_id).images] == ["partial", "scored"]
+    assert _job_status(env, job_id) == "completed_with_errors"
+
+
+def test_earlier_failures_count_when_a_later_run_finishes_the_rest(env):
+    """A resumed job: image 0 failed in run 1; run 2 only processes image 1, which scores."""
+    job_id, records = _make_job(env, [_png(), _png()])
+
+    _run(env, job_id, records[:1], _boom)
+    assert _job_status(env, job_id) == "completed_with_errors"
+
+    _run(env, job_id, records, _scored(90.0))
+    assert [i.status for i in _results(env, job_id).images] == ["failed", "scored"]
+    assert _job_status(env, job_id) == "completed_with_errors"
+
+
+def test_rerun_of_a_clean_job_with_a_filtered_image_stays_completed(env):
+    job_id, records = _make_job(env, [_png(), _png(30, 30)])  # second is too small
+    _run(env, job_id, records, _scored(75.0))
+    _run(env, job_id, records, _scored(75.0))
+    assert [i.status for i in _results(env, job_id).images] == ["scored", "filtered_out"]
+    assert _job_status(env, job_id) == "completed"

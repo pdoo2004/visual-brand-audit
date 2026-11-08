@@ -131,12 +131,18 @@ def _run_batch(
             status = "failed"
         outcomes[image_id] = status
 
-    degraded = any(s in {"failed", "partial"} for s in outcomes.values())
-    final = "completed_with_errors" if degraded else "completed"
+    # Judge the whole job from every stored image status. Images finished in an earlier
+    # run were skipped above, so this run's own outcomes alone would hide their failures.
     with database.get_conn(db_path) as conn:
+        stored = database.get_job_image_statuses(conn, job_id)
+        degraded = any(s in {"failed", "partial"} for s in stored.values())
+        final = "completed_with_errors" if degraded else "completed"
         database.set_job_status(conn, job_id, final)
 
-    log.info("job %s → %s (%d image(s): %s)", job_id, final, len(outcomes), _tally(outcomes))
+    log.info(
+        "job %s → %s (%d processed now; all images: %s)",
+        job_id, final, len(outcomes), _tally(stored),
+    )
 
 
 class _Stage:
