@@ -19,13 +19,14 @@ from __future__ import annotations
 import logging
 import math
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import asdict, is_dataclass
+from dataclasses import asdict, is_dataclass, replace
 from typing import Any
 
 from PIL import Image
 
 from brandlens.api.worker import ImageAnalysis
 from brandlens.scoring.engine import CriterionScore, ImageScore
+from brandlens.scoring.explanations import explain_criterion
 
 log = logging.getLogger(__name__)
 
@@ -66,34 +67,21 @@ def to_image_analysis(
 def _criterion_mapping(criterion: CriterionScore) -> dict[str, Any]:
     """One CriterionScore -> the mapping ``db.save_image_result`` accepts."""
     available = criterion.availability == "ok" and criterion.score is not None
+    # The database requires availability "ok" to come with a score. If the scorer ever
+    # reports "ok" without one, explain it as needing review rather than fail the image.
+    explained = criterion if available else replace(
+        criterion, availability="unavailable_needs_review"
+    )
     return {
         "criterion_id": criterion.criterion_id,
         "score": float(criterion.score) if available else None,
         "weight": float(criterion.weight),
         "source": criterion.source,
         "label": criterion.label,
-        "explanation": _explanation(criterion, available),
+        "explanation": explain_criterion(explained),
         "evidence": [str(item) for item in criterion.evidence],
         "availability": "ok" if available else "unavailable_needs_review",
     }
-
-
-def _explanation(criterion: CriterionScore, available: bool) -> str:
-    """A short, plain statement for the reviewer.
-
-    This is a basic placeholder for the full natural-language explanations (the
-    explanation component, tasks 5.2 / 5.3). Observed evidence is stored
-    separately in ``evidence``.
-    """
-    reasons = " ".join(str(r) for r in criterion.reasons)
-    if not available:
-        return f"Needs human review. {reasons}".strip() if reasons else "Needs human review."
-    text = f"Scored {criterion.score:.0f}/100."
-    if criterion.label:
-        text += f" Label: {criterion.label}."
-    if reasons:
-        text += f" {reasons}"
-    return text
 
 
 def _measurements(
