@@ -29,7 +29,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.upload_dir = settings.upload_dir
         app.state.processed_dir = settings.processed_dir
         app.state.rubric_path = settings.rubric_path
-        yield
+        # None -> the worker's placeholder analysis. "pipeline" builds the real analyzer
+        # once (rubric + model client), so a bad configuration fails at startup.
+        analyzer = None
+        if settings.analyzer == "pipeline":
+            from brandlens.api.analysis import PipelineAnalyzer
+
+            analyzer = PipelineAnalyzer.from_settings(settings)
+        app.state.analyzer = analyzer
+        try:
+            yield
+        finally:
+            if analyzer is not None:
+                analyzer.close()
 
     app = FastAPI(
         title="BrandLens API",
