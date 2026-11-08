@@ -5,7 +5,6 @@ import unittest
 from brandlens.scoring import (
     CriterionScore,
     ImageScore,
-    attach_explanations,
     explain_criterion,
     explained_results,
     score_image,
@@ -14,18 +13,18 @@ from brandlens.scoring import (
 
 
 def _row(**kwargs):
-    defaults = dict(
-        criterion_id="exposure_brightness",
-        score=100.0,
-        weight=1.0,
-        configured_weight=1.0,
-        source="cv",
-        label=None,
-        evidence=("mean_luminance 128 >= mean_luminance_min 40",),
-        availability="ok",
-        rule_id="pass_fail_thresholds",
-        reasons=(),
-    )
+    defaults = {
+        "criterion_id": "exposure_brightness",
+        "score": 100.0,
+        "weight": 1.0,
+        "configured_weight": 1.0,
+        "source": "cv",
+        "label": None,
+        "evidence": ("mean_luminance 128 >= mean_luminance_min 40",),
+        "availability": "ok",
+        "rule_id": "pass_fail_thresholds",
+        "reasons": (),
+    }
     defaults.update(kwargs)
     return CriterionScore(**defaults)
 

@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from PIL import Image
@@ -25,11 +25,11 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from brandlens.api.model_client import ModelClient, ModelFailure  # noqa: E402
-from brandlens.config import load_cv_config  # noqa: E402
-from brandlens.pipeline import score_photo  # noqa: E402
-from brandlens.scoring import explained_results  # noqa: E402
-from brandlens.vlm.validate import ParsedCriterion  # noqa: E402
+from brandlens.api.model_client import ModelClient, ModelFailure
+from brandlens.config import load_cv_config
+from brandlens.pipeline import score_photo
+from brandlens.scoring import explained_results
+from brandlens.vlm.validate import ParsedCriterion
 
 SAMPLES = ROOT / "vlm" / "samples"
 CONFIG = ROOT / "config" / "brand_standards.json"
@@ -265,7 +265,7 @@ def main() -> int:
         follow_ups.append("No blocking mismatches in this run. Re-run with --live before midterm if Ollama/vLLM is up.")
 
     payload = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "mode": mode,
         "config": str(CONFIG.relative_to(ROOT)),
         "images": images,
