@@ -7,6 +7,7 @@ import pytest
 from PIL import Image
 
 from brandlens import pipeline
+from brandlens.api.model_client import ModelFailure
 from brandlens.logger import image_logging_context
 
 
@@ -177,3 +178,81 @@ def test_cv_stages_log_success_and_failure(components, caplog):
         assert "/secret/customer.jpg" not in caplog.text
     finally:
         image.close()
+def test_vlm_model_failure_becomes_unavailable_envelope(monkeypatch):
+    """SCRUM-139: timeout/malformed VLM must not crash; tone is needs-review."""
+    entry = {
+        "criterion_id": "tone_approachability",
+        "name": "Tone",
+        "definition": "Tone fit",
+        "evaluation_evidence": "visible mood",
+    }
+    client = Mock()
+    client.judge.side_effect = ModelFailure("timeout", "request timed out", attempts=2)
+    image = Image.new("RGB", (64, 64), color=(200, 180, 160))
+    try:
+        results = pipeline._run_vlm(image, [entry], client)
+    finally:
+        image.close()
+    envelope = results["tone_approachability"]
+    assert envelope["ok"] is False
+    assert any("timeout" in err.lower() for err in envelope["errors"])
+
+
+def test_score_image_partial_when_vlm_unavailable():
+    """CV still scores when the VLM envelope marks failure."""
+    from brandlens.scoring import score_image
+
+    rubric = {
+        "rubric_id": "t",
+        "flag_threshold": None,
+        "criteria": [
+            {
+                "criterion_id": "exposure_brightness",
+                "method": "cv",
+                "weight": 0.5,
+                "params": {
+                    "mean_luminance_min": 40,
+                    "mean_luminance_max": 215,
+                    "near_black_fraction_max": 0.2,
+                    "near_white_fraction_max": 0.2,
+                },
+                "required_measurements": [
+                    "mean_luminance",
+                    "near_black_fraction",
+                    "near_white_fraction",
+                ],
+            },
+            {
+                "criterion_id": "tone_approachability",
+                "method": "vlm",
+                "weight": 0.5,
+                "params": {
+                    "fit_score_min": 1,
+                    "fit_score_max": 5,
+                    "score_mapping": "linear_1_5_to_0_100",
+                },
+                "required_measurements": ["label", "fit_score", "evidence"],
+            },
+        ],
+    }
+    scored = score_image(
+        rubric,
+        cv_results={
+            "exposure_brightness": {
+                "mean_luminance": 128.0,
+                "near_black_fraction": 0.0,
+                "near_white_fraction": 0.0,
+            }
+        },
+        vlm_results={
+            "tone_approachability": {
+                "ok": False,
+                "errors": ["VLM timeout: request timed out"],
+            }
+        },
+    )
+    assert scored.status == "partial"
+    tone = next(c for c in scored.criteria if c.criterion_id == "tone_approachability")
+    assert tone.availability == "unavailable_needs_review"
+    assert tone.score is None
+    assert scored.overall_score == 100.0

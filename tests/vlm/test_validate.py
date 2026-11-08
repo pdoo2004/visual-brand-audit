@@ -48,8 +48,15 @@ class TestValidateModelOutput(unittest.TestCase):
         self.assertTrue(result.ok)
         self.assertEqual(result.criteria[0].tone_label, "casual, lifestyle")
 
-    def test_invalid_json_is_a_validation_failure(self):
+    def test_markdown_fenced_json_is_unwrapped(self):
         result = validate_model_output("```json\n" + _dump(VALID) + "\n```")
+
+        self.assertTrue(result.ok)
+        self.assertEqual(result.errors, ())
+        self.assertEqual(result.criteria[0].fit_score, 4)
+
+    def test_invalid_json_is_a_validation_failure(self):
+        result = validate_model_output("not json at all")
 
         self.assertFalse(result.ok)
         self.assertEqual(result.criteria, ())
