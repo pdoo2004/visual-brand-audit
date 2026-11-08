@@ -7,6 +7,7 @@ comes back as ``ok`` false and a list of reasons, instead of raising.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
@@ -15,6 +16,19 @@ from brandlens.vlm.criteria import CRITERIA, RECOMMENDED_TONES
 
 _MIN_EVIDENCE_CHARS = 12
 _TONE_WORDS = set(RECOMMENDED_TONES)
+_FENCED_JSON = re.compile(
+    r"```(?:json|JSON)?\s*([\s\S]*?)\s*```",
+    re.MULTILINE,
+)
+
+
+def _json_candidate(text: str) -> str:
+    """Prefer raw JSON; if the model wrapped it in markdown fences, unwrap once."""
+    stripped = text.strip()
+    match = _FENCED_JSON.search(stripped)
+    if match:
+        return match.group(1).strip()
+    return stripped
 
 
 class _CriterionScore(BaseModel):
@@ -77,7 +91,7 @@ def validate_model_output(
         raise KeyError(f"No VLM criterion named {unknown}. MVP model criteria: {sorted(CRITERIA)}")
 
     try:
-        payload = json.loads(text)
+        payload = json.loads(_json_candidate(text))
     except json.JSONDecodeError:
         return _failure("response is not valid JSON")
     if not isinstance(payload, dict):

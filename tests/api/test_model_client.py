@@ -86,10 +86,11 @@ def test_valid_reply_returns_criteria(request_, image_path):
     assert result.criteria[0].tone_words == ("casual", "lifestyle")
 
 
-def test_code_fenced_json_is_rejected(request_, image_path):
-    with _client(lambda r: _reply(_good(), fenced=True)) as c, pytest.raises(ModelFailure) as err:
-        c.judge(request_, image_path)
-    assert err.value.reason == "invalid_json"
+def test_code_fenced_json_is_accepted(request_, image_path):
+    with _client(lambda r: _reply(_good(), fenced=True)) as c:
+        result = c.judge(request_, image_path)
+    assert result.criteria[0].id == "B1"
+    assert result.criteria[0].fit_score == 4
 
 
 def test_request_is_openai_chat_shape(request_, image_path):
