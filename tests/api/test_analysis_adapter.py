@@ -27,6 +27,7 @@ from brandlens.api.config import Settings
 from brandlens.api.results import build_job_results
 from brandlens.api.worker import ImageAnalysis, run_job
 from brandlens.scoring.engine import CriterionScore, ImageScore
+from brandlens.scoring.explanations import explain_criterion
 
 CRITERIA = ["exposure_brightness", "tone_approachability"]
 
@@ -69,7 +70,8 @@ def test_available_criterion_becomes_a_storable_mapping():
     assert c["score"] == 87.4 and c["weight"] == 0.4 and c["source"] == "vlm"
     assert c["label"] == "warm" and c["availability"] == "ok"
     assert c["evidence"] == ["smiling subject", "soft light"]
-    assert c["explanation"].startswith("Scored 87/100.") and "warm" in c["explanation"]
+    assert c["explanation"] == explain_criterion(scored.criteria[0])
+    assert "warm" in c["explanation"] and "smiling subject" in c["explanation"]
 
 
 def test_unavailable_criterion_keeps_a_null_score_and_needs_review():
@@ -86,8 +88,9 @@ def test_unavailable_criterion_keeps_a_null_score_and_needs_review():
     unavailable = result.criteria[1]
     assert unavailable["score"] is None
     assert unavailable["availability"] == "unavailable_needs_review"
+    assert unavailable["explanation"] == explain_criterion(scored.criteria[1])
+    assert "needs review" in unavailable["explanation"]
     assert "Model did not answer in time." in unavailable["explanation"]
-    assert unavailable["explanation"].startswith("Needs human review")
 
 
 def test_an_ok_criterion_without_a_score_is_treated_as_unavailable():
@@ -95,6 +98,7 @@ def test_an_ok_criterion_without_a_score_is_treated_as_unavailable():
     scored = _image_score([_criterion("exposure_brightness", score=None)])
     (c,) = to_image_analysis(scored).criteria
     assert c["availability"] == "unavailable_needs_review" and c["score"] is None
+    assert "needs review" in c["explanation"]  # explained, not an AssertionError
 
 
 def test_scorer_failure_marks_the_image_failed_but_keeps_its_criteria():
