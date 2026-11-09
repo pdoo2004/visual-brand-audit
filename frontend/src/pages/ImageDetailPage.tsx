@@ -1,10 +1,12 @@
 import { Link, Navigate, useParams } from "react-router-dom";
+import type { ImageResult } from "../api";
 import CriterionRow from "../components/results/CriterionRow";
+import FeedbackControls from "../components/results/FeedbackControls";
 import ImageThumb from "../components/results/ImageThumb";
 import { Button, Card, StatusBadge } from "../components/ui";
+import { useImageFeedback } from "../hooks/useImageFeedback";
 import { useJobResults } from "../hooks/useJobResults";
-import { displayName, formatScore, imageStatus, isScored, skippedReason } from "../lib/results";
-
+import { criterionName, displayName, formatScore, hasScores, imageStatus, isScored, skippedReason } from "../lib/results";
 export default function ImageDetailPage() {
   const { jobId, imageId } = useParams();
   if (!jobId || !imageId) return <Navigate to="/" replace />;
@@ -51,7 +53,7 @@ function DetailView({ jobId, imageId }: { jobId: string; imageId: string }) {
           <div className="mt-4 flex flex-col gap-4 sm:flex-row">
             <ImageThumb image={image} className="h-56 w-full shrink-0 rounded-card sm:w-72" />
             <div className="flex flex-col items-start gap-2">
-              {isScored(image) ? (
+              {hasScores(image) ? (
                 <>
                   <p className="text-4xl font-semibold tabular-nums">
                     {formatScore(image.overall_score)}
@@ -61,27 +63,57 @@ function DetailView({ jobId, imageId }: { jobId: string; imageId: string }) {
                   <p className="text-sm text-text-muted">Weighted average of the criteria below.</p>
                 </>
               ) : (
-                <p className="text-sm text-text-muted">{skippedReason(image)}</p>
-              )}
+                <p className="text-sm text-text-muted">
+                  {isScored(image) ? "Scores are not available yet." : skippedReason(image)}
+                </p>)}
             </div>
           </div>
 
-          {isScored(image) && (
-            <Card className="mt-6">
-              <h2 className="text-lg font-semibold">Criteria</h2>
-              {image.criteria.length === 0 ? (
-                <p className="mt-2 text-sm text-text-muted">No criterion scores were recorded for this image.</p>
-              ) : (
-                <ul className="mt-2 divide-y divide-line">
-                  {image.criteria.map((c) => (
-                    <CriterionRow key={c.criterion_id} criterion={c} />
-                  ))}
-                </ul>
-              )}
-            </Card>
-          )}
-        </>
+          {hasScores(image) && <FeedbackSections key={image.image_id} image={image} />}        </>
       )}
     </main>
+  );
+}
+
+/** Overall feedback plus the criteria list, each with Agree / Disagree controls. */
+function FeedbackSections({ image }: { image: ImageResult }) {
+  const feedback = useImageFeedback(image.image_id);
+
+  const controls = (target: string | null, subject: string) =>
+    feedback.ready && (
+      <FeedbackControls
+        subject={subject}
+        record={feedback.latest(target)}
+        saving={feedback.isSaving(target)}
+        error={feedback.errorFor(target)}
+        onSubmit={(verdict, comment) => void feedback.save(target, verdict, comment)}
+      />
+    );
+
+  return (
+    <>
+      <Card className="mt-6">
+        <h2 className="text-lg font-semibold">Your feedback on this image</h2>
+        {feedback.loadFailed && (
+          <p className="mt-2 text-sm text-status-review">Earlier feedback could not be loaded. You can still submit new feedback.</p>
+        )}
+        <div className="mt-2">{controls(null, "overall result")}</div>
+      </Card>
+
+      <Card className="mt-6">
+        <h2 className="text-lg font-semibold">Criteria</h2>
+        {image.criteria.length === 0 ? (
+          <p className="mt-2 text-sm text-text-muted">No criterion scores were recorded for this image.</p>
+        ) : (
+          <ul className="mt-2 divide-y divide-line">
+            {image.criteria.map((c) => (
+              <CriterionRow key={c.criterion_id} criterion={c}>
+                {c.availability === "ok" && controls(c.criterion_id, criterionName(c.criterion_id))}
+              </CriterionRow>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </>
   );
 }

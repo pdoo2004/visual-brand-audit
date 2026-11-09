@@ -32,7 +32,8 @@ export function criterionStatus(c: CriterionResult): ResultStatus {
 /** Overall status for an image, or null when it was never scored (filtered out). */
 export function imageStatus(image: ImageResult): ResultStatus | null {
   if (image.status === "filtered_out") return null;
-  if (image.status === "failed") return "fail";
+    if (image.status === "failed") return "fail";
+  if (image.criteria.length === 0) return null; // nothing to judge yet
   if (image.flagged) return "fail";
   if (image.status === "partial" || image.criteria.some((c) => c.availability !== "ok")) return "review";
   return "pass";
@@ -41,7 +42,10 @@ export function imageStatus(image: ImageResult): ResultStatus | null {
 export function isScored(image: ImageResult): boolean {
   return image.status === "scored" || image.status === "partial";
 }
-
+/** Scored with real criterion results. The backend worker currently stubs scoring (score 0, no criteria). */
+export function hasScores(image: ImageResult): boolean {
+  return isScored(image) && image.criteria.length > 0;
+}
 export function formatScore(score: number | null): string {
   return score === null ? "–" : String(Math.round(score));
 }

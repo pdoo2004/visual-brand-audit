@@ -3,8 +3,7 @@ import type { ImageResult } from "../api";
 import ImageThumb from "../components/results/ImageThumb";
 import { Button, Card, StatusBadge } from "../components/ui";
 import { useJobResults } from "../hooks/useJobResults";
-import { displayName, formatScore, imageStatus, isScored, skippedReason } from "../lib/results";
-
+import { displayName, formatScore, hasScores, imageStatus, isScored, skippedReason } from "../lib/results";
 export default function DashboardPage() {
   const { jobId } = useParams();
   if (!jobId) return <Navigate to="/" replace />;
@@ -43,8 +42,7 @@ function ResultsView({ jobId }: { jobId: string }) {
         <>
           <p className="mt-4 text-sm">
             {results.summary.images_scored} of {results.images.length} images scored
-            {results.summary.mean_overall !== null && <> · average {formatScore(results.summary.mean_overall)} / 100</>}
-            {results.summary.flagged_count > 0 && <> · {results.summary.flagged_count} below standard</>}
+            {results.summary.mean_overall !== null && results.images.some(hasScores) && <> · average {formatScore(results.summary.mean_overall)} / 100</>}            {results.summary.flagged_count > 0 && <> · {results.summary.flagged_count} below standard</>}
           </p>
 
           {results.images.length === 0 ? (
@@ -80,7 +78,7 @@ function ImageCard({ jobId, image }: { jobId: string; image: ImageResult }) {
         <p className="truncate font-medium" title={displayName(image.source)}>
           {displayName(image.source)}
         </p>
-        {scored ? (
+        {hasScores(image) ? (
           <div className="flex items-center justify-between">
             <span className="text-2xl font-semibold tabular-nums">
               {formatScore(image.overall_score)}
@@ -89,9 +87,15 @@ function ImageCard({ jobId, image }: { jobId: string; image: ImageResult }) {
             {status && <StatusBadge status={status} />}
           </div>
         ) : (
-          <p className="text-sm text-text-muted">{skippedReason(image)}</p>
+          <p className="text-sm text-text-muted">
+            {scored ? "Scores are not available yet." : skippedReason(image)}
+          </p>
         )}
-        {scored && <p className="text-xs text-text-muted">{image.criteria.length} criteria evaluated</p>}
+        {hasScores(image) && <p className="text-xs text-text-muted">{image.criteria.length} criteria evaluated</p>}        {image.feedback && (
+          <p className="text-xs text-text-muted">
+            Your feedback: {image.feedback.verdict === "agree" ? "Agree" : "Disagree"}
+          </p>
+        )}
       </div>
     </Card>
   );
