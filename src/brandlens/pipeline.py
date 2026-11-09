@@ -15,6 +15,7 @@ from brandlens.api.schemas.vlm import ModelCriterion, ModelRequest
 from brandlens.config import ConfigurationError
 from brandlens.cv.cv_input import CVInput
 from brandlens.cv.subject.selector import SingleSubjectSelector
+from brandlens.logger import track_current_stage
 from brandlens.preprocessing.preprocessor import preprocess_image
 from brandlens.scoring import score_image
 from brandlens.vlm.criteria import RECOMMENDED_TONES
@@ -44,22 +45,7 @@ def _make_cv_input(image, criteria, subject_detector, subject_selector):
     
     
 def _check_vlm_entry(entry):
-    """Check that the brand configuration matches the current VLM behavior.
-
-    KRISHNA REVIEW:
-        The current client builds a fixed B1 prompt instead of using the
-        criterion details supplied in ModelRequest. Its validator also uses
-        RECOMMENDED_TONES rather than the brand's configured allowed_labels.
-
-        These checks prevent the pipeline from accepting configuration that
-        the current VLM would ignore.
-
-        Please confirm whether this fixed behavior is intentional. I believe 
-        that RECOMMENDED_TONES should be replaced with the brand's configured allowed_labels.
-        Also, allowed_labels vs target_tone differences should be clarified. 
-        JSON should control the target tones, connect those values to both
-        prompt generation and output validation, then revise these checks.
-    """
+    """Check that the brand configuration matches the current VLM behavior."""
     # The existing client evaluates B1 only. The brand JSON uses
     # "tone_approachability" as the corresponding criterion ID.
     cid = entry["criterion_id"]
@@ -201,8 +187,12 @@ def score_standardized_image(
     if selected_vlm and vlm_client is None:
         raise ValueError("VLM client is required when the JSON selects a VLM criterion.")
 
-    data = _make_cv_input(image, selected_cv, subject_detector, subject_selector)
-    cv_results = {cid: criterion.analyze(data) for cid, criterion in selected_cv.items()}
+    with track_current_stage("cv_input"):
+        data = _make_cv_input(image, selected_cv, subject_detector, subject_selector)
+    cv_results = {}
+    for cid, criterion in selected_cv.items():
+        with track_current_stage(f"cv:{cid}"):
+            cv_results[cid] = criterion.analyze(data)
     vlm_results = _run_vlm(image, selected_vlm, vlm_client)
     scored = score_image(
         rubric, cv_results=cv_results, vlm_results=vlm_results,

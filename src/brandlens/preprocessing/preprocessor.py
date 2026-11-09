@@ -4,6 +4,8 @@ from collections.abc import Mapping
 
 from PIL import Image
 
+from brandlens.logger import log_image_event, track_current_stage
+
 from .photo_filter import FilterSettings, filter_photo
 from .standardization import StandardizationSettings, standardize_image
 
@@ -57,10 +59,13 @@ def preprocess_image(
     if getattr(image, "n_frames", 1) > 1:
         raise ValueError("Animated or multi-frame images are not supported.")
 
-    filtered = filter_photo(image, filter_settings)
+    with track_current_stage("photo_filter"):
+        filtered = filter_photo(image, filter_settings)
     if filtered is None:
+        log_image_event("photo_filter", "filtered_out")
         return None
-    return standardize_image(filtered, standardization_settings)
+    with track_current_stage("standardization"):
+        return standardize_image(filtered, standardization_settings)
 
 
 def preprocess_batch(

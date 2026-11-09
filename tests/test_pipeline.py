@@ -1,4 +1,6 @@
 """Worker integration boundaries: selection, preprocessing, and image ownership."""
+
+import logging
 from unittest.mock import Mock
 
 import pytest
@@ -6,6 +8,7 @@ from PIL import Image
 
 from brandlens import pipeline
 from brandlens.api.model_client import ModelFailure
+from brandlens.logger import image_logging_context
 
 
 @pytest.fixture
@@ -125,6 +128,7 @@ def test_raw_wrapper_preprocesses_once_and_closes_only_owned_image(components, m
                 pipeline.score_photo(raw, configuration, criterion_ids=["brightness"])
         else:
             assert pipeline.score_photo(raw, configuration, criterion_ids=["brightness"]) is analysis.return_value
+
         preprocessing.assert_called_once_with(raw, None, None)
         assert analysis.call_args.args[0] is standardized
         assert analysis.call_args.kwargs["criterion_ids"] == ["brightness"]
@@ -147,6 +151,33 @@ def test_filtered_out_image_does_not_reach_analysis(components, monkeypatch):
     analysis.assert_not_called()
 
 
+def test_cv_stages_log_success_and_failure(components, caplog):
+    configuration, _, _, _ = components
+    image = Image.new("RGB", (100, 100))
+    try:
+        with caplog.at_level(logging.INFO, logger="brandlens.pipeline"):
+            with image_logging_context("job-cv", "image-cv"):
+                pipeline.score_standardized_image(
+                    image, configuration, criterion_ids=["brightness"]
+                )
+        assert "job=job-cv image=image-cv stage=cv:brightness status=started" in caplog.text
+        assert "job=job-cv image=image-cv stage=cv:brightness status=completed" in caplog.text
+
+        caplog.clear()
+        configuration[1]["brightness"].analyze.side_effect = RuntimeError(
+            "private path: /secret/customer.jpg"
+        )
+        with caplog.at_level(logging.INFO, logger="brandlens.pipeline"):
+            with image_logging_context("job-cv", "image-cv"):
+                with pytest.raises(RuntimeError):
+                    pipeline.score_standardized_image(
+                        image, configuration, criterion_ids=["brightness"]
+                    )
+        assert "stage=cv:brightness status=failed" in caplog.text
+        assert "error_type=RuntimeError" in caplog.text
+        assert "/secret/customer.jpg" not in caplog.text
+    finally:
+        image.close()
 def test_vlm_model_failure_becomes_unavailable_envelope(monkeypatch):
     """SCRUM-139: timeout/malformed VLM must not crash; tone is needs-review."""
     entry = {
