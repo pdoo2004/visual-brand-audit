@@ -7,6 +7,7 @@ once and the batch completes with per-image status/results.
 from __future__ import annotations
 
 import io
+import logging
 import uuid
 from pathlib import Path
 
@@ -379,3 +380,79 @@ def test_rerun_of_a_clean_job_with_a_filtered_image_stays_completed(env):
     _run(env, job_id, records, _scored(75.0))
     assert [i.status for i in _results(env, job_id).images] == ["scored", "filtered_out"]
     assert _job_status(env, job_id) == "completed"
+
+
+def test_worker_logs_image_pipeline_stages(env, caplog):
+    """A real batch emits image-level stage progress and durations."""
+    job_id, records = _make_job(env, [_png()])
+
+    with caplog.at_level(logging.INFO):
+        _run(env, job_id, records, analyze=_scored(80.0))
+
+    messages = [
+        record.getMessage()
+        for record in caplog.records
+        if record.name == "brandlens.pipeline"
+    ]
+    output = "\n".join(messages)
+
+    assert f"job={job_id}" in output
+    assert f"image={records[0][0]}" in output
+
+    for stage in (
+        "image_loading",
+        "photo_filter",
+        "standardization",
+        "analysis",
+    ):
+        assert f"stage={stage} status=started" in output
+        assert f"stage={stage} status=completed" in output
+
+    assert "duration_ms=" in output
+    assert "stage=image status=scored" in output
+    assert _results(env, job_id).images[0].status == "scored"
+
+
+def test_worker_logs_filtered_image(env, caplog):
+    """Filtered images have a recorded reason and skip analysis."""
+    job_id, records = _make_job(env, [_png(10, 10)])
+
+    with caplog.at_level(logging.INFO):
+        _run(env, job_id, records, analyze=_scored(80.0))
+
+    output = "\n".join(
+        record.getMessage()
+        for record in caplog.records
+        if record.name == "brandlens.pipeline"
+    )
+
+    assert "stage=photo_filter status=started" in output
+    assert "stage=image status=filtered_out" in output
+    assert "reason=too_small" in output
+    assert "stage=analysis status=started" not in output
+    assert _results(env, job_id).images[0].status == "filtered_out"
+
+
+def test_worker_logs_failures_without_sensitive_details(env, caplog):
+    """An analysis exception is logged by type, without raw content."""
+    job_id, records = _make_job(env, [_png()])
+    secret = "/private/customer-images/confidential_photo.png"
+
+    def failing_analyzer(image, criterion_ids):
+        raise RuntimeError(f"Failed to process {secret}")
+
+    with caplog.at_level(logging.INFO):
+        _run(env, job_id, records, analyze=failing_analyzer)
+
+    output = "\n".join(
+        record.getMessage() for record in caplog.records
+    )
+
+    assert f"job={job_id}" in output
+    assert f"image={records[0][0]}" in output
+    assert "stage=analysis status=failed" in output
+    assert "error_type=RuntimeError" in output
+    assert "stage=image status=failed" in output
+    assert secret not in output
+
+    assert _results(env, job_id).images[0].status == "failed"

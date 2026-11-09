@@ -34,6 +34,7 @@ from typing import Any
 from PIL import Image
 
 from brandlens.api import db as database
+from brandlens.logger import image_logging_context, log_image_event, track_current_stage
 from brandlens.preprocessing.image_io import load_image
 from brandlens.preprocessing.photo_filter import FilterSettings, filter_reject_reason
 from brandlens.preprocessing.preprocessor import preprocess_image
@@ -92,8 +93,12 @@ def run_job(
     """
     try:
         _run_batch(job_id, image_records, db_path, processed_dir, analyze or placeholder_analyze)
-    except Exception as exc:  # last line of defence for the whole batch
-        log.exception("job %s: batch could not run", job_id)
+    except Exception as exc:  # noqa: BLE001 - prevent unexpected batch failures from escaping
+        log.warning(
+            "job %s: batch could not run; error_type=%s",
+            job_id,
+            type(exc).__name__,
+        )
         with database.get_conn(db_path) as conn:
             database.set_job_status(
                 conn, job_id, "failed", error_code="INTERNAL_ERROR",
@@ -121,14 +126,17 @@ def _run_batch(
         if image_id in already_done:
             log.info("job %s image %s already has a result; skipping", job_id, image_id)
             continue
-        try:
-            status = _process_image(
-                job_id, image_id, raw_path, db_path, processed_dir, criterion_ids, analyze, stage
-            )
-        except Exception as exc:  # noqa: BLE001 - one bad image must not stop the batch
-            log.warning("job %s image %s: unexpected error: %s", job_id, image_id, exc)
-            _mark_failed(db_path, image_id, "INTERNAL_ERROR", f"{type(exc).__name__}: {exc}")
-            status = "failed"
+        with image_logging_context(job_id, image_id):
+            try:
+                status = _process_image(
+                    job_id, image_id, raw_path, db_path, processed_dir, criterion_ids, analyze, stage
+                )
+            except Exception as exc:  # noqa: BLE001 - one bad image must not stop the batch
+                log.warning("job %s image %s: unexpected error: %s", job_id, image_id, exc)
+                _mark_failed(db_path, image_id, "INTERNAL_ERROR", f"{type(exc).__name__}: {exc}")
+                status = "failed"
+
+            log_image_event("image", status)
         outcomes[image_id] = status
 
     # Judge the whole job from every stored image status. Images finished in an earlier
@@ -173,17 +181,22 @@ def _process_image(
 ) -> str:
     """Preprocess, analyze and store one image. Returns its final status."""
     try:
-        image = load_image(raw_path)
+        with track_current_stage("image_loading"):
+            image = load_image(raw_path)
     except ValueError as exc:
         reason = _load_reject_reason(str(exc))
         if reason:
             _mark_filtered(db_path, image_id, reason)
+            log_image_event("image", "filtered_out", reason=reason)
             return "filtered_out"
         _mark_failed(db_path, image_id, "LOAD_ERROR", str(exc))
         return "failed"
     except Exception as exc:  # noqa: BLE001
         _mark_failed(db_path, image_id, "LOAD_ERROR", str(exc))
-        log.warning("job %s image %s: load failed: %s", job_id, image_id, exc)
+        log.warning(
+            "job %s image %s: load failed; error_type=%s",
+            job_id, image_id, type(exc).__name__,
+        )
         return "failed"
 
     # Filtering and standardizing live in brandlens.preprocessing; the worker
@@ -193,11 +206,15 @@ def _process_image(
         standardized = preprocess_image(image, _FILTER, _STD)
     except Exception as exc:  # noqa: BLE001
         _mark_failed(db_path, image_id, "PREPROCESS_ERROR", str(exc))
-        log.warning("job %s image %s: preprocessing failed: %s", job_id, image_id, exc)
+        log.warning(
+            "job %s image %s: preprocessing failed; error_type=%s",
+            job_id, image_id, type(exc).__name__,
+        )
         return "failed"
     if standardized is None:
         reason = filter_reject_reason(image, _FILTER) or "unprocessable"
         _mark_filtered(db_path, image_id, reason)
+        log_image_event("image", "filtered_out", reason=reason)
         return "filtered_out"
 
     out_path = processed_dir / f"{image_id}.png"
@@ -205,9 +222,13 @@ def _process_image(
 
     stage.enter_analysis()
     try:
-        result = analyze(standardized, criterion_ids)
+        with track_current_stage("analysis"):
+            result = analyze(standardized, criterion_ids)
     except Exception as exc:  # noqa: BLE001 - analysis failures are per image
-        log.warning("job %s image %s: analysis failed: %s", job_id, image_id, exc)
+        log.warning(
+            "job %s image %s: analysis failed; error_type=%s",
+            job_id, image_id, type(exc).__name__,
+        )
         with database.get_conn(db_path) as conn:
             database.save_image_result(
                 conn, image_id, status="failed",
