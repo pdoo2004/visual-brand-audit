@@ -87,7 +87,7 @@ async def run_url_job(
             processed_dir=processed_dir / job_id,
             analyze=analyze,
         )
-    except Exception as exc:  # noqa: BLE001 - terminal status is mandatory
+    except Exception as exc:
         log.exception("URL job %s failed before analysis", job_id)
         with database.get_conn(db_path) as conn:
             database.set_job_status(
