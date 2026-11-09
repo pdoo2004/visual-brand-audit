@@ -10,6 +10,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from uuid import uuid4
 
+from brandlens.api.model_client import ModelFailure
 from brandlens.api.schemas.vlm import ModelCriterion, ModelRequest
 from brandlens.config import ConfigurationError
 from brandlens.cv.cv_input import CVInput
@@ -77,11 +78,19 @@ def _check_vlm_entry(entry):
         )
 
 
+def _vlm_unavailable(reason: str, *errors: str) -> dict:
+    """Envelope the scoring engine treats as unavailable_needs_review (SCRUM-139)."""
+    return {"ok": False, "errors": [reason, *errors] if errors else [reason]}
+
+
 def _run_vlm(image, entries, client):
     """Adapt the shared RGB image and configured entries to ModelClient.judge.
 
     The existing client owns HTTP, prompt generation, output validation and
     retries. Its path-based input is served by a temporary lossless PNG.
+
+    SCRUM-139: timeouts and malformed replies become unavailable envelopes so
+    CV scoring still completes and the tone criterion is marked needs-review.
     """
     results = {}
     for entry in entries:
@@ -97,15 +106,23 @@ def _run_vlm(image, entries, client):
                 )
             ],
         )
-        with TemporaryDirectory(prefix="brandlens-vlm-") as directory:
-            path = Path(directory) / "standardized.png"
-            image.save(path, format="PNG")
-            result = client.judge(request, path)
-        if len(result.criteria) != 1 or result.criteria[0].id != "B1":
-            raise ValueError("Existing VLM client must return exactly one B1 judgment.")
-        # Preserve B1 provenance inside the judgment; use the rubric ID as its
-        # outer key. The existing scorer already accepts tone_label and B1.
-        results[entry["criterion_id"]] = asdict(result.criteria[0])
+        try:
+            with TemporaryDirectory(prefix="brandlens-vlm-") as directory:
+                path = Path(directory) / "standardized.png"
+                image.save(path, format="PNG")
+                result = client.judge(request, path)
+            if len(result.criteria) != 1 or result.criteria[0].id != "B1":
+                results[entry["criterion_id"]] = _vlm_unavailable(
+                    "Existing VLM client must return exactly one B1 judgment."
+                )
+                continue
+            # Preserve B1 provenance inside the judgment; use the rubric ID as its
+            # outer key. The existing scorer already accepts tone_label and B1.
+            results[entry["criterion_id"]] = asdict(result.criteria[0])
+        except ModelFailure as exc:
+            results[entry["criterion_id"]] = _vlm_unavailable(
+                f"VLM {exc.reason}: {exc.message}",
+            )
     return results
 
 
@@ -144,7 +161,8 @@ def score_standardized_image(
         Only selected components run, and scoring receives the same selection.
         The VLM's temporary PNG is removed on failure or success. Its existing
         path-based client still needs that temporary file; preprocessing is
-        not repeated. Model failures propagate under the existing policy.
+        not repeated. ModelFailure (timeout, malformed output, …) becomes an
+        unavailable tone result so CV criteria still score (SCRUM-139).
     """
     rubric, criteria = configuration
     by_id = {entry["criterion_id"]: entry for entry in rubric["criteria"]}
