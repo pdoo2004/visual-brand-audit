@@ -1,75 +1,44 @@
-"""POST /api/v1/analyses/urls: submit a public webpage for analysis (SCRUM-178, [STRETCH]).
-
-This endpoint only *accepts* the submission: it validates the URL, records the job and its
-input (`input_type='url'`, `submission_url`, `max_pages`), and returns 202. The crawler and image
-downloader (SCRUM-179 and the crawler work) are not built yet, so the job stays `queued` until
-they are wired in at the marked hook below.
-"""
+"""POST /api/v1/analyses/urls: submit public webpage for background analysis."""
 
 from __future__ import annotations
 
-import ipaddress
 import logging
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any
-from urllib.parse import urlsplit
 
-from fastapi import APIRouter, Body, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, Request
 from pydantic import ValidationError
 
 from brandlens.api import db as database
 from brandlens.api.routers.jobs import _error, _load_rubric_criteria
 from brandlens.api.schemas import ErrorCode, InputType, JobAccepted, UrlSubmission
+from brandlens.api.url_worker import run_url_job
+from brandlens.crawler.public_url import non_public_reason
 
 log = logging.getLogger(__name__)
-
 router = APIRouter(prefix="/api/v1", tags=["analyses"])
 
-# Hostnames that can never be a public website.
-_BLOCKED_SUFFIXES = (".local", ".localhost", ".internal", ".lan", ".home", ".corp")
-
-
-def _non_public_reason(url: str) -> str | None:
-    """Why `url` cannot be a public website, or None if it looks public.
-
-    A server-side crawler will fetch this URL, so addresses that point back at our own machine
-    or private network (SSRF) are refused up front. This is a syntax-level check only: the
-    crawler must also re-check the resolved IP address when it actually fetches.
-    """
-    parts = urlsplit(url)
-    if parts.username or parts.password:
-        return "URLs with embedded credentials are not allowed."
-    host = (parts.hostname or "").rstrip(".").lower()
-    if not host:
-        return "URL has no host."
-    try:
-        ip = ipaddress.ip_address(host)
-    except ValueError:
-        if host == "localhost" or host.endswith(_BLOCKED_SUFFIXES) or "." not in host:
-            return "URL must point to a public website, not a local or internal host."
-        return None
-    if not ip.is_global:
-        return "URL must point to a public website, not a private or reserved IP address."
-    return None
+# Keep the original helper available for existing URL-validation tests.
+_non_public_reason = non_public_reason
 
 
 @router.post(
     "/analyses/urls",
     status_code=202,
     response_model=JobAccepted,
-    summary="Submit a public webpage for analysis [stretch]",
+    summary="Submit a public webpage for analysis",
     response_description="Job accepted; poll status_url for progress.",
 )
 async def submit_url(
     request: Request,
+    background_tasks: BackgroundTasks,
     payload: Annotated[dict[str, Any], Body(description="UrlSubmission JSON")],
 ) -> JobAccepted:
     db_path: Path = request.app.state.db_path
     rubric_path: Path = request.app.state.rubric_path
 
-    # Validate by hand so errors use the same shape as the upload endpoint.
     try:
         submission = UrlSubmission.model_validate(payload)
     except ValidationError as exc:
@@ -85,7 +54,18 @@ async def submit_url(
     if reason:
         raise HTTPException(status_code=422, detail=_error(ErrorCode.VALIDATION_ERROR, reason))
 
-    criteria = submission.criterion_ids or _load_rubric_criteria(rubric_path, submission.rubric_id)
+    # Validate the rubric even when the user supplied a custom criterion subset.
+    valid_criteria = _load_rubric_criteria(rubric_path, submission.rubric_id)
+    criteria = submission.criterion_ids or valid_criteria
+    unknown = set(criteria) - set(valid_criteria)
+    if unknown:
+        raise HTTPException(
+            status_code=422,
+            detail=_error(
+                ErrorCode.VALIDATION_ERROR,
+                "Unknown criterion IDs: " + ", ".join(sorted(unknown)),
+            ),
+        )
 
     job_id = str(uuid.uuid4())
     created_at = datetime.now(UTC)
@@ -100,7 +80,15 @@ async def submit_url(
         )
         database.insert_job_criteria(conn, job_id, criteria)
 
-    # Hook: start the crawl -> download -> preprocess pipeline for `job_id` here once the crawler
-    # exists. Until then the job stays `queued`.
-    log.info("url job %s accepted: %s (max_pages=%s)", job_id, url, submission.max_pages)
+    background_tasks.add_task(
+        run_url_job,
+        job_id=job_id,
+        url=url,
+        max_pages=submission.max_pages,
+        db_path=db_path,
+        upload_dir=request.app.state.upload_dir,
+        processed_dir=request.app.state.processed_dir,
+        analyze=getattr(request.app.state, "analyzer", None),
+    )
+    log.info("URL job %s accepted: %s (max_pages=%s)", job_id, url, submission.max_pages)
     return JobAccepted.for_job(uuid.UUID(job_id), InputType.URL, created_at)
