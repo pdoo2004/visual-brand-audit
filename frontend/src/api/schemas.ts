@@ -122,6 +122,8 @@ export const feedbackRecordSchema = z.object({
   comment: z.string().nullable(),
   created_at: z.string(),
 });
+export const feedbackListSchema = z.array(feedbackRecordSchema);
+
 export type FeedbackRecord = z.infer<typeof feedbackRecordSchema>;
 
 // ---- Results (GET /jobs/{id}/results) ---------------------------------------------------

@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
 import type { CriterionResult } from "../../api";
 import { SourceTag, StatusBadge } from "../ui";
 import { criterionName, criterionStatus, formatScore } from "../../lib/results";
 
-export default function CriterionRow({ criterion }: { criterion: CriterionResult }) {
+/** `children` is an optional slot below the explanation, used for the feedback controls. */
+export default function CriterionRow({ criterion, children }: { criterion: CriterionResult; children?: ReactNode }) {
   const unavailable = criterion.availability !== "ok";
   return (
     <li className="flex flex-col gap-2 py-4">
@@ -37,6 +39,8 @@ export default function CriterionRow({ criterion }: { criterion: CriterionResult
           ))}
         </ul>
       )}
+
+      {children}
     </li>
   );
 }
