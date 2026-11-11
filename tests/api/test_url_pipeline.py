@@ -162,3 +162,56 @@ def test_url_job_uses_real_cv_pipeline(client):
     assert len(image["criteria"]) == 1
     assert image["criteria"][0]["criterion_id"] == "exposure_brightness"
     assert image["overall_score"] is not None
+
+def test_duplicate_downloads_are_analyzed_once(
+    client, monkeypatch
+):
+    http, app, settings = client
+    calls = []
+
+    async def duplicate_download(urls, dest_dir):
+        dest_dir.mkdir(parents=True, exist_ok=True)
+
+        items = []
+        for index in range(2):
+            path = dest_dir / f"{index}.png"
+
+            Image.new(
+                "RGB", (120, 120), "gray"
+            ).save(path)
+
+            items.append(
+                SimpleNamespace(
+                    url=f"https://cdn.example/photo{index}.png",
+                    path=path,
+                )
+            )
+
+        return SimpleNamespace(downloaded=items, failed=[])
+
+    monkeypatch.setattr(
+        url_worker,
+        "download_images",
+        duplicate_download,
+    )
+
+    def analyze(image, criteria):
+        calls.append(1)
+        return ImageAnalysis(
+            status="scored",
+            overall_score=80.0,
+            criteria=[],
+        )
+
+    app.state.analyzer = analyze
+
+    response = _submit(http)
+    assert response.status_code == 202
+
+    job_id = response.json()["job_id"]
+
+    with database.get_conn(settings.db_path) as conn:
+        images = database.get_job_images(conn, job_id)
+
+    assert len(images) == 1
+    assert len(calls) == 1

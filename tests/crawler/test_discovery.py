@@ -87,3 +87,44 @@ def test_rejected_page_is_reported():
     assert result.image_urls == []
     assert len(result.failed_pages) == 1
     assert result.failed_pages[0].reason == "HTTP 403"
+    
+def test_pagination_mode_skips_unrelated_pages():
+    requested = []
+
+    def handler(request):
+        requested.append(str(request.url))
+
+        page = request.url.params.get("page")
+
+        if page == "2":
+            html = '''
+                <img src="/b.jpg">
+                <a href="?page=3" rel="next">Next</a>
+            '''
+        elif page == "3":
+            html = '<img src="/c.jpg">'
+        else:
+            html = '''
+                <img src="/a.jpg">
+                <a href="/about">About</a>
+                <a href="?page=2" rel="next">Next</a>
+            '''
+
+        return httpx.Response(
+            200,
+            text=html,
+            headers={"content-type": "text/html"},
+        )
+
+    result = fetch(
+        "https://site.example/gallery",
+        handler,
+        settings=DiscoverySettings(
+            max_pages=3,
+            page_follow_mode="pagination",
+        ),
+    )
+
+    assert len(result.pages_visited) == 3
+    assert len(result.image_urls) == 3
+    assert all("/about" not in url for url in requested)

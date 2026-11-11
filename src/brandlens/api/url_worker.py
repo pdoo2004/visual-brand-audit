@@ -12,6 +12,7 @@ from pathlib import Path
 
 from brandlens.api import db as database
 from brandlens.api.worker import Analyzer, run_job
+from brandlens.crawler.deduplicate import unique_downloads
 from brandlens.crawler.discovery import DiscoverySettings, discover_images
 from brandlens.crawler.downloader import download_images
 
@@ -40,10 +41,22 @@ async def run_url_job(
 
         discovery = await discover_images(
             url,
-            settings=DiscoverySettings(max_pages=max_pages or 1),
+            settings=DiscoverySettings(
+                max_pages=max_pages or 1,
+                page_follow_mode="pagination",
+            ),
         )
         raw_dir = upload_dir / job_id
         downloaded = await download_images(discovery.image_urls, raw_dir)
+
+        unique_images, duplicates = unique_downloads(downloaded.downloaded)
+
+        log.info(
+            "URL job %s: %d unique images, %d duplicates skipped",
+            job_id,
+            len(unique_images),
+            len(duplicates),
+        )
 
         if not downloaded.downloaded:
             reason = (
@@ -60,7 +73,7 @@ async def run_url_job(
 
         image_records: list[tuple[str, Path]] = []
         with database.get_conn(db_path) as conn:
-            for ordinal, image in enumerate(downloaded.downloaded):
+            for ordinal, image in enumerate(unique_images):
                 image_id = database.create_image(
                     conn,
                     job_id=job_id,

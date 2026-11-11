@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from brandlens.crawler.deduplicate import unique_downloads
 from brandlens.crawler.discovery import (
     DiscoveryResult,
     DiscoverySettings,
@@ -22,12 +23,12 @@ from brandlens.preprocessing.image_io import load_image
 
 @dataclass
 class CrawlerPipelineResult:
-    """Each image has a small preview, original URL, score, and raw measurements."""
+    """Images, scores, measurements, and crawl diagnostics."""
 
     images: list[dict]
     discovery: DiscoveryResult
     download_failures: list[DownloadFailure]
-
+    duplicate_count: int = 0
 
 async def run_crawler_pipeline(
     url: str,
@@ -55,8 +56,9 @@ async def run_crawler_pipeline(
     with TemporaryDirectory(prefix="brandlens-crawler-") as temp_dir:
         destination = Path(output_dir) if save_images else Path(temp_dir)
         downloads = await download_images(discovery.image_urls, destination)
+        unique_images, duplicates = unique_downloads(downloads.downloaded)
 
-        for item in downloads.downloaded:
+        for item in unique_images:
             row = {
                 "url": item.url,
                 "path": item.path if save_images else None,
@@ -90,4 +92,9 @@ async def run_crawler_pipeline(
                     image.close()
             photos.append(row)
 
-    return CrawlerPipelineResult(photos, discovery, downloads.failed)
+    return CrawlerPipelineResult(
+        images=photos,
+        discovery=discovery,
+        download_failures=downloads.failed,
+        duplicate_count=len(duplicates),
+    )
