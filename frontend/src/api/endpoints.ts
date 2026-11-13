@@ -36,6 +36,28 @@ export function submitUpload(submission: UploadSubmission, options: CallOptions 
     });
 }
 
+/** Body fields for the existing webpage URL submission endpoint. */
+export interface UrlSubmission {
+    url: string;
+    rubricId: string;
+    criterionIds: string[];
+    maxPages: number;
+}
+
+/** POST /analyses/urls: discover and analyze images from a webpage. */
+export function submitUrl(submission: UrlSubmission, options: CallOptions = {}): Promise<JobAccepted> {
+    return request("/analyses/urls", jobAcceptedSchema, {
+        method: "POST",
+        json: {
+            url: submission.url,
+            rubric_id: submission.rubricId,
+            criterion_ids: submission.criterionIds,
+            max_pages: submission.maxPages,
+        },
+        ...options,
+    });
+}
+
 /** GET /jobs/{id}: status and progress, for Screen 2 polling. */
 export function getJobStatus(jobId: string, options: CallOptions = {}): Promise<JobStatus> {
     return request(`/jobs/${encodeURIComponent(jobId)}`, jobStatusSchema, options);
@@ -70,5 +92,5 @@ export function submitFeedback(
 
 /** GET /images/{id}/feedback: every Agree/Disagree saved for an image, newest first. */
 export function getImageFeedback(imageId: string, options: CallOptions = {}): Promise<FeedbackRecord[]> {
-  return request(`/images/${encodeURIComponent(imageId)}/feedback`, feedbackListSchema, options);
+    return request(`/images/${encodeURIComponent(imageId)}/feedback`, feedbackListSchema, options);
 }

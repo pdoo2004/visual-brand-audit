@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import logging
+import re
 from collections import deque
 from dataclasses import dataclass
 from html.parser import HTMLParser
-from urllib.parse import urldefrag, urljoin, urlsplit
+from urllib.parse import parse_qs, urldefrag, urljoin, urlsplit
 
 import httpx
 
@@ -30,6 +31,7 @@ class DiscoverySettings:
     max_html_bytes: int = 2 * 1024 * 1024
     timeout_seconds: float = 15.0
     max_redirects: int = 5
+    page_follow_mode: str = "all"  # "all" or "pagination"
 
     def __post_init__(self) -> None:
         for key in ("max_pages", "max_images", "max_html_bytes"):
@@ -42,7 +44,10 @@ class DiscoverySettings:
             raise ValueError("max_redirects must be a nonnegative integer")
         if type(self.timeout_seconds) not in (int, float) or self.timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive")
-
+        if self.page_follow_mode not in {"all", "pagination"}:
+            raise ValueError(
+                "page_follow_mode must be 'all' or 'pagination'"
+            )
 
 @dataclass(frozen=True)
 class PageFailure:
@@ -62,7 +67,10 @@ class _Parser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.images: list[str] = []
         self.links: list[str] = []
+        self.pagination_links: list[str] = []
         self.base_href: str | None = None
+        self._anchor_href: str | None = None
+        self._anchor_text: list[str] = []
 
     @staticmethod
     def _srcset(value: str | None) -> str | None:
@@ -92,9 +100,46 @@ class _Parser(HTMLParser):
             } and a.get("content"):
                 self.images.append(a["content"])
         elif tag == "a" and a.get("href"):
-            self.links.append(a["href"])
+            href = a["href"]
+            self.links.append(href)
 
+            rel = (a.get("rel") or "").lower().split()
+            if "next" in rel or _is_pagination_url(href):
+                self.pagination_links.append(href)
 
+            self._anchor_href = href
+            self._anchor_text = []
+        
+    def handle_data(self, data: str) -> None:
+        if self._anchor_href is not None:
+            self._anchor_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "a" and self._anchor_href is not None:
+            label = "".join(self._anchor_text).strip().lower()
+
+            if label in {"next", "next page", "older", "›", "»"}:
+                self.pagination_links.append(self._anchor_href)
+
+            self._anchor_href = None
+            self._anchor_text = []
+
+def _is_pagination_url(href: str) -> bool:
+    """Recognize common static HTML pagination patterns."""
+    parts = urlsplit(href)
+
+    query = parse_qs(parts.query)
+    if "page" in query:
+        return any(
+            value.isdigit()
+            for value in query["page"]
+        )
+
+    return bool(
+        re.search(r"/page/\d+/?$", parts.path, re.IGNORECASE)
+        or re.search(r"/next/?$", parts.path, re.IGNORECASE)
+    )
+    
 def _absolute(value: str, base: str) -> str | None:
     try:
         value = urldefrag(urljoin(base, value.strip())).url
@@ -184,7 +229,13 @@ async def discover_images(
                         break
             if len(images) >= settings.max_images:
                 break
-            for raw in parsed.links if settings.max_pages > 1 else []:
+            links_to_follow = (
+                parsed.pagination_links
+                if settings.page_follow_mode == "pagination"
+                else parsed.links
+            )
+
+            for raw in links_to_follow if settings.max_pages > 1 else []:
                 page = _absolute(raw, base)
                 if not page or (urlsplit(page).hostname or "").lower() != host:
                     continue

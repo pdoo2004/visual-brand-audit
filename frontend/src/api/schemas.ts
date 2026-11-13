@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const jobStateSchema = z.enum([
   "queued",
+  "crawling",
   "preprocessing",
   "analyzing",
   "scoring",
