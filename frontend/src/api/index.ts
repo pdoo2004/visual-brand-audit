@@ -1,5 +1,5 @@
 export { ApiError, errorMessage } from "./errors";
-export { getImageFeedback, getJobResults, getJobStatus, getRubrics, submitFeedback, submitUpload } from "./endpoints";export { isTerminalJobState } from "./schemas";
+export { getImageFeedback, getJobResults, getJobStatus, getRubrics, submitFeedback, submitUpload, submitUrl} from "./endpoints";export { isTerminalJobState } from "./schemas";
 export type {
   ApiErrorCode,
   CriterionResult,

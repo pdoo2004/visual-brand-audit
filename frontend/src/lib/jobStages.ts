@@ -16,6 +16,7 @@ export const STAGES: { state: JobState; label: string }[] = [
 /** Where each state sits in the pipeline. Higher = further along. */
 const ORDER: Record<JobState, number> = {
   queued: 0,
+  crawling: 0,
   preprocessing: 1,
   analyzing: 2,
   scoring: 3,
@@ -46,6 +47,8 @@ export function stateLabel(state: JobState): string {
   switch (state) {
     case "queued":
       return "Queued";
+    case "crawling":
+      return "Crawling";
     case "completed":
       return "Completed";
     case "completed_with_errors":
@@ -63,6 +66,8 @@ export function headline(state: JobState, progress: JobProgress): string {
   switch (state) {
     case "queued":
       return "Waiting to start…";
+    case "crawling":
+      return "Discovering and downloading webpage images…";
     case "completed":
       return `Analyzed ${total} ${total === 1 ? "image" : "images"}`;
     case "completed_with_errors":
