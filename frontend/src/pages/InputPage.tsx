@@ -4,7 +4,7 @@ import { errorMessage, submitUpload, submitUrl } from "../api";
 import FileDropzone from "../components/FileDropzone";
 import { Button, Card, Checkbox } from "../components/ui";
 import { METHOD_GROUPS, RUBRICS } from "../config/criteria";
-import { checkFiles, mergeFiles, validateForm, type FileProblem, type FormErrors } from "../lib/validation";
+import { capFiles, checkFiles, mergeFiles, validateForm, type FileProblem, type FormErrors } from "../lib/validation";
 
 export default function InputPage() {
   const navigate = useNavigate();
@@ -24,9 +24,10 @@ export default function InputPage() {
 
   function addFiles(incoming: File[]) {
     const { accepted, rejected: bad } = checkFiles(incoming);
-    setRejected(bad);
+    const { accepted: kept, rejected: overflow } = capFiles(mergeFiles(files, accepted));
+    setRejected([...bad, ...overflow]);
     if (accepted.length > 0) {
-      setFiles((current) => mergeFiles(current, accepted));
+      setFiles(kept);
       setErrors((e) => ({ ...e, files: undefined }));
     }
   }
