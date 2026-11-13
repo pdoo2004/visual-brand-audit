@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { ACCEPT_ATTRIBUTE } from "../lib/validation";
+import { ACCEPT_ATTRIBUTE, MAX_FILES } from "../lib/validation";
 
 interface FileDropzoneProps {
   files: File[];
@@ -36,7 +36,7 @@ export default function FileDropzone({ files, onAdd, onRemove, error, disabled }
         } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
       >
         <span className="font-medium">Drop photos here</span>
-        <span className="text-text-muted">or click to browse. JPEG, PNG, or WebP, up to 10 MB each.</span>
+        <span className="text-text-muted">or click to browse. JPEG, PNG, or WebP, up to 10 MB each, {MAX_FILES} photos at most.</span>
         <input
           id={inputId}
           type="file"
