@@ -123,6 +123,19 @@ docker compose --profile gpu up --build
 
 Gemma 4 E4B weights are gated on Hugging Face — `HF_TOKEN` is required on the first run. Weights are cached in the `hf-cache` Docker volume so subsequent starts skip the download.
 
+### Upload limits
+
+The API refuses oversized or malformed uploads before any job is created. The limits can be changed with environment variables:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `BRANDLENS_MAX_FILE_BYTES` | `10485760` (10 MB) | Largest single image |
+| `BRANDLENS_MAX_FILES_PER_REQUEST` | `20` | Images per upload request |
+| `BRANDLENS_MAX_TOTAL_BYTES` | `104857600` (100 MB) | Total size of one upload request |
+| `BRANDLENS_MAX_IMAGE_PIXELS` | `25000000` (25 MP) | Largest image by pixel count |
+
+The frontend shows the 10 MB, 20-file and 100 MB limits (`frontend/src/lib/validation.ts`). If you change the API limits, update that file to match.
+
 ## Architecture
 
 | Component | Role |
