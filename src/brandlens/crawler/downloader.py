@@ -43,7 +43,7 @@ class DownloadSettings:
     """Caps for one batch. Failures inside these caps are logged, not raised."""
 
     max_concurrency: int = 4
-    max_bytes: int = 20 * 1024 * 1024
+    max_bytes: int = 10 * 1024 * 1024
     timeout_seconds: float = 20.0
     max_redirects: int = 5
 
