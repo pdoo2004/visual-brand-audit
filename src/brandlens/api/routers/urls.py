@@ -12,7 +12,7 @@ from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, Request
 from pydantic import ValidationError
 
 from brandlens.api import db as database
-from brandlens.api.routers.jobs import _error, _load_rubric_criteria
+from brandlens.api.routers.jobs import _error, resolve_criteria
 from brandlens.api.schemas import ErrorCode, InputType, JobAccepted, UrlSubmission
 from brandlens.api.url_worker import run_url_job
 from brandlens.crawler.public_url import non_public_reason
@@ -54,18 +54,7 @@ async def submit_url(
     if reason:
         raise HTTPException(status_code=422, detail=_error(ErrorCode.VALIDATION_ERROR, reason))
 
-    # Validate the rubric even when the user supplied a custom criterion subset.
-    valid_criteria = _load_rubric_criteria(rubric_path, submission.rubric_id)
-    criteria = submission.criterion_ids or valid_criteria
-    unknown = set(criteria) - set(valid_criteria)
-    if unknown:
-        raise HTTPException(
-            status_code=422,
-            detail=_error(
-                ErrorCode.VALIDATION_ERROR,
-                "Unknown criterion IDs: " + ", ".join(sorted(unknown)),
-            ),
-        )
+    criteria = resolve_criteria(rubric_path, submission.rubric_id, submission.criterion_ids)
 
     job_id = str(uuid.uuid4())
     created_at = datetime.now(UTC)
