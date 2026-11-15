@@ -67,7 +67,7 @@ def test_save_images_retains_files_and_continues_after_scoring_failure(tmp_path,
         result = []
         for idx, url in enumerate(urls):
             path = dest / f"{idx:04d}.png"
-            Image.new("RGB", (320, 240), "teal").save(path)
+            Image.new("RGB", (320, 240), "teal" if idx == 0 else "blue").save(path)
             result.append(DownloadedImage(url, path, path.stat().st_size))
         return DownloadResult(result, [])
 
