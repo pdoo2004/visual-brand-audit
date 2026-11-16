@@ -84,6 +84,8 @@ def build_job_results(conn: sqlite3.Connection, job_id: str) -> JobResults | Non
                 source=row["source"],
                 status=status,
                 reject_reason=row["reject_reason"],
+                error_code=row["error_code"],
+                error_message=row["error_message"],
                 overall_score=row["overall_score"],
                 flagged=bool(row["flagged"]),
                 measurements=(

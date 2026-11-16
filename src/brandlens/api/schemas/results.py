@@ -40,6 +40,8 @@ class ImageResult(BaseSchema):
     source: str = Field(min_length=1)  # "upload:name.jpg" or an image URL
     status: ImageStatus
     reject_reason: RejectReason | None = None  # only for filtered_out images
+    error_code: str | None = None
+    error_message: str | None = None
     overall_score: Score | None = None
     flagged: bool = False
     # CV measurement keys are provisional until SCRUM-116/129/130/131 settle them.

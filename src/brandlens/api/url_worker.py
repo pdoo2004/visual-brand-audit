@@ -14,7 +14,7 @@ from brandlens.api import db as database
 from brandlens.api.worker import Analyzer, run_job
 from brandlens.crawler.deduplicate import unique_downloads
 from brandlens.crawler.discovery import DiscoverySettings, discover_images
-from brandlens.crawler.downloader import download_images
+from brandlens.crawler.downloader import DownloadCode, download_images
 
 log = logging.getLogger(__name__)
 
@@ -58,21 +58,10 @@ async def run_url_job(
             len(duplicates),
         )
 
-        if not downloaded.downloaded:
-            reason = (
-                discovery.failed_pages[0].reason
-                if discovery.failed_pages
-                else "No supported images could be downloaded from the submitted webpage."
-            )
-            with database.get_conn(db_path) as conn:
-                database.set_job_status(
-                    conn, job_id, "failed", error_code="INTERNAL_ERROR",
-                    error_message=f"URL analysis could not obtain images: {reason}",
-                )
-            return
-
         image_records: list[tuple[str, Path]] = []
+
         with database.get_conn(db_path) as conn:
+            # Successfully downloaded images enter the analysis pipeline.
             for ordinal, image in enumerate(unique_images):
                 image_id = database.create_image(
                     conn,
@@ -82,6 +71,59 @@ async def run_url_job(
                     raw_path=str(image.path),
                 )
                 image_records.append((image_id, image.path))
+
+            # Failed downloads remain visible in the results,
+            # but do not enter preprocessing or analysis.
+            for ordinal, failure in enumerate(
+                downloaded.failed, start=len(unique_images)
+            ):
+                image_id = database.create_image(
+                    conn,
+                    job_id=job_id,
+                    ordinal=ordinal,
+                    source=failure.url,
+                )
+
+                too_large = failure.code == DownloadCode.TOO_LARGE
+
+                database.save_image_result(
+                    conn,
+                    image_id,
+                    status="failed",
+                    error_code=(
+                        "FILE_TOO_LARGE"
+                        if too_large
+                        else f"DOWNLOAD_{failure.code.upper()}"
+                    ),
+                    error_message=(
+                        "Image exceeds the 10 MB download limit."
+                        if too_large
+                        else failure.message
+                    ),
+                )
+
+        # If nothing was downloaded successfully, end the job.
+        # Failed image records remain available in the results API.
+        if not unique_images:
+            reason = (
+                "Image exceeds the 10 MB download limit."
+                if downloaded.failed and downloaded.failed[0].code == DownloadCode.TOO_LARGE
+                else downloaded.failed[0].message
+                if downloaded.failed
+                else discovery.failed_pages[0].reason
+                if discovery.failed_pages
+                else "No supported images could be downloaded from the submitted webpage."
+            )
+
+            with database.get_conn(db_path) as conn:
+                database.set_job_status(
+                    conn,
+                    job_id,
+                    "failed",
+                    error_code="CRAWL_FAILED",
+                    error_message=f"URL analysis could not obtain images: {reason}",
+                )
+            return
 
         log.info(
             "URL job %s: %d pages, %d downloaded, %d rejected",
