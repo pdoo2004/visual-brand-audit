@@ -1,0 +1,2 @@
+run_label,images_per_batch,measured_runs,median_batch_seconds,median_images_per_second,seconds_per_image_at_median,minimum_batch_seconds,maximum_batch_seconds,repeat_outputs_consistent
+baseline,10,11,3.368672599986894,2.9685283158829106,0.3368672599986894,3.1398057999904267,4.25147739998647,True

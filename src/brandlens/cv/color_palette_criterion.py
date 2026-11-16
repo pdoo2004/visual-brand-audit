@@ -10,6 +10,7 @@ from typing import Any
 
 import cv2
 import numpy as np
+from scipy.spatial.distance import cdist
 from sklearn.cluster import KMeans
 
 from .criterion_base import CriterionBase
@@ -144,9 +145,15 @@ class ColorPaletteCriterion(CriterionBase):
         else:
             sample = pixels
         sample_lab = self._rgb_to_lab(sample)
-        unique_lab = np.unique(sample_lab, axis=0)
-        cluster_count = min(self._settings["n_clusters"], len(unique_lab))
-        if cluster_count == len(unique_lab):
+        # Most photographs have far more colors than clusters. A prefix can
+        # prove that without sorting the entire sample. Low-diversity images
+        # still use the complete sample so their exact centers are preserved.
+        requested = self._settings["n_clusters"]
+        unique_lab = np.unique(sample_lab[:256], axis=0)
+        if len(unique_lab) <= requested and len(sample_lab) > 256:
+            unique_lab = np.unique(sample_lab, axis=0)
+        cluster_count = min(requested, len(unique_lab))
+        if len(unique_lab) <= requested:
             centers = unique_lab
         else:
             model = KMeans(
@@ -165,9 +172,10 @@ class ColorPaletteCriterion(CriterionBase):
         counts = np.zeros(len(centers), dtype=np.int64)
         for start in range(0, pixel_count, 10_000):
             lab = self._rgb_to_lab(pixels[start : start + 10_000])
-            squared_distance = np.sum(
-                (lab[:, None, :] - centers[None, :, :]) ** 2, axis=2
-            )
+            # The compiled direct-distance loop avoids per-channel broadcast
+            # temporaries. Squared Euclidean Lab distance preserves center order
+            # and argmin's first-center tie rule without a matrix norm identity.
+            squared_distance = cdist(lab, centers, metric="sqeuclidean")
             labels = np.argmin(squared_distance, axis=1)
             counts += np.bincount(labels, minlength=len(centers))
         colors = []
