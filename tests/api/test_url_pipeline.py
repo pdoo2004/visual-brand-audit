@@ -215,3 +215,109 @@ def test_duplicate_downloads_are_analyzed_once(
 
     assert len(images) == 1
     assert len(calls) == 1
+
+def test_oversized_url_image_visible_in_results(client, monkeypatch):
+    from brandlens.crawler.downloader import DownloadCode, DownloadFailure
+
+    http, app, _ = client
+    analyzed = []
+
+    async def download_with_oversized_image(urls, dest_dir):
+        dest_dir.mkdir(parents=True, exist_ok=True)
+
+        path = dest_dir / "small.png"
+        Image.new("RGB", (120, 120), "green").save(path)
+
+        return SimpleNamespace(
+            downloaded=[
+                SimpleNamespace(
+                    url="https://cdn.example/small.png",
+                    path=path,
+                )
+            ],
+            failed=[
+                DownloadFailure(
+                    url="https://cdn.example/large.png",
+                    code=DownloadCode.TOO_LARGE,
+                    message="Image exceeds the 10485760 byte limit.",
+                )
+            ],
+        )
+
+    monkeypatch.setattr(
+        url_worker, "download_images", download_with_oversized_image
+    )
+
+    def analyze(image, criteria):
+        analyzed.append(1)
+        return ImageAnalysis(
+            status="scored",
+            overall_score=85.0,
+            criteria=[],
+        )
+
+    app.state.analyzer = analyze
+
+    response = _submit(http)
+    assert response.status_code == 202
+    job_id = response.json()["job_id"]
+
+    progress = http.get(f"/api/v1/jobs/{job_id}").json()
+    assert progress["status"] == "completed_with_errors"
+    assert progress["progress"]["images_total"] == 2
+    assert progress["progress"]["images_failed"] == 1
+
+    results = http.get(f"/api/v1/jobs/{job_id}/results")
+    assert results.status_code == 200
+
+    images = results.json()["images"]
+    assert len(images) == 2
+    assert len(analyzed) == 1
+
+    assert images[0]["status"] == "scored"
+    assert images[0]["overall_score"] == 85.0
+
+    assert images[1]["status"] == "failed"
+    assert images[1]["source"] == "https://cdn.example/large.png"
+    assert images[1]["error_code"] == "FILE_TOO_LARGE"
+    assert "10 MB" in images[1]["error_message"]
+    assert images[1]["overall_score"] is None
+
+def test_all_oversized_url_images_remain_visible(client, monkeypatch):
+    from brandlens.crawler.downloader import DownloadCode, DownloadFailure
+
+    http, _, _ = client
+
+    async def download_only_oversized(urls, dest_dir):
+        return SimpleNamespace(
+            downloaded=[],
+            failed=[
+                DownloadFailure(
+                    url="https://cdn.example/large.png",
+                    code=DownloadCode.TOO_LARGE,
+                    message="Image exceeds the 10485760 byte limit.",
+                )
+            ],
+        )
+
+    monkeypatch.setattr(
+        url_worker, "download_images", download_only_oversized
+    )
+
+    response = _submit(http)
+    assert response.status_code == 202
+    job_id = response.json()["job_id"]
+
+    progress = http.get(f"/api/v1/jobs/{job_id}").json()
+    assert progress["status"] == "failed"
+    assert progress["progress"]["images_total"] == 1
+    assert progress["progress"]["images_failed"] == 1
+
+    results = http.get(f"/api/v1/jobs/{job_id}/results")
+    assert results.status_code == 200
+
+    images = results.json()["images"]
+    assert len(images) == 1
+    assert images[0]["status"] == "failed"
+    assert images[0]["error_code"] == "FILE_TOO_LARGE"
+    assert "10 MB" in images[0]["error_message"]

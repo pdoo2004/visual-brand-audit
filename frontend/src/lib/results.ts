@@ -62,7 +62,21 @@ const REJECT_TEXT: Record<string, string> = {
 /** One line explaining why an image has no score. */
 export function skippedReason(image: ImageResult): string {
   if (image.status === "filtered_out") {
-    return (image.reject_reason && REJECT_TEXT[image.reject_reason]) || "Skipped before analysis";
+    return (
+      (image.reject_reason && REJECT_TEXT[image.reject_reason]) ||
+      "Skipped before analysis"
+    );
   }
+
+  if (image.status === "failed") {
+    if (image.error_code === "FILE_TOO_LARGE") {
+      return "Download rejected: image exceeds the 10 MB limit";
+    }
+
+    if (image.error_message) {
+      return image.error_message;
+    }
+  }
+
   return "Analysis failed for this image";
 }

@@ -112,7 +112,7 @@ function JobProgressView({ jobId }: { jobId: string }) {
           <Link to="/" className="underline">
             New analysis
           </Link>
-          {finished && (
+          {(finished || jobFailed) && (
             <Link
               to={`/jobs/${jobId}/results`}
               className="rounded-control bg-ink px-4 py-2 text-sm font-medium text-surface hover:bg-ink/90"

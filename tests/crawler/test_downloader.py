@@ -234,3 +234,7 @@ def test_literal_public_ip_does_not_use_dns(tmp_path):
 def test_settings_reject_a_non_positive_cap():
     with pytest.raises(ValueError):
         DownloadSettings(max_concurrency=0)
+
+
+def test_default_download_limit_is_10mb():
+    assert DownloadSettings().max_bytes == 10 * 1024 * 1024

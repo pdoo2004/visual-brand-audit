@@ -146,6 +146,8 @@ export const imageResultSchema = z.object({
   source: z.string(), // "upload:name.jpg" or an image URL
   status: imageStatusSchema,
   reject_reason: rejectReasonSchema.nullish(),
+  error_code: z.string().nullish(),
+  error_message: z.string().nullish(),
   overall_score: z.number().nullable(),
   flagged: z.boolean().default(false),
   measurements: z.record(z.string(), z.unknown()).nullish(), // provisional keys
