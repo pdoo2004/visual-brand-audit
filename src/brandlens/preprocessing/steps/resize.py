@@ -2,6 +2,7 @@
 
 from PIL import Image
 
+
 def resize_to_fit(
     image: Image.Image,
     max_size: tuple[int, int] | None,

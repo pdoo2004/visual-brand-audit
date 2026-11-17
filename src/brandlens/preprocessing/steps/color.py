@@ -4,6 +4,7 @@ from io import BytesIO
 
 from PIL import Image, ImageCms
 
+
 def convert_to_rgb(
     image: Image.Image,
     background: tuple[int, int, int] = (255, 255, 255),

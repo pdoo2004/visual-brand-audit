@@ -151,9 +151,6 @@ class TestFilterToggle(unittest.TestCase):
                 filter_photo(image, settings)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class TestFilterRejectReason(unittest.TestCase):
     """Test the rejection reason, which must agree with filter_photo."""
@@ -193,3 +190,7 @@ class TestFilterRejectReason(unittest.TestCase):
         with Image.new("RGB", (100, 100)) as image:
             with self.assertRaises(TypeError):
                 filter_reject_reason(image, settings="bad")
+
+
+if __name__ == "__main__":
+    unittest.main()
