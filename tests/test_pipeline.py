@@ -178,6 +178,7 @@ def test_cv_stages_log_success_and_failure(components, caplog):
         assert "/secret/customer.jpg" not in caplog.text
     finally:
         image.close()
+@pytest.mark.regression  # AC-5: VLM failure falls back to CV-only with needs-review flag
 def test_vlm_model_failure_becomes_unavailable_envelope(monkeypatch):
     """SCRUM-139: timeout/malformed VLM must not crash; tone is needs-review."""
     entry = {
@@ -198,6 +199,7 @@ def test_vlm_model_failure_becomes_unavailable_envelope(monkeypatch):
     assert any("timeout" in err.lower() for err in envelope["errors"])
 
 
+@pytest.mark.regression  # AC-5
 def test_score_image_partial_when_vlm_unavailable():
     """CV still scores when the VLM envelope marks failure."""
     from brandlens.scoring import score_image

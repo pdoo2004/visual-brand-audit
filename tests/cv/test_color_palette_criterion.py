@@ -3,6 +3,7 @@
 import json
 import unittest
 
+import pytest
 import numpy as np
 from PIL import Image
 
@@ -88,6 +89,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
         self.assertEqual(colors[0]["proportion"], 1.0)
         self.assertEqual(result["measurements"]["palette_distance"], 0.0)
 
+    @pytest.mark.regression  # AC-3: CV criteria produce a score and explanation
     def test_known_black_white_weighted_distance(self):
         image = self.image([(0, 0, 0)] * 3 + [(255, 255, 255)])
         result = ColorPaletteCriterion({"brand_palette": ["#000000"]}).analyze(
@@ -177,6 +179,7 @@ class TestColorPaletteCriterion(unittest.TestCase):
                     colors, sorted(colors, key=lambda c: (-c["proportion"], *c["lab"]))
                 )
 
+    @pytest.mark.regression  # AC-3
     def test_result_schema_json_and_input_preservation(self):
         image = self.image([(0, 0, 0), (255, 255, 255)])
         image.info["example"] = "keep"

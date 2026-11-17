@@ -43,6 +43,9 @@ subject = ["transformers", "torch", "torchvision"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "regression: MVP acceptance criteria regression suite (run with -m regression)",
+]
 
 [tool.ruff.lint]
 ignore = ["SIM117"]

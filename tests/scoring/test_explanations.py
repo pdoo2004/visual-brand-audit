@@ -2,6 +2,8 @@
 
 import unittest
 
+import pytest
+
 from brandlens.scoring import (
     CriterionScore,
     ImageScore,
@@ -30,11 +32,13 @@ def _row(**kwargs):
 
 
 class TestExplanations(unittest.TestCase):
+    @pytest.mark.regression  # AC-3: CV criteria produce explanations
     def test_pass_explanation_cites_evidence(self):
         text = explain_criterion(_row())
         self.assertIn("passed", text.lower())
         self.assertIn("mean_luminance", text)
 
+    @pytest.mark.regression  # AC-3
     def test_fail_explanation_cites_reason(self):
         text = explain_criterion(
             _row(score=0.0, evidence=(), reasons=("mean_luminance 10 < mean_luminance_min 40",))
@@ -42,6 +46,7 @@ class TestExplanations(unittest.TestCase):
         self.assertIn("failed", text.lower())
         self.assertIn("mean_luminance", text)
 
+    @pytest.mark.regression  # AC-4: VLM explanation included in output
     def test_vlm_explanation_includes_label_and_evidence(self):
         text = explain_criterion(
             _row(
@@ -70,6 +75,7 @@ class TestExplanations(unittest.TestCase):
         self.assertIn("needs review", text.lower())
         self.assertIn("timeout", text.lower())
 
+    @pytest.mark.regression  # AC-6: scoring engine produces overall summary
     def test_summary_identifies_partial_and_review(self):
         scored = ImageScore(
             rubric_id="test",
@@ -94,6 +100,7 @@ class TestExplanations(unittest.TestCase):
         self.assertIn("Overall score 100/100 (partial)", summary)
         self.assertIn("Needs review: tone_approachability", summary)
 
+    @pytest.mark.regression  # AC-6
     def test_summary_notes_flagged(self):
         scored = ImageScore(
             rubric_id="test",
@@ -104,6 +111,7 @@ class TestExplanations(unittest.TestCase):
         )
         self.assertIn("Flagged", summarize_image(scored))
 
+    @pytest.mark.regression  # AC-6
     def test_attach_explanations_ready_for_persistence(self):
         rubric = {
             "rubric_id": "t",

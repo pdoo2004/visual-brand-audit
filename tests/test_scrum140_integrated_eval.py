@@ -43,6 +43,7 @@ def configuration():
     return load_cv_config(CONFIG)
 
 
+@pytest.mark.regression  # AC-9: full pipeline completes end-to-end
 def test_integrated_pipeline_scores_sample_with_explanations(configuration):
     path = SAMPLES / "01-coffee-shop.jpg"
     assert path.is_file()
@@ -64,6 +65,7 @@ def test_integrated_pipeline_scores_sample_with_explanations(configuration):
     assert "Overall score" in summary
 
 
+@pytest.mark.regression  # AC-5
 def test_integrated_pipeline_survives_vlm_failure(configuration):
     path = SAMPLES / "03-neon-city.jpg"
     image = Image.open(path)

@@ -1,5 +1,6 @@
 import unittest
 
+import pytest
 from PIL import Image
 
 from brandlens.preprocessing.photo_filter import (
@@ -52,6 +53,7 @@ class TestFilterPhoto(unittest.TestCase):
                 with Image.new("RGB", size) as image:
                     self.assertIs(filter_photo(image), image)
 
+    @pytest.mark.regression  # AC-1: photo filter rejects images by geometry
     def test_rejects_short_side_below_minimum(self):
         for size in ((63, 100), (100, 63)):
             with self.subTest(size=size):
@@ -68,6 +70,7 @@ class TestFilterPhoto(unittest.TestCase):
                 with Image.new("RGB", size) as image:
                     self.assertIs(filter_photo(image), image)
 
+    @pytest.mark.regression  # AC-1
     def test_rejects_aspect_ratio_above_maximum(self):
         for size in ((321, 64), (64, 321)):
             with self.subTest(size=size):
