@@ -4,6 +4,7 @@ import json
 import math
 import unittest
 
+import pytest
 from PIL import Image
 
 from brandlens.cv.contrast_criterion import ContrastCriterion
@@ -54,6 +55,7 @@ class TestContrastCriterion(unittest.TestCase):
                 with self.subTest(value=type(value)), self.assertRaises(TypeError):
                     ContrastCriterion().analyze(value)
 
+    @pytest.mark.regression  # AC-3: CV criteria produce a score and explanation
     def test_result_contract(self):
         result = self.analyze_values([0, 255])
         self.assertEqual(
@@ -127,6 +129,7 @@ class TestContrastCriterion(unittest.TestCase):
         self.assertAlmostEqual(m["luminance_std"], math.sqrt(125))
         self.assertAlmostEqual(m["p5_p95_range"], 27.0)
 
+    @pytest.mark.regression  # AC-3
     def test_equal_black_white_maximum_std(self):
         m = self.analyze_values([0, 255])["measurements"]
         self.assertEqual(m["luminance_std"], 127.5)

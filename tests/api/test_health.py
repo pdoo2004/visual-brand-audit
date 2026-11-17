@@ -1,5 +1,6 @@
 """Tests for the API scaffold (SCRUM-152): health check, docs, settings."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from brandlens.api.app import create_app
@@ -10,6 +11,7 @@ def make_client(settings: Settings | None = None) -> TestClient:
     return TestClient(create_app(settings or Settings()))
 
 
+@pytest.mark.regression  # AC-7: API health check
 def test_health_returns_ok_and_version():
     response = make_client().get("/health")
     assert response.status_code == 200

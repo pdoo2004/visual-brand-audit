@@ -4,6 +4,7 @@ import json
 import unittest
 from math import hypot
 
+import pytest
 from PIL import Image
 
 from brandlens.cv.cv_input import CVInput
@@ -21,6 +22,7 @@ class TestSubjectFramingCriterion(unittest.TestCase):
         self.image = Image.new('RGB', (200, 100))
         self.addCleanup(self.image.close)
 
+    @pytest.mark.regression  # AC-3: CV criteria produce a score and explanation
     def test_center_coverage_margins(self):
         result = SubjectFramingCriterion().analyze(CVInput(self.image, region()))
         m = result['measurements']
@@ -30,6 +32,7 @@ class TestSubjectFramingCriterion(unittest.TestCase):
         self.assertFalse(m['near_edge'])
         self.assertEqual(result['subject_region']['source'], 'manual')
 
+    @pytest.mark.regression  # AC-3
     def test_thirds_anchor(self):
         box = region(1/3-.05, 2/3-.05, 1/3+.05, 2/3+.05)
         m = SubjectFramingCriterion().analyze(CVInput(self.image, box))['measurements']

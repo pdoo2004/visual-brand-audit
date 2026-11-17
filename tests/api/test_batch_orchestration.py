@@ -83,6 +83,7 @@ def _scored(score: float):
     return analyze
 
 
+@pytest.mark.regression  # AC-10: batch orchestration processes every image
 def test_every_image_is_processed_exactly_once(env):
     job_id, records = _make_job(env, [_png() for _ in range(5)])
     calls: list[int] = []
@@ -126,6 +127,7 @@ def test_rerunning_a_job_does_not_process_images_again(env):
     assert _job_status(env, job_id) == "completed"
 
 
+@pytest.mark.regression  # AC-10
 def test_one_failing_image_does_not_stop_the_batch(env):
     job_id, records = _make_job(env, [_png() for _ in range(4)])
     seen = {"n": 0}
@@ -171,6 +173,7 @@ def test_partial_result_makes_the_job_completed_with_errors(env):
     assert _job_status(env, job_id) == "completed_with_errors"
 
 
+@pytest.mark.regression  # AC-10
 def test_mixed_batch_reports_per_image_status(env):
     files = [_png(), b"this is not an image", _png(10, 10), _png()]
     job_id, records = _make_job(env, files)

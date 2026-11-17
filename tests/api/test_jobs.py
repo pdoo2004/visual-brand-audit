@@ -60,6 +60,7 @@ def _upload(client: TestClient, *, n: int = 1, rubric_id: str = "default-v1-draf
 # Submission
 # ---------------------------------------------------------------------------
 
+@pytest.mark.regression  # AC-7: API accepts upload and returns job ID
 def test_submit_returns_202_with_job_id(client):
     r = _upload(client)
     assert r.status_code == 202
@@ -127,6 +128,7 @@ def test_submit_rejects_unknown_rubric(client):
 # Status polling
 # ---------------------------------------------------------------------------
 
+@pytest.mark.regression  # AC-7
 def test_poll_returns_job_status_with_progress(client):
     submit = _upload(client, n=2)
     job_id = submit.json()["job_id"]
@@ -154,6 +156,7 @@ def test_poll_invalid_uuid_returns_404(client):
 # Async execution (BackgroundTasks run synchronously inside TestClient)
 # ---------------------------------------------------------------------------
 
+@pytest.mark.regression  # AC-7
 def test_background_worker_completes_job(client):
     """Submit → background task processes images → job reaches a terminal state."""
     submit = _upload(client, n=1)

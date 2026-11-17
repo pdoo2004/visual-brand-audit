@@ -78,6 +78,7 @@ def _client(handler, **kw) -> ModelClient:
     )
 
 
+@pytest.mark.regression  # AC-4: VLM client sends valid request and parses reply
 def test_valid_reply_returns_criteria(request_, image_path):
     with _client(lambda r: _reply(_good())) as c:
         result = c.judge(request_, image_path)
@@ -93,6 +94,7 @@ def test_code_fenced_json_is_accepted(request_, image_path):
     assert result.criteria[0].fit_score == 4
 
 
+@pytest.mark.regression  # AC-4
 def test_request_is_openai_chat_shape(request_, image_path):
     seen = {}
 
@@ -141,6 +143,7 @@ def test_from_settings(request_, image_path):
         assert c.judge(request_, image_path).criteria
 
 
+@pytest.mark.regression  # AC-4
 def test_one_retry_then_success(request_, image_path):
     calls = []
 
@@ -171,6 +174,7 @@ def test_one_retry_then_success(request_, image_path):
         (lambda r: _reply(_good(fit_score=9)), "invalid_output"),
     ],
 )
+@pytest.mark.regression  # AC-5: VLM failure raises ModelFailure
 def test_two_failures_raise_model_failure(request_, image_path, handler, reason):
     with _client(handler) as c, pytest.raises(ModelFailure) as err:
         c.judge(request_, image_path)

@@ -52,6 +52,7 @@ def _criterion(cid: str, score: float | None = 80.0, **kw) -> dict:
     return base
 
 
+@pytest.mark.regression  # AC-8: results persisted and retrievable
 def test_store_then_retrieve_by_job_id(conn):
     job_id, (img, _) = _job_with_images(conn)
     database.save_image_result(
@@ -79,6 +80,7 @@ def test_store_then_retrieve_by_job_id(conn):
     assert json.loads(rows[0]["evidence_json"]) == ["mean luminance 120"]
 
 
+@pytest.mark.regression  # AC-8
 def test_unavailable_criterion_is_stored_with_null_score(conn):
     job_id, (img, _) = _job_with_images(conn)
     database.save_image_result(

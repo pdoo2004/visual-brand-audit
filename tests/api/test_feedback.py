@@ -59,6 +59,7 @@ def _post(client, image_id, body):
     return client.post(f"/api/v1/images/{image_id}/feedback", json=body)
 
 
+@pytest.mark.regression  # AC-8: feedback stored and retrievable
 def test_whole_image_feedback_is_stored_and_returned(client, seeded):
     _, img, _ = seeded
     r = _post(client, img, {"verdict": "agree", "comment": "  looks right  "})
@@ -92,6 +93,7 @@ def test_history_is_kept_newest_first(client, seeded):
     )
 
 
+@pytest.mark.regression  # AC-8
 def test_feedback_shows_up_in_job_results(client, seeded):
     job_id, img, _ = seeded
     _post(client, img, {"verdict": "disagree", "comment": "too dark"})

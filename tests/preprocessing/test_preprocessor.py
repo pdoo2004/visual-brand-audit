@@ -3,6 +3,7 @@
 import unittest
 from unittest.mock import patch
 
+import pytest
 from PIL import Image
 
 from brandlens.preprocessing.photo_filter import FilterSettings
@@ -23,6 +24,7 @@ class TestPreprocessor(unittest.TestCase):
             self.addCleanup(image.close)
         return result
 
+    @pytest.mark.regression  # AC-2: images standardized before analysis
     def test_single_image_returns_new_rgb_image(self):
         original = self.image("L", color=75)
         output = preprocess_image(original)
@@ -36,6 +38,7 @@ class TestPreprocessor(unittest.TestCase):
             self.assertIsNone(preprocess_image(self.image(size=(32, 32))))
             standardize.assert_not_called()
 
+    @pytest.mark.regression  # AC-2
     def test_filter_runs_before_resize(self):
         output = preprocess_image(
             self.image(), standardization_settings=StandardizationSettings(max_size=(32, 32))
