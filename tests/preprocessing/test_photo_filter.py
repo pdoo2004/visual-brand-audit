@@ -128,6 +128,29 @@ class TestFilterPhoto(unittest.TestCase):
                     self.assertEqual(image.info, original_metadata)
 
 
+class TestFilterToggle(unittest.TestCase):
+    def test_enabled_requires_boolean(self):
+        for value in (None, 0, 1, "false"):
+            with self.subTest(value=value), self.assertRaises(TypeError):
+                FilterSettings(enabled=value)
+
+    def test_disabled_filter_accepts_small_and_extreme_images(self):
+        for size in ((10, 10), (1000, 10)):
+            with self.subTest(size=size), Image.new("RGB", size) as image:
+                settings = FilterSettings(enabled=False)
+                self.assertIsNone(filter_reject_reason(image, settings))
+                self.assertIs(filter_photo(image, settings), image)
+                self.assertIsNone(filter_photo(image))
+
+    def test_disabled_filter_still_rejects_invalid_images(self):
+        settings = FilterSettings(enabled=False)
+        with self.assertRaises(TypeError):
+            filter_photo(None, settings)
+        with Image.new("RGB", (0, 10)) as image:
+            with self.assertRaises(ValueError):
+                filter_photo(image, settings)
+
+
 if __name__ == "__main__":
     unittest.main()
 

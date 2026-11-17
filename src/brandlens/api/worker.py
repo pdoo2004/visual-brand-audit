@@ -38,7 +38,7 @@ from brandlens.logger import image_logging_context, log_image_event, track_curre
 from brandlens.preprocessing.image_io import load_image
 from brandlens.preprocessing.photo_filter import FilterSettings, filter_reject_reason
 from brandlens.preprocessing.preprocessor import preprocess_image
-from brandlens.preprocessing.standardization import StandardizationSettings
+from brandlens.preprocessing.photo_standardization import StandardizationSettings
 
 log = logging.getLogger(__name__)
 

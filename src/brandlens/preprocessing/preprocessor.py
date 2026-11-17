@@ -7,7 +7,7 @@ from PIL import Image
 from brandlens.logger import log_image_event, track_current_stage
 
 from .photo_filter import FilterSettings, filter_photo
-from .standardization import StandardizationSettings, standardize_image
+from .photo_standardization import StandardizationSettings, standardize_image
 
 
 def _resolve_settings(filter_settings, standardization_settings):

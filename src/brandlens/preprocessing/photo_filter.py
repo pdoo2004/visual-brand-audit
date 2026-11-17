@@ -8,7 +8,7 @@ from PIL import Image
 class FilterSettings:
     """
     Settings for filtering images by size and aspect ratio.
-    
+
     Attributes:
         min_short_side (int): Minimum allowed length of the shorter
             image side, in pixels. Defaults to 64.
@@ -18,6 +18,7 @@ class FilterSettings:
 
     min_short_side: int = 64
     max_aspect_ratio: float = 5.0
+    enabled: bool = True
 
     def __post_init__(self):
         # Check minimum image size.
@@ -31,6 +32,8 @@ class FilterSettings:
             raise TypeError("max_aspect_ratio must be a number.")
         if not isfinite(self.max_aspect_ratio) or self.max_aspect_ratio < 1:
             raise ValueError("max_aspect_ratio must be finite and at least 1.")
+        if type(self.enabled) is not bool:
+            raise TypeError("enabled must be a boolean.")
 
 def filter_reject_reason(
     image: Image.Image,
@@ -67,6 +70,8 @@ def filter_reject_reason(
 
     if short_side <= 0:
         raise ValueError("Image dimensions must be positive.")
+    if not settings.enabled:
+        return None
     if short_side < settings.min_short_side:
         return "too_small"
     if long_side / short_side > settings.max_aspect_ratio:
@@ -83,7 +88,7 @@ def filter_photo(
 
     Checks minimum side length and longest-to-shortest side ratio.
     Does not modify the image or confirm that it is a photograph.
-    
+
     Args:
         image (Image.Image): Input Pillow image. It is not modified.
         settings (FilterSettings | None): Filtering thresholds.

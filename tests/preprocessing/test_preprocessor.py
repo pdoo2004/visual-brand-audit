@@ -7,7 +7,7 @@ from PIL import Image
 
 from brandlens.preprocessing.photo_filter import FilterSettings
 from brandlens.preprocessing.preprocessor import preprocess_batch, preprocess_image
-from brandlens.preprocessing.standardization import StandardizationSettings
+from brandlens.preprocessing.photo_standardization import StandardizationSettings
 
 
 class TestPreprocessor(unittest.TestCase):
