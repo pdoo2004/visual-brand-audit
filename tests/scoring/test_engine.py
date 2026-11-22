@@ -5,7 +5,6 @@ import unittest
 from pathlib import Path
 
 import pytest
-
 from PIL import Image
 
 from brandlens.api.schemas.results import CriterionResult

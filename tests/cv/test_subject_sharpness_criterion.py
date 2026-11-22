@@ -3,8 +3,8 @@
 import json
 import unittest
 
-import pytest
 import numpy as np
+import pytest
 from PIL import Image, ImageFilter
 
 from brandlens.cv.cv_input import CVInput

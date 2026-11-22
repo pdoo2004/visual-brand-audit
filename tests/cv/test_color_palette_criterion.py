@@ -3,8 +3,8 @@
 import json
 import unittest
 
-import pytest
 import numpy as np
+import pytest
 from PIL import Image
 
 from brandlens.cv.color_palette_criterion import ColorPaletteCriterion

@@ -48,7 +48,7 @@ Run only the MVP regression suite (54 tests, no external dependencies, ~3 s):
 pytest -m regression
 ```
 
-The regression suite covers all 10 MVP acceptance criteria derived from the completed SCRUM backlog items:
+The regression suite covers 10 backend MVP acceptance criteria (preprocessing, CV, VLM, scoring, API, persistence, and batch orchestration). The React frontend and URL-submission workflow are not included in this selection. Criteria are derived from the completed SCRUM backlog items:
 
 | Acceptance criterion | SCRUM tickets |
 |---|---|
