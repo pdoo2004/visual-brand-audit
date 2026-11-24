@@ -39,12 +39,29 @@ class Settings:
     # Which analysis the worker runs on each image: "placeholder" (stub scores, no model
     # needed; the default so the API starts anywhere) or "pipeline" (real CV + VLM scoring).
     analyzer: str = "placeholder"
+    # Upload limits (SCRUM-161). The per-file size matches the interface contract and the
+    # frontend (10 MB); the pixel cap matches preprocessing.image_io.load_image (25 MP).
+    max_file_bytes: int = 10 * 1024 * 1024
+    max_files_per_request: int = 20
+    max_total_bytes: int = 100 * 1024 * 1024
+    max_image_pixels: int = 25_000_000
 
     def __post_init__(self) -> None:
         if self.analyzer not in ("placeholder", "pipeline"):
             raise ValueError(
                 f"analyzer must be 'placeholder' or 'pipeline', got {self.analyzer!r}"
             )
+        for name in (
+            "max_file_bytes",
+            "max_files_per_request",
+            "max_total_bytes",
+            "max_image_pixels",
+        ):
+            value = getattr(self, name)
+            if type(value) is not int or value < 1:
+                raise ValueError(f"{name} must be a positive integer, got {value!r}")
+        if self.max_total_bytes < self.max_file_bytes:
+            raise ValueError("max_total_bytes must be at least max_file_bytes")
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -68,4 +85,14 @@ class Settings:
                 os.getenv("BRANDLENS_MODEL_MAX_RETRIES", str(cls.model_max_retries))
             ),
             analyzer=os.getenv("BRANDLENS_ANALYZER", cls.analyzer).strip().lower(),
+            max_file_bytes=int(os.getenv("BRANDLENS_MAX_FILE_BYTES", str(cls.max_file_bytes))),
+            max_files_per_request=int(
+                os.getenv("BRANDLENS_MAX_FILES_PER_REQUEST", str(cls.max_files_per_request))
+            ),
+            max_total_bytes=int(
+                os.getenv("BRANDLENS_MAX_TOTAL_BYTES", str(cls.max_total_bytes))
+            ),
+            max_image_pixels=int(
+                os.getenv("BRANDLENS_MAX_IMAGE_PIXELS", str(cls.max_image_pixels))
+            ),
         )

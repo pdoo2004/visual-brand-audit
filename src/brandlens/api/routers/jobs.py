@@ -7,10 +7,12 @@ GET  /api/v1/jobs/{job_id}/results →  200 JobResults (409 while the job is sti
 
 from __future__ import annotations
 
+import io
 import json
 import logging
 import re
 import uuid
+import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
@@ -24,6 +26,7 @@ from fastapi import (
     Request,
     UploadFile,
 )
+from PIL import Image
 from pydantic import ValidationError
 
 from brandlens.api import db as database
@@ -46,14 +49,30 @@ log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["jobs"])
 
-_MAX_FILE_BYTES = 20 * 1024 * 1024  # 20 MB
-
-
 def _sniff_is_image(head: bytes) -> bool:
     """True for JPEG/PNG/WebP, judged by the file's own bytes (client Content-Type is not trusted)."""
     if head.startswith((b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n")):
         return True
     return head[:4] == b"RIFF" and head[8:12] == b"WEBP"
+
+
+def _exceeds_pixel_limit(data: bytes, max_pixels: int) -> bool:
+    """True if the image's declared size is over max_pixels.
+
+    Only the header is read (no decoding), so a small file that claims a huge canvas is
+    caught here at almost no cost. A file Pillow cannot parse is not rejected here: it
+    still fails per image in the worker, as before.
+    """
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", Image.DecompressionBombWarning)
+            with Image.open(io.BytesIO(data)) as image:
+                width, height = image.size
+    except Image.DecompressionBombError:
+        return True
+    except (OSError, ValueError, SyntaxError):
+        return False
+    return width * height > max_pixels
 
 
 def _display_name(name: str | None) -> str:
@@ -73,10 +92,12 @@ def _load_rubric_criteria(rubric_path: Path, rubric_id: str) -> list[str]:
     try:
         rubric = json.loads(rubric_path.read_text())
     except (OSError, json.JSONDecodeError) as exc:
+        # The reason can contain server file paths: log it, don't send it to the client.
+        log.error("could not read rubric file %s: %s", rubric_path, exc)
         raise HTTPException(
             status_code=500,
-            detail=_error(ErrorCode.INTERNAL_ERROR, f"Could not read rubric file: {exc}"),
-        )
+            detail=_error(ErrorCode.INTERNAL_ERROR, "The rubric could not be loaded."),
+        ) from exc
     if rubric.get("rubric_id") != rubric_id:
         raise HTTPException(
             status_code=422,
@@ -90,6 +111,28 @@ def _load_rubric_criteria(rubric_path: Path, rubric_id: str) -> list[str]:
 
 def _error(code: ErrorCode, message: str) -> dict:
     return ErrorBody(code=code, message=message).model_dump()
+
+
+def resolve_criteria(
+    rubric_path: Path, rubric_id: str, criterion_ids: list[str] | None
+) -> list[str]:
+    """Criteria to evaluate: the caller's subset, or every rubric criterion if none given.
+
+    Always checks the rubric id, and rejects any criterion the rubric does not define,
+    so an invalid request is refused before a job is created. Used by both endpoints.
+    """
+    valid = _load_rubric_criteria(rubric_path, rubric_id)
+    if criterion_ids is None:
+        return valid
+    unknown = sorted(set(criterion_ids) - set(valid))
+    if unknown:
+        raise HTTPException(
+            status_code=422,
+            detail=_error(
+                ErrorCode.VALIDATION_ERROR, "Unknown criterion IDs: " + ", ".join(unknown)
+            ),
+        )
+    return criterion_ids
 
 
 @router.post(
@@ -113,6 +156,7 @@ async def submit_upload(
     upload_dir: Path = request.app.state.upload_dir
     processed_dir: Path = request.app.state.processed_dir
     rubric_path: Path = request.app.state.rubric_path
+    limits = request.app.state.settings
 
     # Validate non-file form fields with the existing Pydantic schema.
     try:
@@ -132,17 +176,44 @@ async def submit_upload(
             detail=_error(ErrorCode.VALIDATION_ERROR, "At least one file is required."),
         )
 
+    if len(files) > limits.max_files_per_request:
+        raise HTTPException(
+            status_code=422,
+            detail=_error(
+                ErrorCode.VALIDATION_ERROR,
+                f"Too many files: {len(files)}. The limit is {limits.max_files_per_request} "
+                "per request.",
+            ),
+        )
+
+    # Check the rubric and criteria now, before any file is read or stored.
+    criteria = resolve_criteria(rubric_path, opts.rubric_id, opts.criterion_ids)
+
+    max_file_mb = limits.max_file_bytes // (1024 * 1024)
+    max_pixels_mp = limits.max_image_pixels // 1_000_000
+
     # Validate each file on its own: keep the good ones, report the bad ones.
     pending: list[tuple[str, bytes]] = []  # (display filename, data)
     rejected: list[RejectedUpload] = []
+    total_bytes = 0
     for f in files:
         name = _display_name(f.filename)
-        data = await f.read(_MAX_FILE_BYTES + 1)
-        if len(data) > _MAX_FILE_BYTES:
+        data = await f.read(limits.max_file_bytes + 1)
+        total_bytes += len(data)
+        if total_bytes > limits.max_total_bytes:
+            raise HTTPException(
+                status_code=413,
+                detail=_error(
+                    ErrorCode.FILE_TOO_LARGE,
+                    f"Request exceeds the {limits.max_total_bytes // (1024 * 1024)} MB "
+                    "total upload limit.",
+                ),
+            )
+        if len(data) > limits.max_file_bytes:
             rejected.append(RejectedUpload(
                 filename=name,
                 code=ErrorCode.FILE_TOO_LARGE,
-                message="File exceeds the 20 MB per-file limit.",
+                message=f"File exceeds the {max_file_mb} MB per-file limit.",
             ))
         elif not data:
             rejected.append(RejectedUpload(
@@ -153,6 +224,12 @@ async def submit_upload(
                 filename=name,
                 code=ErrorCode.UNSUPPORTED_FILE_TYPE,
                 message="Not a supported image. Use JPEG, PNG, or WebP.",
+            ))
+        elif _exceeds_pixel_limit(data, limits.max_image_pixels):
+            rejected.append(RejectedUpload(
+                filename=name,
+                code=ErrorCode.VALIDATION_ERROR,
+                message=f"Image is too large in pixels. The limit is {max_pixels_mp} MP.",
             ))
         else:
             pending.append((name, data))
@@ -165,9 +242,6 @@ async def submit_upload(
             details=[r.model_dump(mode="json") for r in rejected],
         ).model_dump(mode="json")
         raise HTTPException(status_code=_REJECT_STATUS.get(first.code, 422), detail=body)
-
-    # Resolve criteria — rubric default when caller omits criterion_ids.
-    criteria = opts.criterion_ids or _load_rubric_criteria(rubric_path, opts.rubric_id)
 
     # Generate job UUID upfront so we can use it as the upload subdirectory.
     job_id = str(uuid.uuid4())

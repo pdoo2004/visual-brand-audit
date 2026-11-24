@@ -1,6 +1,10 @@
 export const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const ACCEPT_ATTRIBUTE = ALLOWED_MIME_TYPES.join(",");
 export const MAX_FILE_BYTES = 10 * 1024 * 1024; // contract: proposed 10 MB per file
+// Batch limits. These mirror the API defaults (BRANDLENS_MAX_FILES_PER_REQUEST and
+// BRANDLENS_MAX_TOTAL_BYTES); the API enforces them regardless, this just warns earlier.
+export const MAX_FILES = 20;
+export const MAX_TOTAL_BYTES = 100 * 1024 * 1024;
 
 export interface FileProblem {
   fileName: string;
@@ -42,6 +46,30 @@ export function mergeFiles(current: File[], incoming: File[]): File[] {
   const key = (f: File) => `${f.name}|${f.size}|${f.lastModified}`;
   const seen = new Set(current.map(key));
   return [...current, ...incoming.filter((f) => !seen.has(key(f)))];
+}
+
+/** Keeps files in order until the batch would pass the file-count or total-size limit. */
+export function capFiles(files: File[]): FileSplit {
+  const accepted: File[] = [];
+  const rejected: FileProblem[] = [];
+  let total = 0;
+  for (const file of files) {
+    if (accepted.length >= MAX_FILES) {
+      rejected.push({
+        fileName: file.name,
+        message: `Not added. One analysis can include up to ${MAX_FILES} photos.`,
+      });
+    } else if (total + file.size > MAX_TOTAL_BYTES) {
+      rejected.push({
+        fileName: file.name,
+        message: `Not added. One analysis can include up to ${formatMb(MAX_TOTAL_BYTES)} in total.`,
+      });
+    } else {
+      accepted.push(file);
+      total += file.size;
+    }
+  }
+  return { accepted, rejected };
 }
 
 export interface FormErrors {
