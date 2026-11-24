@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """QLoRA fine-tune of Gemma 4 12B on the BrandLens B1 chat JSONL.
 
 Default base model: google/gemma-4-12B-it
@@ -179,12 +178,12 @@ def main() -> None:
         processor.tokenizer.padding_side = "right"
 
     # Gemma 4 unified: prefer eager attn; transformers 5 uses dtype= over torch_dtype=.
-    load_kw = dict(
-        device_map="auto",
-        trust_remote_code=True,
-        attn_implementation="eager",
-        dtype=torch.bfloat16,
-    )
+    load_kw = {
+        "device_map": "auto",
+        "trust_remote_code": True,
+        "attn_implementation": "eager",
+        "dtype": torch.bfloat16,
+    }
     if args.no_4bit:
         model = AutoModelForImageTextToText.from_pretrained(args.model, **load_kw)
     else:
@@ -213,7 +212,9 @@ def main() -> None:
     model.print_trainable_parameters()
 
     train_ds = Dataset.from_list([example_from_row(r) for r in train_rows])
-    eval_ds = Dataset.from_list([example_from_row(r) for r in eval_rows]) if eval_rows else None
+    # Holdout stays offline for this job (eval_strategy="no"); keep eval_rows for logs only.
+    if eval_rows:
+        print(f"holdout rows reserved (not scored in-loop): {len(eval_rows)}")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     collator = make_vision_collator(processor, args.max_length)

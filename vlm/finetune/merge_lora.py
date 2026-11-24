@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Merge a LoRA adapter into the base Gemma 4 12B weights for vLLM serving.
 
 vLLM can also load LoRA adapters dynamically; merging is the simplest path for

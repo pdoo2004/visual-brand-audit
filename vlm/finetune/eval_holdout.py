@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Run the holdout set through a base model + optional LoRA adapter.
 
 Checks:
@@ -30,7 +29,7 @@ REPO_SRC = next(
 if str(REPO_SRC) not in sys.path:
     sys.path.insert(0, str(REPO_SRC))
 
-from brandlens.vlm.validate import validate_model_output  # noqa: E402
+from brandlens.vlm.validate import validate_model_output
 
 
 def load_jsonl(path: Path) -> list[dict]:

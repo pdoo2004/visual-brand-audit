@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Turn manifest.jsonl into chat SFT JSONL for Gemma 4 vision fine-tuning.
 
 Writes:
@@ -20,7 +19,7 @@ VLM = ROOT.parent
 if str(VLM) not in sys.path:
     sys.path.insert(0, str(VLM))
 
-from prompt_template import render_prompt  # noqa: E402
+from prompt_template import render_prompt
 
 PROMPT = render_prompt(["B1"])
 

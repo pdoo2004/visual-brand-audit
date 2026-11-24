@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 """Build BrandLens B1 fine-tune manifest (~200 rows) with locked tone words."""
 from __future__ import annotations
 
 import json
-import shutil
+import urllib.error
 import urllib.request
 from collections import Counter
 from pathlib import Path
@@ -346,7 +345,7 @@ def download(url: str, dest: Path) -> bool:
             return False
         dest.write_bytes(data)
         return True
-    except Exception as e:
+    except (OSError, urllib.error.URLError, TimeoutError, ValueError) as e:
         print(f"FAIL {url}: {e}")
         return False
 

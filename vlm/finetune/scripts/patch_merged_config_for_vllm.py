@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Patch merged Gemma4 config so vLLM can build attention layers.
 
 Root cause (vLLM Gemma4DecoderLayer):
@@ -20,7 +19,6 @@ import argparse
 import json
 import shutil
 from pathlib import Path
-
 
 _COPY_FROM_TEXT = (
     "num_key_value_heads",
