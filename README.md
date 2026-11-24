@@ -23,8 +23,9 @@ A scoring engine combines both layers against a configurable rubric and produces
 | React/TypeScript UI (upload, job polling, results dashboard) | Built |
 | Docker Compose (frontend + API + GPU model service) | Built |
 | Test dataset (12 fixture images, pytest fixtures) | Built |
-| Worker pipeline integration (CV + VLM wired into job worker) | In progress |
-| Web crawler | In progress |
+| MVP regression suite (54 tests, `pytest -m regression`) | Built |
+| Worker pipeline integration (CV + VLM wired into job worker) | Built |
+| Web crawler (URL submission, downloader, bounded page traversal) | Built |
 | Rubric threshold calibration | In progress |
 
 ## Getting started
@@ -35,11 +36,32 @@ Requires Python 3.11+.
 pip install -e ".[dev]"
 ```
 
-Run the test suite:
+Run the full test suite:
 
 ```bash
 pytest tests/
 ```
+
+Run only the MVP regression suite (54 tests, no external dependencies, ~3 s):
+
+```bash
+pytest -m regression
+```
+
+The regression suite covers 10 backend MVP acceptance criteria (preprocessing, CV, VLM, scoring, API, persistence, and batch orchestration). The React frontend and URL-submission workflow are not included in this selection. Criteria are derived from the completed SCRUM backlog items:
+
+| Acceptance criterion | SCRUM tickets |
+|---|---|
+| Photo filter rejects images by geometry | SCRUM-117 |
+| Images standardized before analysis | SCRUM-118, 128 |
+| CV criteria each produce a score and explanation | SCRUM-129, 130, 131, 132 |
+| VLM client sends a valid request and parses the reply | SCRUM-137, 138 |
+| VLM failure falls back to CV-only with a needs-review flag | SCRUM-139 |
+| Scoring engine combines CV + VLM into an overall score | SCRUM-121, 122, 123 |
+| API accepts an image upload and returns a job ID | SCRUM-152, 153, 154, 155 |
+| Results and feedback are persisted and retrievable | SCRUM-158, 159, 160 |
+| Full pipeline completes end-to-end on representative images | SCRUM-166, 169 |
+| Batch orchestration processes multiple images and isolates failures | SCRUM-167 |
 
 Run only the fixture image smoke tests:
 
@@ -143,8 +165,14 @@ Three GitHub Actions workflows run on every push and pull request to `main`:
 | Workflow | What it checks |
 |---|---|
 | `lint` | Ruff static analysis |
-| `tests` | Full pytest suite |
+| `tests` | Full pytest suite (500 tests) |
 | `docker-smoke` | Builds the API image and confirms `GET /health` returns `{"status":"ok"}` |
+
+To run only the MVP acceptance criteria gate locally before pushing:
+
+```bash
+pytest -m regression
+```
 
 ## Stack
 

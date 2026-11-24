@@ -4,6 +4,7 @@ import json
 import unittest
 
 import numpy as np
+import pytest
 from PIL import Image, ImageFilter
 
 from brandlens.cv.cv_input import CVInput
@@ -26,6 +27,7 @@ class TestSubjectSharpnessCriterion(unittest.TestCase):
             checker[16:48, 16:48] = 0
         return Image.fromarray(np.repeat(checker[..., None], 3, axis=2))
 
+    @pytest.mark.regression  # AC-3: CV criteria produce a score and explanation
     def test_known_laplacian_variance_and_emphasis(self):
         with self.image() as image:
             m = SubjectSharpnessCriterion().analyze(CVInput(image, region()))['measurements']
@@ -39,6 +41,7 @@ class TestSubjectSharpnessCriterion(unittest.TestCase):
             m = SubjectSharpnessCriterion().analyze(CVInput(image, region()))['measurements']
         self.assertEqual(m['detail_emphasis_index'], -1)
 
+    @pytest.mark.regression  # AC-3
     def test_blur_reduces_detail(self):
         with self.image() as image, image.filter(ImageFilter.GaussianBlur(2)) as blurred:
             criterion = SubjectSharpnessCriterion()

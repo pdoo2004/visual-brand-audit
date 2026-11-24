@@ -4,6 +4,7 @@ import json
 import math
 import unittest
 
+import pytest
 from PIL import Image
 
 from brandlens.cv.brightness_criterion import BrightnessCriterion
@@ -54,6 +55,7 @@ class TestBrightnessCriterion(unittest.TestCase):
                 with self.subTest(value=type(value)), self.assertRaises(TypeError):
                     BrightnessCriterion().analyze(value)
 
+    @pytest.mark.regression  # AC-3: CV criteria produce a score and explanation
     def test_result_contract(self):
         result = self.analyze_values([0, 255])
         self.assertEqual(
@@ -123,6 +125,7 @@ class TestBrightnessCriterion(unittest.TestCase):
                     self.assertEqual(m["near_black_fraction"], float(value <= 10))
                     self.assertEqual(m["near_white_fraction"], float(value >= 245))
 
+    @pytest.mark.regression  # AC-3
     def test_black_white_mean(self):
         self.assertEqual(
             self.analyze_values([0, 255])["measurements"]["mean_luminance"], 127.5

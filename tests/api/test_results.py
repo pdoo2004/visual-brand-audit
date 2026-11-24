@@ -71,6 +71,7 @@ def _seed(client, *, status: str = "completed") -> tuple[str, dict[str, str]]:
     return job_id, ids
 
 
+@pytest.mark.regression  # AC-8: results retrievable by job ID
 def test_completed_job_returns_images_criteria_and_summary(client):
     job_id, ids = _seed(client, status="completed_with_errors")
     r = client.get(f"/api/v1/jobs/{job_id}/results")

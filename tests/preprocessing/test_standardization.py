@@ -1,5 +1,6 @@
 import unittest
 
+import pytest
 from PIL import Image, ImageCms
 
 from brandlens.preprocessing.standardization import (
@@ -58,6 +59,7 @@ class TestStandardizeImage(unittest.TestCase):
                 self.assertEqual(processed.tobytes(), image.tobytes())
                 self.assertIsNot(processed, image)
 
+    @pytest.mark.regression  # AC-2: images standardized before analysis
     def test_resize_preserves_aspect_ratio(self):
         settings = StandardizationSettings(max_size=(200, 200))
 
@@ -94,6 +96,7 @@ class TestStandardizeImage(unittest.TestCase):
             with standardize_image(image, settings) as processed:
                 self.assertEqual(processed.size, (1200, 100))
 
+    @pytest.mark.regression  # AC-2
     def test_exif_orientation_rotates_pixels(self):
         with Image.new("RGB", (2, 3)) as image:
             image.putdata([
@@ -113,6 +116,7 @@ class TestStandardizeImage(unittest.TestCase):
             self.assertEqual(image.size, (2, 3))
             self.assertEqual(image.getexif()[274], 6)
 
+    @pytest.mark.regression  # AC-2
     def test_grayscale_converts_to_rgb(self):
         with Image.new("L", (10, 10), 75) as image:
             with standardize_image(image) as processed:
