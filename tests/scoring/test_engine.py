@@ -4,7 +4,6 @@ import json
 import unittest
 from pathlib import Path
 
-import pytest
 from PIL import Image
 
 from brandlens.api.schemas.results import CriterionResult
@@ -55,7 +54,6 @@ EXPOSURE_PARAMS = {
 
 
 class TestScoringEngine(unittest.TestCase):
-    @pytest.mark.regression  # AC-6: scoring engine combines CV + VLM into overall score
     def test_exposure_pass_and_fail_use_rubric_bounds(self):
         rubric = _rubric(
             _criterion(
@@ -224,7 +222,49 @@ class TestScoringEngine(unittest.TestCase):
         self.assertEqual(rejected.criteria[0].availability, "unavailable_needs_review")
         self.assertIn("allowed_labels", rejected.criteria[0].reasons[0])
 
-    @pytest.mark.regression  # AC-6
+        # Production rubric requires fit_score only; empty tone_label is OK on low fit.
+        low_rubric = _rubric(
+            _criterion(
+                "tone_approachability",
+                "vlm",
+                1,
+                {
+                    "fit_score_min": 1,
+                    "fit_score_max": 5,
+                    "score_mapping": "linear_1_5_to_0_100",
+                },
+                ["fit_score", "evidence"],
+            )
+        )
+        low_no_label = score_image(
+            low_rubric,
+            vlm_results={
+                "tone_approachability": {
+                    "tone_label": "",
+                    "fit_score": 1,
+                    "evidence": (
+                        "Abstract blue lines over a dark skyline feel technical, "
+                        "not approachable."
+                    ),
+                }
+            },
+        )
+        self.assertEqual(low_no_label.criteria[0].availability, "ok")
+        self.assertAlmostEqual(low_no_label.criteria[0].score, 0.0)
+
+        high_no_label = score_image(
+            low_rubric,
+            vlm_results={
+                "tone_approachability": {
+                    "tone_label": "",
+                    "fit_score": 4,
+                    "evidence": "Someone is smiling in soft light.",
+                }
+            },
+        )
+        self.assertEqual(high_no_label.criteria[0].availability, "unavailable_needs_review")
+        self.assertIn("Missing measurement label", high_no_label.criteria[0].reasons[0])
+
     def test_unavailable_criterion_does_not_block_others_and_renormalizes_weights(self):
         rubric = _rubric(
             _criterion("exposure_brightness", "cv", 0.25, EXPOSURE_PARAMS, []),
@@ -288,7 +328,6 @@ class TestScoringEngine(unittest.TestCase):
         self.assertAlmostEqual(result.overall_score, 50.0)
         self.assertEqual(result.status, "scored")
 
-    @pytest.mark.regression  # AC-6
     def test_flag_threshold_and_total_failure(self):
         rubric = _rubric(
             _criterion("exposure_brightness", "cv", 1, EXPOSURE_PARAMS, []),

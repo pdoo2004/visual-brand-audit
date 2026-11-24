@@ -97,7 +97,13 @@ def score_palette(measurements: dict[str, Any], params: dict[str, Any]) -> RuleO
 
 
 def score_framing(measurements: dict[str, Any], params: dict[str, Any]) -> RuleOutcome:
-    """Pass when the subject is near center or a third, and inside any margin bound."""
+    """Pass when the subject is near center or a third, and inside any margin bound.
+
+    Accepts legacy names (center_offset / thirds_offset) and the native CV names
+    from brand_standards.json (center_distance / nearest_thirds_distance).
+    """
+    measurements = _framing_measurements(measurements)
+    params = _framing_params(params)
     position_bounds = []
     for measurement, param in (
         ("center_offset", "center_offset_max"),
@@ -109,7 +115,8 @@ def score_framing(measurements: dict[str, Any], params: dict[str, Any]) -> RuleO
     if not position_bounds:
         return unavailable(
             _PASS_FAIL,
-            "Rubric thresholds unset: center_offset_max, thirds_offset_max",
+            "Rubric thresholds unset: center_offset_max/center_distance_max, "
+            "thirds_offset_max/nearest_thirds_distance_max",
         )
 
     evidence: list[str] = []
@@ -143,7 +150,13 @@ def score_framing(measurements: dict[str, Any], params: dict[str, Any]) -> RuleO
 
 
 def score_sharpness(measurements: dict[str, Any], params: dict[str, Any]) -> RuleOutcome:
-    """Pass subject sharpness and ratio bounds. Intentional motion is not an automatic fail."""
+    """Pass subject sharpness and ratio bounds. Intentional motion is not an automatic fail.
+
+    Accepts legacy names (subject_sharpness / sharpness_ratio) and native CV names
+    (subject_laplacian_variance / detail_emphasis_index).
+    """
+    measurements = _sharpness_measurements(measurements)
+    params = _sharpness_params(params)
     active = []
     unset = []
     for measurement, param in (
@@ -208,18 +221,21 @@ def score_tone(measurements: dict[str, Any], params: dict[str, Any]) -> RuleOutc
     if not low <= fit <= high:
         return unavailable(mapping, f"fit_score {fit} is outside {low}..{high}.")
 
-    label = measurements.get("label")
-    if not isinstance(label, str) or not label.strip():
-        return unavailable(mapping, "Missing measurement label.")
-    label = label.strip()
-    allowed = params.get("allowed_labels")
-    if isinstance(allowed, list):
-        allowed_words = {str(word).strip().casefold() for word in allowed}
-        words = [word.strip() for word in label.split(",") if word.strip()]
-        rejected = [word for word in words if word.casefold() not in allowed_words]
-        if not words or rejected:
-            shown = ", ".join(rejected or ["(empty)"])
-            return unavailable(mapping, f"label not in allowed_labels: {shown}")
+    raw_label = measurements.get("label")
+    label = raw_label.strip() if isinstance(raw_label, str) else ""
+    # Low fit may honestly name no target-tone words (empty tone_label).
+    if not label:
+        if fit > 2:
+            return unavailable(mapping, "Missing measurement label.")
+    else:
+        allowed = params.get("allowed_labels")
+        if isinstance(allowed, list):
+            allowed_words = {str(word).strip().casefold() for word in allowed}
+            words = [word.strip() for word in label.split(",") if word.strip()]
+            rejected = [word for word in words if word.casefold() not in allowed_words]
+            if not words or rejected:
+                shown = ", ".join(rejected or ["(empty)"])
+                return unavailable(mapping, f"label not in allowed_labels: {shown}")
 
     evidence = measurements.get("evidence")
     if not isinstance(evidence, str) or not evidence.strip():
@@ -230,6 +246,54 @@ def score_tone(measurements: dict[str, Any], params: dict[str, Any]) -> RuleOutc
         f"from fit_score_min {low}..fit_score_max {high} -> {_num(score)}"
     )
     return RuleOutcome(score, _OK, mapping, (), (evidence.strip(), trace), label=label)
+
+
+def _framing_params(params: dict[str, Any]) -> dict[str, Any]:
+    """Map native rubric param names onto the legacy framing scorer keys."""
+    out = dict(params)
+    if "center_offset_max" not in out and "center_distance_max" in out:
+        out["center_offset_max"] = out["center_distance_max"]
+    if "thirds_offset_max" not in out and "nearest_thirds_distance_max" in out:
+        out["thirds_offset_max"] = out["nearest_thirds_distance_max"]
+    return out
+
+
+def _framing_measurements(measurements: dict[str, Any]) -> dict[str, Any]:
+    """Map native CV framing measurements onto legacy scorer keys."""
+    out = dict(measurements)
+    if "center_offset" not in out and "center_distance" in out:
+        out["center_offset"] = out["center_distance"]
+    if "thirds_offset" not in out and "nearest_thirds_distance" in out:
+        out["thirds_offset"] = out["nearest_thirds_distance"]
+    if "edge_margin_min" not in out:
+        margins = [
+            _as_float(out.get(name))
+            for name in ("left_margin", "right_margin", "top_margin", "bottom_margin")
+        ]
+        present = [value for value in margins if value is not None]
+        if present:
+            out["edge_margin_min"] = min(present)
+    return out
+
+
+def _sharpness_params(params: dict[str, Any]) -> dict[str, Any]:
+    """Map native rubric param names onto the legacy sharpness scorer keys."""
+    out = dict(params)
+    if "subject_sharpness_min" not in out and "subject_laplacian_variance_min" in out:
+        out["subject_sharpness_min"] = out["subject_laplacian_variance_min"]
+    if "sharpness_ratio_min" not in out and "detail_emphasis_index_min" in out:
+        out["sharpness_ratio_min"] = out["detail_emphasis_index_min"]
+    return out
+
+
+def _sharpness_measurements(measurements: dict[str, Any]) -> dict[str, Any]:
+    """Map native CV sharpness measurements onto legacy scorer keys."""
+    out = dict(measurements)
+    if "subject_sharpness" not in out and "subject_laplacian_variance" in out:
+        out["subject_sharpness"] = out["subject_laplacian_variance"]
+    if "sharpness_ratio" not in out and "detail_emphasis_index" in out:
+        out["sharpness_ratio"] = out["detail_emphasis_index"]
+    return out
 
 
 CV_RULES = {

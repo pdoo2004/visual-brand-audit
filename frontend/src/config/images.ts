@@ -1,11 +1,9 @@
 import type { ImageResult } from "../api";
 
 /**
- * Where an image's picture comes from. The backend has no image-serving endpoint yet, so this
- * returns null and the UI shows a placeholder tile. When the endpoint exists, change only this
- * function, e.g. `return \`/api/v1/images/${image.image_id}/file\`;`
+ * Preview URL for a result image. Served by GET /api/v1/images/{id}/file
+ * (proxied to the API in vite.config.ts during local dev).
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function imageUrl(_image: ImageResult): string | null {
-  return null;
+export function imageUrl(image: ImageResult): string | null {
+  return `/api/v1/images/${image.image_id}/file`;
 }

@@ -1,0 +1,9 @@
+data/
+outputs/
+logs/
+images/
+_ppt_extract/
+__pycache__/
+*.pyc
+.cache/
+JOURNEY.md
