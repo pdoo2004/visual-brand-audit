@@ -33,6 +33,14 @@ class TestSingleSubjectSelector(unittest.TestCase):
         selected = selector.select(detection(candidate(.7), candidate(.99, 'dog')))
         self.assertEqual(selected.subject_region.label, 'person')
 
+    def test_highest_confidence_picks_among_multiple(self):
+        selector = SingleSubjectSelector(
+            {'min_confidence': .5, 'multi_policy': 'highest_confidence'}
+        )
+        selected = selector.select(detection(candidate(.6, 'cup'), candidate(.9, 'person')))
+        self.assertEqual(selected.subject_region.label, 'person')
+        self.assertEqual(selected.subject_region.selection_method, 'highest_confidence_v1')
+
     def test_selector_settings_copy_and_validation(self):
         settings = {'labels': ['person']}
         selector = SingleSubjectSelector(settings)

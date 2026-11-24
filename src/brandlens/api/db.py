@@ -373,6 +373,11 @@ def get_job_images(conn: sqlite3.Connection, job_id: str) -> list[sqlite3.Row]:
     ).fetchall()
 
 
+def get_image(conn: sqlite3.Connection, image_id: str) -> sqlite3.Row | None:
+    """Return one image row (including raw_path) or None if unknown."""
+    return conn.execute("SELECT * FROM images WHERE image_id = ?", (image_id,)).fetchone()
+
+
 def get_job_criterion_scores(
     conn: sqlite3.Connection, job_id: str
 ) -> dict[str, list[sqlite3.Row]]:

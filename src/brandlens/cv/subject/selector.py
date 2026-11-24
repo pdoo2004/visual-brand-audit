@@ -15,11 +15,17 @@ class SubjectSelection:
     reason: str | None
 
 
-class SingleSubjectSelector:
-    """Accept exactly one candidate after confidence/optional label filtering.
+_MULTI_POLICIES = frozenset({"review", "highest_confidence", "largest_area"})
 
-    This is a configurable heuristic, not confirmation of photographic intent.
-    Multiple objects remain ambiguous; no largest-object or highest-score guess.
+
+class SingleSubjectSelector:
+    """Pick a primary subject after confidence/optional label filtering.
+
+    Default ``multi_policy=review`` keeps the conservative MVP rule: more than
+    one candidate → needs human review (no largest-object guess).
+
+    API demos may set ``multi_policy=highest_confidence`` (or ``largest_area``)
+    so framing/sharpness can still score on busy photos.
     min_confidence defaults to 0.7 as a starting setting, not a calibrated limit.
     """
 
@@ -28,7 +34,7 @@ class SingleSubjectSelector:
             settings = {}
         if not isinstance(settings, dict):
             raise TypeError("settings must be a dictionary or None.")
-        if set(settings) - {"min_confidence", "labels"}:
+        if set(settings) - {"min_confidence", "labels", "multi_policy"}:
             raise ValueError("Unknown selector settings.")
         self._minimum = settings.get("min_confidence", 0.7)
         validate_fraction("min_confidence", self._minimum)
@@ -40,11 +46,20 @@ class SingleSubjectSelector:
                 raise ValueError("labels must be a nonempty list/tuple of names or None.")
             labels = tuple(labels)
         self._labels = labels
+        policy = settings.get("multi_policy", "review")
+        if policy not in _MULTI_POLICIES:
+            raise ValueError(
+                "multi_policy must be one of: review, highest_confidence, largest_area."
+            )
+        self._multi_policy = policy
 
     @property
     def settings(self) -> dict[str, Any]:
-        return {"min_confidence": self._minimum,
-                "labels": list(self._labels) if self._labels is not None else None}
+        return {
+            "min_confidence": self._minimum,
+            "labels": list(self._labels) if self._labels is not None else None,
+            "multi_policy": self._multi_policy,
+        }
 
     def select(self, detections: DetectionResult) -> SubjectSelection:
         """Return an explicit decision, preserving model provenance."""
@@ -58,7 +73,23 @@ class SingleSubjectSelector:
         if not candidates:
             return SubjectSelection(None, "No candidate meets the subject-selection settings.")
         if len(candidates) != 1:
-            return SubjectSelection(None, "Multiple candidate subjects require review.")
+            if self._multi_policy == "review":
+                return SubjectSelection(None, "Multiple candidate subjects require review.")
+            if self._multi_policy == "highest_confidence":
+                c = max(candidates, key=lambda item: (item.confidence, _area(item)))
+                method = "highest_confidence_v1"
+            else:
+                c = max(candidates, key=lambda item: (_area(item), item.confidence))
+                method = "largest_area_v1"
+            return SubjectSelection(
+                SubjectRegion(
+                    c.left, c.top, c.right, c.bottom, reliable=True,
+                    source=detections.source, source_version=detections.source_version,
+                    label=c.label, confidence=c.confidence,
+                    selection_method=method,
+                ),
+                None,
+            )
         c = candidates[0]
         return SubjectSelection(SubjectRegion(
             c.left, c.top, c.right, c.bottom, reliable=True,
@@ -66,3 +97,7 @@ class SingleSubjectSelector:
             label=c.label, confidence=c.confidence,
             selection_method="single_candidate_v1",
         ), None)
+
+
+def _area(candidate: Any) -> float:
+    return max(0.0, (candidate.right - candidate.left) * (candidate.bottom - candidate.top))

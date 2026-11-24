@@ -39,17 +39,34 @@ class Settings:
     # Which analysis the worker runs on each image: "placeholder" (stub scores, no model
     # needed; the default so the API starts anywhere) or "pipeline" (real CV + VLM scoring).
     analyzer: str = "placeholder"
+    # Framing/sharpness need a subject box. RT-DETR is optional; disable with
+    # BRANDLENS_SUBJECT_DETECTOR=0 if torch/transformers weights are unavailable.
+    subject_detector_enabled: bool = True
+    subject_detector_device: int = -1  # -1 = CPU
+    # When multiple detections pass the confidence filter: review | highest_confidence | largest_area
+    subject_multi_policy: str = "highest_confidence"
 
     def __post_init__(self) -> None:
         if self.analyzer not in ("placeholder", "pipeline"):
             raise ValueError(
                 f"analyzer must be 'placeholder' or 'pipeline', got {self.analyzer!r}"
             )
+        if self.subject_multi_policy not in {
+            "review",
+            "highest_confidence",
+            "largest_area",
+        }:
+            raise ValueError(
+                "subject_multi_policy must be one of: "
+                "review, highest_confidence, largest_area, "
+                f"got {self.subject_multi_policy!r}"
+            )
 
     @classmethod
     def from_env(cls) -> Settings:
         """Build settings from BRANDLENS_* environment variables."""
         origins = os.getenv("BRANDLENS_CORS_ORIGINS", _DEFAULT_CORS_ORIGINS)
+        subject_raw = os.getenv("BRANDLENS_SUBJECT_DETECTOR", "1").lower()
         return cls(
             host=os.getenv("BRANDLENS_HOST", cls.host),
             port=int(os.getenv("BRANDLENS_PORT", str(cls.port))),
@@ -68,4 +85,11 @@ class Settings:
                 os.getenv("BRANDLENS_MODEL_MAX_RETRIES", str(cls.model_max_retries))
             ),
             analyzer=os.getenv("BRANDLENS_ANALYZER", cls.analyzer).strip().lower(),
+            subject_detector_enabled=subject_raw not in {"0", "false", "no", "off"},
+            subject_detector_device=int(
+                os.getenv("BRANDLENS_SUBJECT_DEVICE", str(cls.subject_detector_device))
+            ),
+            subject_multi_policy=os.getenv(
+                "BRANDLENS_SUBJECT_MULTI_POLICY", cls.subject_multi_policy
+            ).strip().lower(),
         )

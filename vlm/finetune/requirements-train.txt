@@ -1,0 +1,19 @@
+# ARC / GPU fine-tune stack for google/gemma-4-12B-it (gemma4_unified).
+# Needs Python >=3.10 and transformers >=5.10. Rebuild with:
+#   bash scripts/rebuild_venv_py311.sh
+#
+#   pip install -U torch torchvision --index-url https://download.pytorch.org/whl/cu124
+#   pip install -r requirements-train.txt
+
+transformers>=5.10.0
+accelerate>=1.1.0
+peft>=0.14.0
+trl>=0.15.0
+bitsandbytes>=0.45.0
+datasets>=3.0.0
+pillow>=10.0.0
+safetensors>=0.4.0
+sentencepiece>=0.2.0
+protobuf>=4.25.0
+huggingface_hub>=0.26.0
+pydantic>=2.0.0

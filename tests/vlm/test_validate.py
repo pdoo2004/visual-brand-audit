@@ -3,8 +3,6 @@
 import json
 import unittest
 
-import pytest
-
 from brandlens.vlm import validate_model_output
 
 VALID = {
@@ -28,7 +26,6 @@ def _dump(payload: dict) -> str:
 
 
 class TestValidateModelOutput(unittest.TestCase):
-    @pytest.mark.regression  # AC-4: VLM client parses structured reply
     def test_a_complete_b1_reply_parses(self):
         result = validate_model_output(_dump(VALID))
 
@@ -58,7 +55,6 @@ class TestValidateModelOutput(unittest.TestCase):
         self.assertEqual(result.errors, ())
         self.assertEqual(result.criteria[0].fit_score, 4)
 
-    @pytest.mark.regression  # AC-4
     def test_invalid_json_is_a_validation_failure(self):
         result = validate_model_output("not json at all")
 
@@ -90,7 +86,6 @@ class TestValidateModelOutput(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertEqual(result.errors, ("B1 fit_score must be an integer from 1 to 5",))
 
-    @pytest.mark.regression  # AC-4
     def test_an_off_list_tone_word_is_a_validation_failure(self):
         payload = json.loads(_dump(VALID))
         payload["criteria"][0]["tone_label"] = "authentic, industrial"
@@ -111,8 +106,34 @@ class TestValidateModelOutput(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertEqual(
             result.errors,
-            ("B1 evidence must be one sentence naming something visible",),
+            (
+                "B1 evidence must be one short sentence citing something "
+                "visible and explaining the tone fit",
+            ),
         )
+
+    def test_empty_tone_label_is_ok_for_low_fit(self):
+        payload = json.loads(_dump(VALID))
+        payload["criteria"][0]["tone_label"] = ""
+        payload["criteria"][0]["fit_score"] = 1
+        payload["criteria"][0]["evidence"] = (
+            "Abstract blue network lines over a dark skyline feel technical, "
+            "not approachable or lifestyle."
+        )
+        result = validate_model_output(json.dumps(payload))
+
+        self.assertTrue(result.ok)
+        self.assertEqual(result.criteria[0].tone_words, ())
+        self.assertEqual(result.criteria[0].fit_score, 1)
+
+    def test_empty_tone_label_fails_for_high_fit(self):
+        payload = json.loads(_dump(VALID))
+        payload["criteria"][0]["tone_label"] = ""
+        payload["criteria"][0]["fit_score"] = 4
+        result = validate_model_output(json.dumps(payload))
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.errors, ("B1 tone_label is empty",))
 
     def test_the_wrong_criterion_is_a_validation_failure(self):
         payload = json.loads(_dump(VALID))

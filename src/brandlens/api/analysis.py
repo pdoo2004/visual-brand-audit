@@ -144,7 +144,13 @@ class PipelineAnalyzer:
         self._score_fn = score_fn
 
     @classmethod
-    def from_settings(cls, settings: Any, *, subject_detector: Any = None) -> PipelineAnalyzer:
+    def from_settings(
+        cls,
+        settings: Any,
+        *,
+        subject_detector: Any = None,
+        subject_selector: Any = None,
+    ) -> PipelineAnalyzer:
         """Load the rubric and create the model client from the API settings.
 
         Raises the configuration loader's error if the rubric file is invalid, so
@@ -158,10 +164,17 @@ class PipelineAnalyzer:
         needs_model = any(c.get("method") == "vlm" for c in rubric.get("criteria", []))
         client = ModelClient.from_settings(settings) if needs_model else None
         log.info(
-            "pipeline analyzer ready: rubric %s, model client %s",
-            rubric.get("rubric_id"), "on" if client else "off (no VLM criteria)",
+            "pipeline analyzer ready: rubric %s, model client %s, subject detector %s",
+            rubric.get("rubric_id"),
+            "on" if client else "off (no VLM criteria)",
+            "on" if subject_detector is not None else "off",
         )
-        return cls(configuration, client, subject_detector=subject_detector)
+        return cls(
+            configuration,
+            client,
+            subject_detector=subject_detector,
+            subject_selector=subject_selector,
+        )
 
     def __call__(self, image: Image.Image, criterion_ids: Sequence[str]) -> ImageAnalysis:
         scored, cv_results, vlm_results = self._score_fn(

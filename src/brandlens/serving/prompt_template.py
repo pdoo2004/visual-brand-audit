@@ -1,6 +1,6 @@
-"""VLM prompt for SCRUM-135.
+"""VLM prompt for B1 tone and approachability.
 
-The locked MVP rubric (SCRUM-180) sends only B1 to the model.
+The locked MVP rubric sends only B1 to the model.
 Q1-Q5 are computer-vision measurements and must not be scored here.
 """
 
@@ -30,11 +30,18 @@ RESPONSE_SCHEMA = {
                         "type": "string",
                         "description": (
                             "Comma-separated words from the target tone list "
-                            "that are actually visible."
+                            "that are actually visible; empty string when fit_score is 1 or 2 "
+                            "and no target tone words apply."
                         ),
                     },
                     "fit_score": {"type": "integer", "minimum": 1, "maximum": 5},
-                    "evidence": {"type": "string"},
+                    "evidence": {
+                        "type": "string",
+                        "description": (
+                            "One short sentence: a visible cue, then why that supports "
+                            "the fit_score versus the target tone."
+                        ),
+                    },
                 },
             },
         }
@@ -58,9 +65,9 @@ Use this JSON shape:
     {{
       "id": "<criterion id>",
       "name": "<criterion name>",
-      "tone_label": "<comma-separated words from the target tone that you actually see>",
+      "tone_label": "<comma-separated target-tone words you actually see, or empty if none fit>",
       "fit_score": <integer 1 to 5, where 5 is a strong fit to the target tone>,
-      "evidence": "<one sentence that names something visible in this photograph>"
+      "evidence": "<one short sentence: visible cue + why the score fits or misses the target tone>"
     }}
   ]
 }}
@@ -70,10 +77,12 @@ Rules:
 - name must be copied exactly from that criterion's name line.
 - fit_score is an integer from 1 to 5.
 - tone_label uses only words from the target tone list, lowercase and comma-separated. Name the words you actually see. Do not add a tone word that is not on that list.
-- evidence must name a visible subject, object, place, or light. Do not invent words, logos, or people that are not in the photograph.
+- If fit_score is 1 or 2 and no target-tone words apply, set tone_label to "".
+- evidence is one short sentence. First name something visible (subject, object, place, or light), then say why that supports the fit_score versus the target tone. Do not write a caption-only description. Do not invent words, logos, or people that are not in the photograph.
+- Good high-score evidence: "Soft window light and a relaxed pour feel approachable and lifestyle, so the tone fits."
+- Good low-score evidence: "Abstract blue network lines over a dark skyline feel technical, not approachable or lifestyle."
 - If the photograph does not fit the target tone, say so with a low score. Do not force a passing judgment.
 """
-
 
 def criteria_block(criterion_ids: list[str]) -> str:
     lines = []

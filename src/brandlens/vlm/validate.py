@@ -42,10 +42,12 @@ class _CriterionScore(BaseModel):
 
     @field_validator("evidence")
     @classmethod
-    def evidence_names_something_visible(cls, value: str) -> str:
+    def evidence_is_short_visible_judgment(cls, value: str) -> str:
         text = value.strip()
         if len(text) < _MIN_EVIDENCE_CHARS:
-            raise ValueError("must be one sentence naming something visible")
+            raise ValueError(
+                "must be one short sentence citing something visible and explaining the tone fit"
+            )
         return text
 
 
@@ -72,8 +74,9 @@ class ModelOutputValidation:
     """Parsed criterion scores, or the reasons the reply was rejected.
 
     ``ok`` is false for invalid JSON, the wrong criteria, a score outside
-    1-5, an off-list tone word, or evidence that does not name anything.
-    ``criteria`` is empty in that case. Callers keep going from ``errors``.
+    1-5, an off-list tone word, an empty tone_label when fit_score is above 2,
+    or evidence that is too short. ``criteria`` is empty in that case.
+    Callers keep going from ``errors``.
     """
 
     ok: bool
@@ -111,7 +114,11 @@ def validate_model_output(
     for row, expected_id in zip(parsed.criteria, expected_ids, strict=False):
         if ids == list(expected_ids) and row.name != CRITERIA[expected_id]["name"]:
             errors.append(f'{expected_id} name must be "{CRITERIA[expected_id]["name"]}"')
-        words, word_errors = _tone_words(row.tone_label, row.id or expected_id)
+        words, word_errors = _tone_words(
+            row.tone_label,
+            row.id or expected_id,
+            fit_score=row.fit_score,
+        )
         errors.extend(word_errors)
         if not errors:
             judgments.append(
@@ -156,7 +163,10 @@ def _schema_errors(payload: dict, exc: ValidationError) -> list[str]:
         elif kind == "string_type":
             messages.append(f"{label} {field} must be a string")
         elif kind == "value_error" and field == "evidence":
-            messages.append(f"{label} evidence must be one sentence naming something visible")
+            messages.append(
+                f"{label} evidence must be one short sentence citing something "
+                "visible and explaining the tone fit"
+            )
         else:
             messages.append(f"{label} {err['msg']}")
     return messages or ["response does not match the criterion schema"]
@@ -175,8 +185,16 @@ def _label(payload: dict, loc: tuple) -> str:
     return "response"
 
 
-def _tone_words(label: str, criterion_id: str) -> tuple[tuple[str, ...], list[str]]:
+def _tone_words(
+    label: str,
+    criterion_id: str,
+    *,
+    fit_score: int | None = None,
+) -> tuple[tuple[str, ...], list[str]]:
     if not label.strip():
+        # Low fit may honestly mean "no target tone words apply."
+        if fit_score is not None and fit_score <= 2:
+            return (), []
         return (), [f"{criterion_id} tone_label is empty"]
     words: list[str] = []
     errors: list[str] = []
