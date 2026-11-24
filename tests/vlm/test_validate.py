@@ -107,8 +107,10 @@ class TestValidateModelOutput(unittest.TestCase):
         self.assertEqual(
             result.errors,
             (
-                "B1 evidence must be one short sentence citing something "
-                "visible and explaining the tone fit",
+                (
+                    "B1 evidence must be one short sentence citing something "
+                    "visible and explaining the tone fit"
+                ),
             ),
         )
 
