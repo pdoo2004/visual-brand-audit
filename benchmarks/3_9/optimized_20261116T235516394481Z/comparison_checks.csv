@@ -1,0 +1,8 @@
+check,passed
+Baseline is repeatable,True
+Current run is repeatable,True
+Inputs and settings match,True
+Environment matches,True
+Standardized pixels match exactly,True
+CV/scoring outputs match within tolerance,True
+Median throughput improves or team target is met,True

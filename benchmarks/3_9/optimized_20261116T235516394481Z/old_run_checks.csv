@@ -1,0 +1,6 @@
+check,passed
+Old run is repeatable,True
+Old run inputs and settings match,True
+Old run environment matches,True
+Old run standardized pixels match,True
+Old run CV/scoring outputs match,True

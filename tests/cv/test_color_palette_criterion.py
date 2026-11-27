@@ -2,6 +2,7 @@
 
 import json
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -155,6 +156,57 @@ class TestColorPaletteCriterion(unittest.TestCase):
         colors = result["measurements"]["dominant_colors"]
         self.assertEqual([c["proportion"] for c in colors], [0.5, 0.5])
         self.assertEqual([c["hex"] for c in colors], ["#000000", "#FFFFFF"])
+
+    def test_colors_after_uniform_prefix_are_not_missed(self):
+        # The fast diversity check must fall back to the entire sample.
+        pixels = [(0, 0, 0)] * 300 + [(255, 255, 255)] * 100
+        result = ColorPaletteCriterion(
+            {"n_clusters": 2, "max_sample_pixels": None}
+        ).analyze(CVInput(self.image(pixels)))
+        colors = result["measurements"]["dominant_colors"]
+        self.assertEqual([c["hex"] for c in colors], ["#000000", "#FFFFFF"])
+        self.assertEqual([c["proportion"] for c in colors], [0.75, 0.25])
+
+    def test_compiled_assignment_matches_original_distance_calculation(self):
+        from scipy.spatial.distance import cdist
+
+        def checked_distances(lab, centers, *, metric):
+            actual = cdist(lab, centers, metric=metric)
+            original = np.sum(
+                (lab[:, None, :] - centers[None, :, :]) ** 2, axis=2
+            )
+            # Exact distances and labels, including ties. Exercise more than
+            # one chunk with both photographs' diversity and repeated colors.
+            np.testing.assert_array_equal(actual, original)
+            np.testing.assert_array_equal(actual.argmin(1), original.argmin(1))
+            return actual
+
+        # The first center must win an exact equidistant tie.
+        checked_distances(
+            np.array([[0., 0., 0.], [1., 0., 0.]]),
+            np.array([[-1., 0., 0.], [1., 0., 0.]]),
+            metric="sqeuclidean",
+        )
+        rng = np.random.default_rng(321)
+        varied = [tuple(p) for p in rng.integers(0, 256, (10003, 3)).tolist()]
+        with patch(
+            "brandlens.cv.color_palette_criterion.cdist",
+            side_effect=checked_distances,
+        ) as distance:
+            for pixels in (varied, [(0, 0, 0), (255, 255, 255)] * 5002):
+                ColorPaletteCriterion({"n_clusters": 3}).analyze(
+                    CVInput(self.image(pixels))
+                )
+            self.assertEqual(distance.call_count, 4)
+
+    def test_kmeans_runs_when_diversity_exceeds_clusters_after_prefix(self):
+        pixels = [(0, 0, 0)] * 300 + [(255, 255, 255)] * 100
+        result = ColorPaletteCriterion(
+            {"n_clusters": 1, "max_sample_pixels": None}
+        ).analyze(CVInput(self.image(pixels)))
+        color, = result["measurements"]["dominant_colors"]
+        np.testing.assert_allclose(color["lab"], [25, 0, 0], atol=1e-6)
+        self.assertEqual(color["proportion"], 1.0)
 
     def test_deterministic_full_and_sampled_kmeans(self):
         rng = np.random.default_rng(123)

@@ -1,0 +1,420 @@
+job=optimized-1 image=image-000 stage=image_loading status=started
+job=optimized-1 image=image-000 stage=image_loading status=completed duration_ms=5.2
+job=optimized-1 image=image-000 stage=photo_filter status=started
+job=optimized-1 image=image-000 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-000 stage=standardization status=started
+job=optimized-1 image=image-000 stage=standardization status=completed duration_ms=6.4
+job=optimized-1 image=image-000 stage=cv_input status=started
+job=optimized-1 image=image-000 stage=cv_input status=completed duration_ms=0.0
+job=optimized-1 image=image-000 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-000 stage=cv:exposure_brightness status=completed duration_ms=3.8
+job=optimized-1 image=image-000 stage=cv:contrast status=started
+job=optimized-1 image=image-000 stage=cv:contrast status=completed duration_ms=8.6
+job=optimized-1 image=image-000 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-000 stage=cv:color_palette_fit status=completed duration_ms=134.3
+job=optimized-1 image=image-001 stage=image_loading status=started
+job=optimized-1 image=image-001 stage=image_loading status=completed duration_ms=6.2
+job=optimized-1 image=image-001 stage=photo_filter status=started
+job=optimized-1 image=image-001 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-001 stage=standardization status=started
+job=optimized-1 image=image-001 stage=standardization status=completed duration_ms=7.7
+job=optimized-1 image=image-001 stage=cv_input status=started
+job=optimized-1 image=image-001 stage=cv_input status=completed duration_ms=0.0
+job=optimized-1 image=image-001 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-001 stage=cv:exposure_brightness status=completed duration_ms=4.0
+job=optimized-1 image=image-001 stage=cv:contrast status=started
+job=optimized-1 image=image-001 stage=cv:contrast status=completed duration_ms=11.9
+job=optimized-1 image=image-001 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-001 stage=cv:color_palette_fit status=completed duration_ms=192.3
+job=optimized-1 image=image-002 stage=image_loading status=started
+job=optimized-1 image=image-002 stage=image_loading status=completed duration_ms=12.4
+job=optimized-1 image=image-002 stage=photo_filter status=started
+job=optimized-1 image=image-002 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-002 stage=standardization status=started
+job=optimized-1 image=image-002 stage=standardization status=completed duration_ms=7.1
+job=optimized-1 image=image-002 stage=cv_input status=started
+job=optimized-1 image=image-002 stage=cv_input status=completed duration_ms=0.0
+job=optimized-1 image=image-002 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-002 stage=cv:exposure_brightness status=completed duration_ms=3.5
+job=optimized-1 image=image-002 stage=cv:contrast status=started
+job=optimized-1 image=image-002 stage=cv:contrast status=completed duration_ms=9.9
+job=optimized-1 image=image-002 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-002 stage=cv:color_palette_fit status=completed duration_ms=192.9
+job=optimized-1 image=image-003 stage=image_loading status=started
+job=optimized-1 image=image-003 stage=image_loading status=completed duration_ms=5.5
+job=optimized-1 image=image-003 stage=photo_filter status=started
+job=optimized-1 image=image-003 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-003 stage=standardization status=started
+job=optimized-1 image=image-003 stage=standardization status=completed duration_ms=6.9
+job=optimized-1 image=image-003 stage=cv_input status=started
+job=optimized-1 image=image-003 stage=cv_input status=completed duration_ms=0.0
+job=optimized-1 image=image-003 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-003 stage=cv:exposure_brightness status=completed duration_ms=4.4
+job=optimized-1 image=image-003 stage=cv:contrast status=started
+job=optimized-1 image=image-003 stage=cv:contrast status=completed duration_ms=10.0
+job=optimized-1 image=image-003 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-003 stage=cv:color_palette_fit status=completed duration_ms=140.3
+job=optimized-1 image=image-004 stage=image_loading status=started
+job=optimized-1 image=image-004 stage=image_loading status=completed duration_ms=7.2
+job=optimized-1 image=image-004 stage=photo_filter status=started
+job=optimized-1 image=image-004 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-004 stage=standardization status=started
+job=optimized-1 image=image-004 stage=standardization status=completed duration_ms=6.4
+job=optimized-1 image=image-004 stage=cv_input status=started
+job=optimized-1 image=image-004 stage=cv_input status=completed duration_ms=0.1
+job=optimized-1 image=image-004 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-004 stage=cv:exposure_brightness status=completed duration_ms=3.2
+job=optimized-1 image=image-004 stage=cv:contrast status=started
+job=optimized-1 image=image-004 stage=cv:contrast status=completed duration_ms=9.4
+job=optimized-1 image=image-004 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-004 stage=cv:color_palette_fit status=completed duration_ms=172.9
+job=optimized-1 image=image-005 stage=image_loading status=started
+job=optimized-1 image=image-005 stage=image_loading status=completed duration_ms=9.0
+job=optimized-1 image=image-005 stage=photo_filter status=started
+job=optimized-1 image=image-005 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-005 stage=standardization status=started
+job=optimized-1 image=image-005 stage=standardization status=completed duration_ms=7.0
+job=optimized-1 image=image-005 stage=cv_input status=started
+job=optimized-1 image=image-005 stage=cv_input status=completed duration_ms=0.0
+job=optimized-1 image=image-005 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-005 stage=cv:exposure_brightness status=completed duration_ms=3.4
+job=optimized-1 image=image-005 stage=cv:contrast status=started
+job=optimized-1 image=image-005 stage=cv:contrast status=completed duration_ms=9.5
+job=optimized-1 image=image-005 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-005 stage=cv:color_palette_fit status=completed duration_ms=161.8
+job=optimized-1 image=image-006 stage=image_loading status=started
+job=optimized-1 image=image-006 stage=image_loading status=completed duration_ms=18.8
+job=optimized-1 image=image-006 stage=photo_filter status=started
+job=optimized-1 image=image-006 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-006 stage=standardization status=started
+job=optimized-1 image=image-006 stage=standardization status=completed duration_ms=7.5
+job=optimized-1 image=image-006 stage=cv_input status=started
+job=optimized-1 image=image-006 stage=cv_input status=completed duration_ms=0.0
+job=optimized-1 image=image-006 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-006 stage=cv:exposure_brightness status=completed duration_ms=4.6
+job=optimized-1 image=image-006 stage=cv:contrast status=started
+job=optimized-1 image=image-006 stage=cv:contrast status=completed duration_ms=9.2
+job=optimized-1 image=image-006 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-006 stage=cv:color_palette_fit status=completed duration_ms=147.4
+job=optimized-1 image=image-007 stage=image_loading status=started
+job=optimized-1 image=image-007 stage=image_loading status=completed duration_ms=15.8
+job=optimized-1 image=image-007 stage=photo_filter status=started
+job=optimized-1 image=image-007 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-007 stage=standardization status=started
+job=optimized-1 image=image-007 stage=standardization status=completed duration_ms=6.1
+job=optimized-1 image=image-007 stage=cv_input status=started
+job=optimized-1 image=image-007 stage=cv_input status=completed duration_ms=0.0
+job=optimized-1 image=image-007 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-007 stage=cv:exposure_brightness status=completed duration_ms=3.7
+job=optimized-1 image=image-007 stage=cv:contrast status=started
+job=optimized-1 image=image-007 stage=cv:contrast status=completed duration_ms=11.8
+job=optimized-1 image=image-007 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-007 stage=cv:color_palette_fit status=completed duration_ms=168.7
+job=optimized-1 image=image-008 stage=image_loading status=started
+job=optimized-1 image=image-008 stage=image_loading status=completed duration_ms=15.2
+job=optimized-1 image=image-008 stage=photo_filter status=started
+job=optimized-1 image=image-008 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-008 stage=standardization status=started
+job=optimized-1 image=image-008 stage=standardization status=completed duration_ms=6.8
+job=optimized-1 image=image-008 stage=cv_input status=started
+job=optimized-1 image=image-008 stage=cv_input status=completed duration_ms=0.0
+job=optimized-1 image=image-008 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-008 stage=cv:exposure_brightness status=completed duration_ms=3.3
+job=optimized-1 image=image-008 stage=cv:contrast status=started
+job=optimized-1 image=image-008 stage=cv:contrast status=completed duration_ms=11.1
+job=optimized-1 image=image-008 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-008 stage=cv:color_palette_fit status=completed duration_ms=226.4
+job=optimized-1 image=image-009 stage=image_loading status=started
+job=optimized-1 image=image-009 stage=image_loading status=completed duration_ms=19.5
+job=optimized-1 image=image-009 stage=photo_filter status=started
+job=optimized-1 image=image-009 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-1 image=image-009 stage=standardization status=started
+job=optimized-1 image=image-009 stage=standardization status=completed duration_ms=8.5
+job=optimized-1 image=image-009 stage=cv_input status=started
+job=optimized-1 image=image-009 stage=cv_input status=completed duration_ms=0.1
+job=optimized-1 image=image-009 stage=cv:exposure_brightness status=started
+job=optimized-1 image=image-009 stage=cv:exposure_brightness status=completed duration_ms=4.9
+job=optimized-1 image=image-009 stage=cv:contrast status=started
+job=optimized-1 image=image-009 stage=cv:contrast status=completed duration_ms=10.7
+job=optimized-1 image=image-009 stage=cv:color_palette_fit status=started
+job=optimized-1 image=image-009 stage=cv:color_palette_fit status=completed duration_ms=236.2
+job=optimized-2 image=image-000 stage=image_loading status=started
+job=optimized-2 image=image-000 stage=image_loading status=completed duration_ms=6.1
+job=optimized-2 image=image-000 stage=photo_filter status=started
+job=optimized-2 image=image-000 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-000 stage=standardization status=started
+job=optimized-2 image=image-000 stage=standardization status=completed duration_ms=7.4
+job=optimized-2 image=image-000 stage=cv_input status=started
+job=optimized-2 image=image-000 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-000 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-000 stage=cv:exposure_brightness status=completed duration_ms=4.0
+job=optimized-2 image=image-000 stage=cv:contrast status=started
+job=optimized-2 image=image-000 stage=cv:contrast status=completed duration_ms=9.3
+job=optimized-2 image=image-000 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-000 stage=cv:color_palette_fit status=completed duration_ms=139.8
+job=optimized-2 image=image-001 stage=image_loading status=started
+job=optimized-2 image=image-001 stage=image_loading status=completed duration_ms=6.1
+job=optimized-2 image=image-001 stage=photo_filter status=started
+job=optimized-2 image=image-001 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-001 stage=standardization status=started
+job=optimized-2 image=image-001 stage=standardization status=completed duration_ms=6.9
+job=optimized-2 image=image-001 stage=cv_input status=started
+job=optimized-2 image=image-001 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-001 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-001 stage=cv:exposure_brightness status=completed duration_ms=4.9
+job=optimized-2 image=image-001 stage=cv:contrast status=started
+job=optimized-2 image=image-001 stage=cv:contrast status=completed duration_ms=11.0
+job=optimized-2 image=image-001 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-001 stage=cv:color_palette_fit status=completed duration_ms=189.6
+job=optimized-2 image=image-002 stage=image_loading status=started
+job=optimized-2 image=image-002 stage=image_loading status=completed duration_ms=12.8
+job=optimized-2 image=image-002 stage=photo_filter status=started
+job=optimized-2 image=image-002 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-002 stage=standardization status=started
+job=optimized-2 image=image-002 stage=standardization status=completed duration_ms=6.5
+job=optimized-2 image=image-002 stage=cv_input status=started
+job=optimized-2 image=image-002 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-002 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-002 stage=cv:exposure_brightness status=completed duration_ms=3.4
+job=optimized-2 image=image-002 stage=cv:contrast status=started
+job=optimized-2 image=image-002 stage=cv:contrast status=completed duration_ms=8.9
+job=optimized-2 image=image-002 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-002 stage=cv:color_palette_fit status=completed duration_ms=172.9
+job=optimized-2 image=image-003 stage=image_loading status=started
+job=optimized-2 image=image-003 stage=image_loading status=completed duration_ms=6.4
+job=optimized-2 image=image-003 stage=photo_filter status=started
+job=optimized-2 image=image-003 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-003 stage=standardization status=started
+job=optimized-2 image=image-003 stage=standardization status=completed duration_ms=7.6
+job=optimized-2 image=image-003 stage=cv_input status=started
+job=optimized-2 image=image-003 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-003 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-003 stage=cv:exposure_brightness status=completed duration_ms=4.7
+job=optimized-2 image=image-003 stage=cv:contrast status=started
+job=optimized-2 image=image-003 stage=cv:contrast status=completed duration_ms=10.2
+job=optimized-2 image=image-003 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-003 stage=cv:color_palette_fit status=completed duration_ms=153.5
+job=optimized-2 image=image-004 stage=image_loading status=started
+job=optimized-2 image=image-004 stage=image_loading status=completed duration_ms=7.4
+job=optimized-2 image=image-004 stage=photo_filter status=started
+job=optimized-2 image=image-004 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-004 stage=standardization status=started
+job=optimized-2 image=image-004 stage=standardization status=completed duration_ms=6.7
+job=optimized-2 image=image-004 stage=cv_input status=started
+job=optimized-2 image=image-004 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-004 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-004 stage=cv:exposure_brightness status=completed duration_ms=3.5
+job=optimized-2 image=image-004 stage=cv:contrast status=started
+job=optimized-2 image=image-004 stage=cv:contrast status=completed duration_ms=8.3
+job=optimized-2 image=image-004 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-004 stage=cv:color_palette_fit status=completed duration_ms=179.6
+job=optimized-2 image=image-005 stage=image_loading status=started
+job=optimized-2 image=image-005 stage=image_loading status=completed duration_ms=10.9
+job=optimized-2 image=image-005 stage=photo_filter status=started
+job=optimized-2 image=image-005 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-005 stage=standardization status=started
+job=optimized-2 image=image-005 stage=standardization status=completed duration_ms=6.6
+job=optimized-2 image=image-005 stage=cv_input status=started
+job=optimized-2 image=image-005 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-005 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-005 stage=cv:exposure_brightness status=completed duration_ms=5.6
+job=optimized-2 image=image-005 stage=cv:contrast status=started
+job=optimized-2 image=image-005 stage=cv:contrast status=completed duration_ms=10.2
+job=optimized-2 image=image-005 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-005 stage=cv:color_palette_fit status=completed duration_ms=169.9
+job=optimized-2 image=image-006 stage=image_loading status=started
+job=optimized-2 image=image-006 stage=image_loading status=completed duration_ms=18.9
+job=optimized-2 image=image-006 stage=photo_filter status=started
+job=optimized-2 image=image-006 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-006 stage=standardization status=started
+job=optimized-2 image=image-006 stage=standardization status=completed duration_ms=7.2
+job=optimized-2 image=image-006 stage=cv_input status=started
+job=optimized-2 image=image-006 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-006 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-006 stage=cv:exposure_brightness status=completed duration_ms=3.4
+job=optimized-2 image=image-006 stage=cv:contrast status=started
+job=optimized-2 image=image-006 stage=cv:contrast status=completed duration_ms=9.9
+job=optimized-2 image=image-006 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-006 stage=cv:color_palette_fit status=completed duration_ms=180.6
+job=optimized-2 image=image-007 stage=image_loading status=started
+job=optimized-2 image=image-007 stage=image_loading status=completed duration_ms=16.8
+job=optimized-2 image=image-007 stage=photo_filter status=started
+job=optimized-2 image=image-007 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-007 stage=standardization status=started
+job=optimized-2 image=image-007 stage=standardization status=completed duration_ms=6.4
+job=optimized-2 image=image-007 stage=cv_input status=started
+job=optimized-2 image=image-007 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-007 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-007 stage=cv:exposure_brightness status=completed duration_ms=3.3
+job=optimized-2 image=image-007 stage=cv:contrast status=started
+job=optimized-2 image=image-007 stage=cv:contrast status=completed duration_ms=9.9
+job=optimized-2 image=image-007 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-007 stage=cv:color_palette_fit status=completed duration_ms=158.2
+job=optimized-2 image=image-008 stage=image_loading status=started
+job=optimized-2 image=image-008 stage=image_loading status=completed duration_ms=17.1
+job=optimized-2 image=image-008 stage=photo_filter status=started
+job=optimized-2 image=image-008 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-2 image=image-008 stage=standardization status=started
+job=optimized-2 image=image-008 stage=standardization status=completed duration_ms=6.4
+job=optimized-2 image=image-008 stage=cv_input status=started
+job=optimized-2 image=image-008 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-008 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-008 stage=cv:exposure_brightness status=completed duration_ms=4.2
+job=optimized-2 image=image-008 stage=cv:contrast status=started
+job=optimized-2 image=image-008 stage=cv:contrast status=completed duration_ms=12.8
+job=optimized-2 image=image-008 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-008 stage=cv:color_palette_fit status=completed duration_ms=272.2
+job=optimized-2 image=image-009 stage=image_loading status=started
+job=optimized-2 image=image-009 stage=image_loading status=completed duration_ms=20.1
+job=optimized-2 image=image-009 stage=photo_filter status=started
+job=optimized-2 image=image-009 stage=photo_filter status=completed duration_ms=0.1
+job=optimized-2 image=image-009 stage=standardization status=started
+job=optimized-2 image=image-009 stage=standardization status=completed duration_ms=7.1
+job=optimized-2 image=image-009 stage=cv_input status=started
+job=optimized-2 image=image-009 stage=cv_input status=completed duration_ms=0.0
+job=optimized-2 image=image-009 stage=cv:exposure_brightness status=started
+job=optimized-2 image=image-009 stage=cv:exposure_brightness status=completed duration_ms=3.4
+job=optimized-2 image=image-009 stage=cv:contrast status=started
+job=optimized-2 image=image-009 stage=cv:contrast status=completed duration_ms=10.6
+job=optimized-2 image=image-009 stage=cv:color_palette_fit status=started
+job=optimized-2 image=image-009 stage=cv:color_palette_fit status=completed duration_ms=223.5
+job=optimized-3 image=image-000 stage=image_loading status=started
+job=optimized-3 image=image-000 stage=image_loading status=completed duration_ms=7.9
+job=optimized-3 image=image-000 stage=photo_filter status=started
+job=optimized-3 image=image-000 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-000 stage=standardization status=started
+job=optimized-3 image=image-000 stage=standardization status=completed duration_ms=10.2
+job=optimized-3 image=image-000 stage=cv_input status=started
+job=optimized-3 image=image-000 stage=cv_input status=completed duration_ms=0.1
+job=optimized-3 image=image-000 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-000 stage=cv:exposure_brightness status=completed duration_ms=5.7
+job=optimized-3 image=image-000 stage=cv:contrast status=started
+job=optimized-3 image=image-000 stage=cv:contrast status=completed duration_ms=10.8
+job=optimized-3 image=image-000 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-000 stage=cv:color_palette_fit status=completed duration_ms=223.0
+job=optimized-3 image=image-001 stage=image_loading status=started
+job=optimized-3 image=image-001 stage=image_loading status=completed duration_ms=7.9
+job=optimized-3 image=image-001 stage=photo_filter status=started
+job=optimized-3 image=image-001 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-001 stage=standardization status=started
+job=optimized-3 image=image-001 stage=standardization status=completed duration_ms=13.0
+job=optimized-3 image=image-001 stage=cv_input status=started
+job=optimized-3 image=image-001 stage=cv_input status=completed duration_ms=0.1
+job=optimized-3 image=image-001 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-001 stage=cv:exposure_brightness status=completed duration_ms=3.5
+job=optimized-3 image=image-001 stage=cv:contrast status=started
+job=optimized-3 image=image-001 stage=cv:contrast status=completed duration_ms=13.9
+job=optimized-3 image=image-001 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-001 stage=cv:color_palette_fit status=completed duration_ms=205.7
+job=optimized-3 image=image-002 stage=image_loading status=started
+job=optimized-3 image=image-002 stage=image_loading status=completed duration_ms=12.8
+job=optimized-3 image=image-002 stage=photo_filter status=started
+job=optimized-3 image=image-002 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-002 stage=standardization status=started
+job=optimized-3 image=image-002 stage=standardization status=completed duration_ms=6.7
+job=optimized-3 image=image-002 stage=cv_input status=started
+job=optimized-3 image=image-002 stage=cv_input status=completed duration_ms=0.0
+job=optimized-3 image=image-002 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-002 stage=cv:exposure_brightness status=completed duration_ms=3.5
+job=optimized-3 image=image-002 stage=cv:contrast status=started
+job=optimized-3 image=image-002 stage=cv:contrast status=completed duration_ms=9.2
+job=optimized-3 image=image-002 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-002 stage=cv:color_palette_fit status=completed duration_ms=199.9
+job=optimized-3 image=image-003 stage=image_loading status=started
+job=optimized-3 image=image-003 stage=image_loading status=completed duration_ms=6.3
+job=optimized-3 image=image-003 stage=photo_filter status=started
+job=optimized-3 image=image-003 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-003 stage=standardization status=started
+job=optimized-3 image=image-003 stage=standardization status=completed duration_ms=7.1
+job=optimized-3 image=image-003 stage=cv_input status=started
+job=optimized-3 image=image-003 stage=cv_input status=completed duration_ms=0.0
+job=optimized-3 image=image-003 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-003 stage=cv:exposure_brightness status=completed duration_ms=4.7
+job=optimized-3 image=image-003 stage=cv:contrast status=started
+job=optimized-3 image=image-003 stage=cv:contrast status=completed duration_ms=9.2
+job=optimized-3 image=image-003 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-003 stage=cv:color_palette_fit status=completed duration_ms=144.8
+job=optimized-3 image=image-004 stage=image_loading status=started
+job=optimized-3 image=image-004 stage=image_loading status=completed duration_ms=8.8
+job=optimized-3 image=image-004 stage=photo_filter status=started
+job=optimized-3 image=image-004 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-004 stage=standardization status=started
+job=optimized-3 image=image-004 stage=standardization status=completed duration_ms=6.9
+job=optimized-3 image=image-004 stage=cv_input status=started
+job=optimized-3 image=image-004 stage=cv_input status=completed duration_ms=0.0
+job=optimized-3 image=image-004 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-004 stage=cv:exposure_brightness status=completed duration_ms=3.4
+job=optimized-3 image=image-004 stage=cv:contrast status=started
+job=optimized-3 image=image-004 stage=cv:contrast status=completed duration_ms=9.3
+job=optimized-3 image=image-004 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-004 stage=cv:color_palette_fit status=completed duration_ms=179.0
+job=optimized-3 image=image-005 stage=image_loading status=started
+job=optimized-3 image=image-005 stage=image_loading status=completed duration_ms=9.3
+job=optimized-3 image=image-005 stage=photo_filter status=started
+job=optimized-3 image=image-005 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-005 stage=standardization status=started
+job=optimized-3 image=image-005 stage=standardization status=completed duration_ms=7.1
+job=optimized-3 image=image-005 stage=cv_input status=started
+job=optimized-3 image=image-005 stage=cv_input status=completed duration_ms=0.0
+job=optimized-3 image=image-005 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-005 stage=cv:exposure_brightness status=completed duration_ms=4.9
+job=optimized-3 image=image-005 stage=cv:contrast status=started
+job=optimized-3 image=image-005 stage=cv:contrast status=completed duration_ms=10.3
+job=optimized-3 image=image-005 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-005 stage=cv:color_palette_fit status=completed duration_ms=162.6
+job=optimized-3 image=image-006 stage=image_loading status=started
+job=optimized-3 image=image-006 stage=image_loading status=completed duration_ms=17.1
+job=optimized-3 image=image-006 stage=photo_filter status=started
+job=optimized-3 image=image-006 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-006 stage=standardization status=started
+job=optimized-3 image=image-006 stage=standardization status=completed duration_ms=7.8
+job=optimized-3 image=image-006 stage=cv_input status=started
+job=optimized-3 image=image-006 stage=cv_input status=completed duration_ms=0.0
+job=optimized-3 image=image-006 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-006 stage=cv:exposure_brightness status=completed duration_ms=4.9
+job=optimized-3 image=image-006 stage=cv:contrast status=started
+job=optimized-3 image=image-006 stage=cv:contrast status=completed duration_ms=11.5
+job=optimized-3 image=image-006 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-006 stage=cv:color_palette_fit status=completed duration_ms=185.9
+job=optimized-3 image=image-007 stage=image_loading status=started
+job=optimized-3 image=image-007 stage=image_loading status=completed duration_ms=18.8
+job=optimized-3 image=image-007 stage=photo_filter status=started
+job=optimized-3 image=image-007 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-007 stage=standardization status=started
+job=optimized-3 image=image-007 stage=standardization status=completed duration_ms=6.3
+job=optimized-3 image=image-007 stage=cv_input status=started
+job=optimized-3 image=image-007 stage=cv_input status=completed duration_ms=0.0
+job=optimized-3 image=image-007 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-007 stage=cv:exposure_brightness status=completed duration_ms=3.6
+job=optimized-3 image=image-007 stage=cv:contrast status=started
+job=optimized-3 image=image-007 stage=cv:contrast status=completed duration_ms=9.2
+job=optimized-3 image=image-007 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-007 stage=cv:color_palette_fit status=completed duration_ms=159.6
+job=optimized-3 image=image-008 stage=image_loading status=started
+job=optimized-3 image=image-008 stage=image_loading status=completed duration_ms=17.4
+job=optimized-3 image=image-008 stage=photo_filter status=started
+job=optimized-3 image=image-008 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-008 stage=standardization status=started
+job=optimized-3 image=image-008 stage=standardization status=completed duration_ms=7.5
+job=optimized-3 image=image-008 stage=cv_input status=started
+job=optimized-3 image=image-008 stage=cv_input status=completed duration_ms=0.0
+job=optimized-3 image=image-008 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-008 stage=cv:exposure_brightness status=completed duration_ms=4.2
+job=optimized-3 image=image-008 stage=cv:contrast status=started
+job=optimized-3 image=image-008 stage=cv:contrast status=completed duration_ms=11.7
+job=optimized-3 image=image-008 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-008 stage=cv:color_palette_fit status=completed duration_ms=219.7
+job=optimized-3 image=image-009 stage=image_loading status=started
+job=optimized-3 image=image-009 stage=image_loading status=completed duration_ms=17.4
+job=optimized-3 image=image-009 stage=photo_filter status=started
+job=optimized-3 image=image-009 stage=photo_filter status=completed duration_ms=0.0
+job=optimized-3 image=image-009 stage=standardization status=started
+job=optimized-3 image=image-009 stage=standardization status=completed duration_ms=6.7
+job=optimized-3 image=image-009 stage=cv_input status=started
+job=optimized-3 image=image-009 stage=cv_input status=completed duration_ms=0.0
+job=optimized-3 image=image-009 stage=cv:exposure_brightness status=started
+job=optimized-3 image=image-009 stage=cv:exposure_brightness status=completed duration_ms=3.4
+job=optimized-3 image=image-009 stage=cv:contrast status=started
+job=optimized-3 image=image-009 stage=cv:contrast status=completed duration_ms=12.5
+job=optimized-3 image=image-009 stage=cv:color_palette_fit status=started
+job=optimized-3 image=image-009 stage=cv:color_palette_fit status=completed duration_ms=171.0
